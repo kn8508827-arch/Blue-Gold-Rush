@@ -409,11 +409,11 @@ button:disabled{opacity:.6;cursor:wait}
     if(window.HumanRunner){
       rig.visible=false;
       let settled=false,timer=null;
+      const loading=window.HumanRunner.load(THREE);
       const guard=new Promise((_,rej)=>{timer=setTimeout(()=>rej(new Error('human model load timeout')),10000)});
-      Promise.race([window.HumanRunner.load(THREE),guard]).then(h=>{
-        clearTimeout(timer);
-        if(settled){h.dispose();return}
-        settled=true;human=h;player.add(h.root);disposeRobot();
+      loading.then(h=>{if(settled)h.dispose()},()=>{}); // a result arriving after the timeout is released
+      Promise.race([loading,guard]).then(h=>{
+        clearTimeout(timer);settled=true;human=h;player.add(h.root);disposeRobot();
         window.BGR_HUMAN=h.debug;
       }).catch(err=>{settled=true;clearTimeout(timer);console.warn('[game] human model unavailable – keeping built-in runner:',err&&err.message);rig.visible=true});
     }

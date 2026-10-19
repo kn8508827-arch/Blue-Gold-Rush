@@ -137,7 +137,7 @@
       }
     }
     // deterministic shuffle so thinning does not bias toward index order
-    const shuf=(a)=>{let s=12345;for(let i=a.length-1;i>0;i--){s=(s*1103515245+12345)&0x7fffffff;const j=s%(i+1);const t=a[i];a[i]=a[j];a[j]=t}return a};
+    const shuf=(a)=>{let s=12345;for(let i=a.length-1;i>0;i--){s=(Math.imul(s,1103515245)+12345)&0x7fffffff;const j=s%(i+1);const t=a[i];a[i]=a[j];a[j]=t}return a};
     const hairMat=new THREE.MeshStandardMaterial({color:COL.hair,roughness:.9});
     const beardMat=new THREE.MeshStandardMaterial({color:COL.beard,roughness:.95});
     const skinMat=new THREE.MeshStandardMaterial({color:COL.skin,roughness:.7});
@@ -229,7 +229,7 @@
     const W={air:0,slide:0,crash:0,land:0,lean:0,idle:0};
 
     function update(dt,s){
-      // s: {mode,dx,y,vy,airborne,slide,landT,crashed,crashT,runT,speed}
+      // s: {mode,dx,y,vy,airborne,slide,landT,crashed,speed}
       dt=Math.min(dt,.05);
       const crashed=!!s.crashed,sliding=!crashed&&s.slide>0,air=!crashed&&!sliding&&s.airborne,landing=!crashed&&!sliding&&!air&&s.landT>0;
       const idle=s.mode==='idle';
