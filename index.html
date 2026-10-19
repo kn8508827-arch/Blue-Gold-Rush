@@ -7,21 +7,21 @@
 <title>Blue-Gold-Rush | Team Smaoh Sneha</title>
 <style>
 :root{--blue:#20c8ff;--gold:#ffc847;--ink:#06142b;--panel:#0a2446}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#041126;color:#fff;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;touch-action:pan-y}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#041126;color:#fff;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
 #game{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(#071b42 0%,#0a4e83 48%,#0b223c 100%)}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hud{position:absolute;z-index:2;top:env(safe-area-inset-top,10px);left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:14px clamp(10px,3vw,28px);gap:8px;pointer-events:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:absolute;z-index:6;top:env(safe-area-inset-top,10px);left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:14px clamp(10px,3vw,28px);gap:8px;pointer-events:none}
 .brand{font-weight:950;letter-spacing:.04em;text-shadow:0 2px 10px #00152d;font-size:clamp(16px,2.6vw,26px)}.brand span{color:var(--gold)}
 .stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.stat{pointer-events:auto;background:#06152dd9;border:1px solid #7bdfff66;border-radius:13px;padding:7px 11px;min-width:76px;text-align:center;box-shadow:0 6px 18px #001428}
 .coinrow{display:flex;align-items:center;justify-content:center;gap:8px}.coinrow img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid white}
-.overlay{position:absolute;z-index:3;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px)}
+.overlay{position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px)}
 .card{width:min(92vw,520px);padding:clamp(20px,5vw,34px);border:1px solid #7be1ff66;border-radius:18px;text-align:center;background:linear-gradient(155deg,#102d53f5,#06142cf5);box-shadow:0 20px 70px #00000055}
 .logos{display:flex;justify-content:center;gap:14px;margin-bottom:14px}.logos img{width:clamp(56px,14vw,84px);aspect-ratio:1;object-fit:cover;border-radius:50%;border:3px solid #ffffffd9;box-shadow:0 8px 24px #001725}
 h1{font-size:clamp(28px,7vw,42px);line-height:1;margin:8px 0 10px;font-weight:1000;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--gold)}.subtitle{color:#c6e2f7;line-height:1.5;margin:0 0 10px}
 button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:900;cursor:pointer;color:#03152c;background:linear-gradient(100deg,#35d4ff,#8ceaff);box-shadow:0 7px 22px #20bfff33}
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:#9fc5e2;margin-top:17px;line-height:1.6}
-#pauseBtn{pointer-events:auto;position:absolute;z-index:2;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
-#toast{position:absolute;z-index:4;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
+#pauseBtn{pointer-events:auto;position:absolute;z-index:6;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
+#toast{position:absolute;z-index:9;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
 @media(max-width:520px){.hud{padding:10px}.stat{min-width:62px;padding:6px 8px}.stat small{font-size:9px}.brand{max-width:100px;line-height:1.05}.coinrow img{width:19px;height:19px}}
 </style>
 </head>
@@ -51,7 +51,7 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 
   let W = 800, H = 600, dpr = 1;
   let state = 'menu'; // menu, run, pause, over
-  let last = 0, raf = null;
+  let last = 0, raf = null, idleRaf = null;
 
   // gameplay
   let score = 0, blue = 0, gold = 0;
@@ -105,25 +105,50 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     score = 0; blue = 0; gold = 0; speed = 320; spawnTimer = 0; items = []; particles = []; lane = 1; playerY = 0; playerVY = 0; isSliding = 0; invuln = 0; roadOffset = 0; updateHud();
   }
 
+  function stopIdle() {
+    if (idleRaf) { cancelAnimationFrame(idleRaf); idleRaf = null; }
+  }
+  function startIdle() {
+    stopIdle();
+    function idleLoop() {
+      if (state === 'run') { idleRaf = null; return; }
+      ctx.clearRect(0,0,W,H);
+      drawRoad();
+      const t = performance.now() / 1000;
+      const cx = W/2; const cy = H*0.55;
+      drawCoin(cx - 90 + Math.sin(t*1.4)*16, cy + Math.cos(t*1.7)*10, 22, blueImg, t);
+      drawCoin(cx + 90 + Math.cos(t*1.2)*10, cy + Math.sin(t*1.1)*8, 22, goldImg, t+1);
+      idleRaf = requestAnimationFrame(idleLoop);
+    }
+    idleRaf = requestAnimationFrame(idleLoop);
+  }
+
   function start() {
+    // ensure single loop
     reset();
     state = 'run';
     $('menu').hidden = true;
     $('pauseBtn').hidden = false;
     $('pauseBtn').textContent = 'Ⅱ Pause';
     last = performance.now();
-    cancelAnimationFrame(raf);
+    // stop idle animation and any leftover frames
+    stopIdle();
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
     raf = requestAnimationFrame(loop);
   }
 
   function gameOver(reason) {
+    // end game safely
     state = 'over';
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
     $('pauseBtn').hidden = true;
     $('menu').hidden = false;
     $('menu').querySelector('h1').innerHTML = 'RUN <em>OVER</em>';
     const p = $('menu').querySelector('.subtitle');
     p.innerHTML = `Score: <b>${Math.floor(score)}</b><br>${reason || 'You hit an obstacle.'}`;
     $('startBtn').textContent = '↺ RESTART';
+    // restart idle menu animation
+    startIdle();
   }
 
   function pauseToggle() {
@@ -131,11 +156,12 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
       state = 'pause';
       $('pauseBtn').textContent = '▶ Resume';
       toast('PAUSED');
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
     } else if (state === 'pause') {
       state = 'run';
       $('pauseBtn').textContent = 'Ⅱ Pause';
       last = performance.now();
-      raf = requestAnimationFrame(loop);
+      if (!raf) raf = requestAnimationFrame(loop);
     }
   }
 
@@ -189,7 +215,6 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     let r = Math.random();
     let type = r < 0.55 ? 'coin' : r < 0.8 ? 'block' : 'barrier';
     if (type === 'coin') type = Math.random() < 0.28 ? 'blue' : 'gold';
-    // spawn at distance d=0 (near horizon) and we'll advance them by d
     items.push({ type, l, d: 0, phase: Math.random() * Math.PI * 2, got: false });
   }
 
@@ -202,7 +227,6 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     if ((img === goldImg && goldLoaded) || (img === blueImg && blueLoaded)) {
       ctx.drawImage(img, -r, -r, r*2, r*2);
     } else {
-      // fallback: draw clean coin
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       ctx.fillStyle = img === goldImg ? '#ffcf66' : '#4fe3ff';
@@ -226,27 +250,23 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 
       if ((it.type === 'blue' || it.type === 'gold')) {
         drawCoin(x, y, r, it.type === 'gold' ? goldImg : blueImg, it.phase);
-        // collect if near and same lane and player low
         if (d > 0.78 && d < 0.98 && !it.got && it.l === lane && playerY < 18 && isSliding <= 0) {
           it.got = true;
-          if (it.type === 'gold') gold++;
-          else blue++;
-          // particle burst
+          if (it.type === 'gold') gold++; else blue++;
           for (let i = 0; i < 8; i++) particles.push({ x, y, vx: (Math.random()-0.5)*220, vy: -Math.random()*180, life: 0.6, color: it.type === 'gold' ? '#ffd36a' : '#64f0ff' });
           toast(it.type === 'gold' ? 'Golden!' : 'Blue!');
           updateHud();
         }
       } else if (it.type === 'block') {
         ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
-        // block
         ctx.fillStyle = '#f15b55'; ctx.fillRect(-22, -34, 44, 40);
         ctx.fillStyle = '#ffb5a8'; ctx.fillRect(-16, -28, 32, 7);
         ctx.restore();
-        // collision: if near and same lane
         if (d > 0.82 && d < 0.96 && !it.got && it.l === lane) {
           if (playerY < 18 && isSliding <= 0 && invuln <= 0) {
             it.got = true; // consume
             gameOver('You hit a block');
+            return; // stop further checks this frame
           }
         }
       } else if (it.type === 'barrier') {
@@ -256,18 +276,15 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
         ctx.restore();
         if (d > 0.82 && d < 0.96 && !it.got && it.l === lane) {
           if (playerY < 22 && isSliding <= 0 && invuln <= 0) {
-            it.got = true;
-            gameOver('You hit a barrier');
+            it.got = true; gameOver('You hit a barrier'); return;
           }
         }
       }
     }
-    // remove consumed/out-of-range
     items = items.filter(it => it.d < 1.18 && !it.got);
   }
 
   function drawPlayer(dt) {
-    // physics
     if (playerVY !== 0 || playerY > 0) {
       playerY += playerVY * dt;
       playerVY -= 1400 * dt; // gravity
@@ -279,25 +296,17 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     const x = laneX(lane, 0.92);
     const y = H * 0.82 - playerY;
     ctx.save(); ctx.translate(x, y);
-    // shadow
     ctx.fillStyle = '#001a31'; ctx.beginPath(); ctx.ellipse(0, 34, 22, 7, 0, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
     if (isSliding > 0) {
-      // sliding sprite
-      roundRect(ctx, -26, 6, 52, 22, 8);
-      ctx.fillStyle = '#12b9f5'; ctx.fill();
-      ctx.fillStyle = '#e4f8ff'; ctx.beginPath(); ctx.arc(17, 3, 9, 0, Math.PI*2); ctx.fill();
+      roundRect(ctx, -26, 6, 52, 22, 8); ctx.fillStyle = '#12b9f5'; ctx.fill(); ctx.fillStyle = '#e4f8ff'; ctx.beginPath(); ctx.arc(17, 3, 9, 0, Math.PI*2); ctx.fill();
     } else {
-      // running sprite
-      roundRect(ctx, -18, -6, 36, 44, 9);
-      ctx.fillStyle = '#13bdf5'; ctx.fill();
-      ctx.fillStyle = '#d9f6ff'; ctx.beginPath(); ctx.arc(0, -18, 12, 0, Math.PI*2); ctx.fill();
+      roundRect(ctx, -18, -6, 36, 44, 9); ctx.fillStyle = '#13bdf5'; ctx.fill(); ctx.fillStyle = '#d9f6ff'; ctx.beginPath(); ctx.arc(0, -18, 12, 0, Math.PI*2); ctx.fill();
     }
     ctx.restore();
   }
 
   function roundRect(ctx, x, y, w, h, r) {
-    // simple rounded rect path
     const min = Math.min(w/2, h/2);
     if (r > min) r = min;
     ctx.beginPath();
@@ -324,11 +333,10 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
   }
 
   function loop(now) {
-    if (state !== 'run') return;
+    if (state !== 'run') { raf = null; return; }
     let dt = Math.min((now - last) / 1000, 0.04);
     last = now;
 
-    // update
     score += dt * 10;
     speed = Math.min(750, speed + dt * 2.5);
     roadOffset += dt * speed / 300;
@@ -338,7 +346,6 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
       spawnTimer = 0.45 + Math.random() * 0.6 - Math.min(0.3, score / 400);
     }
 
-    // draw
     ctx.clearRect(0, 0, W, H);
     drawRoad();
     drawItems(dt);
@@ -355,12 +362,8 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     if (state !== 'run') return;
     if (dir === 'left') lane = Math.max(0, lane - 1);
     if (dir === 'right') lane = Math.min(2, lane + 1);
-    if (dir === 'up') {
-      if (playerY === 0) { playerVY = 620; toast('JUMP'); }
-    }
-    if (dir === 'down') {
-      if (playerY === 0 && isSliding <= 0) { isSliding = 0.55; toast('SLIDE'); }
-    }
+    if (dir === 'up') { if (playerY === 0) { playerVY = 620; toast('JUMP'); } }
+    if (dir === 'down') { if (playerY === 0 && isSliding <= 0) { isSliding = 0.55; toast('SLIDE'); } }
   }
 
   addEventListener('keydown', e => {
@@ -373,11 +376,11 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     if (k === 'escape') pauseToggle();
   });
 
-  // touch / swipe
+  // touch / swipe (non-passive so we can prevent scrolling while interacting with canvas)
   let sx = 0, sy = 0, sT = 0;
-  canvas.addEventListener('touchstart', e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; sT = performance.now(); }, { passive: true });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; sT = performance.now(); }, { passive: false });
   canvas.addEventListener('touchend', e => {
-    const t = e.changedTouches[0]; const dx = t.clientX - sx; const dy = t.clientY - sy; const dt = performance.now() - sT;
+    e.preventDefault(); const t = e.changedTouches[0]; const dx = t.clientX - sx; const dy = t.clientY - sy; const dt = performance.now() - sT;
     if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && dt < 300) {
       // tap
       if (state === 'menu') start(); else move('up');
@@ -388,36 +391,46 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     } else {
       if (dy < -30) move('up'); else if (dy > 30) move('down');
     }
-  }, { passive: true });
+  }, { passive: false });
 
   // mouse clicks for lane changes (left/right halves)
   canvas.addEventListener('click', e => {
     if (state === 'menu') start();
-    else {
-      const x = e.clientX; if (x < W/2 - 30) move('left'); else if (x > W/2 + 30) move('right');
-    }
+    else { const x = e.clientX; if (x < W/2 - 30) move('left'); else if (x > W/2 + 30) move('right'); }
   });
 
   // UI
   $('startBtn').addEventListener('click', () => { $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
   $('pauseBtn').addEventListener('click', pauseToggle);
 
-  // idle animation for menu
-  function idleLoop() {
-    // draw a non-interactive scene while not running
-    ctx.clearRect(0,0,W,H);
-    drawRoad();
-    // floating coins
-    const t = performance.now() / 1000;
-    const cx = W/2; const cy = H*0.55;
-    drawCoin(cx - 90 + Math.sin(t*1.4)*16, cy + Math.cos(t*1.7)*10, 22, blueImg, t);
-    drawCoin(cx + 90 + Math.cos(t*1.2)*10, cy + Math.sin(t*1.1)*8, 22, goldImg, t+1);
-    requestAnimationFrame(idleLoop);
-  }
-  requestAnimationFrame(idleLoop);
+  // on load: start idle menu animation
+  startIdle();
 
   // initial HUD update
   updateHud();
+
+  // --- automated restart test (runs in console only if you call runRestartTest())
+  window.runRestartTest = function cycles(n=3, delay=400) {
+    console.log('Restart test start: cycles=',n);
+    let i=0;
+    function one(){
+      console.log('Start game',i+1);
+      $('startBtn').click();
+      // simulate immediate collision after short time by injecting an obstacle in same lane
+      setTimeout(()=>{
+        items.push({type:'block',l:lane,d:0.86,phase:0,got:false});
+      }, 200);
+      // wait for gameOver then restart
+      setTimeout(()=>{
+        if (state==='over'){
+          console.log('Game over reached');
+          $('startBtn').click();
+          i++; if (i<n) setTimeout(one, delay);
+        } else { console.warn('Game did not reach over state in expected time, current state=', state); }
+      }, 900);
+    }
+    one();
+  };
 
 })();
 </script>
