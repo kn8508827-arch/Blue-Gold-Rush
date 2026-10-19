@@ -10,11 +10,14 @@ Renders with Three.js (WebGL, loaded from a CDN) and automatically falls back to
 - Mobile: swipe left/right/up/down.
 - Collect blue and gold coins, avoid blocks and low barriers, pause, and restart.
 
+## Player character
+The runner is a rigged, skinned 3D human (`assets/CesiumMan.glb`, 19 bones) loaded by `human-runner.js` through the bundled `vendor/GLTFLoader.js`. It is re-coloured at load time (Team ស្មោះស្នេហ៍ white polo with blue collar/side panels/sleeve trim and the team emblem decal, navy joggers with blue/gold stripes, white sneakers) and given procedural curly hair, beard and face parts. Run, jump, landing, slide, lane-lean, collision and game-over poses are driven by an `AnimationMixer` cross-fading the model's clip plus procedural bone rotations; hit boxes are unchanged. If the GLB or loader fails, the previous built-in runner is kept; if WebGL is unavailable the 2D fallback is used. The likeness is stylized, not a face scan. Model source/license/attribution (CC BY 4.0, Cesium): see [`ASSETS_LICENSES.md`](ASSETS_LICENSES.md). Verification screenshots are in `docs/`.
+
 ## Upload to GitHub
 1. Open your repository `Blue-Gold-Rush`.
 2. Click **Add file → Upload files**.
 3. Unzip this archive on your computer.
-4. Upload the contents of the `Blue-Gold-Rush` folder (`index.html` and the two coin `.png` files). Do not upload only the ZIP file.
+4. Upload the contents of the `Blue-Gold-Rush` folder (`index.html`, `human-runner.js`, `audio.js`, the `assets/` and `vendor/` folders and the two coin `.png` files). Do not upload only the ZIP file.
 5. Click **Commit changes**.
 
 ## Publish with GitHub Pages
@@ -27,3 +30,6 @@ This is an original game and does not use Subway Surfers artwork, characters, or
 
 ## Sound
 Original Web Audio synthesized music and effects (`audio.js`, no external assets). Use the 🔊 button or **M** to mute and the slider for volume; settings persist in localStorage. Audio starts after the first click/tap/key. Run tests with `npm test`.
+
+### Runner refinement (v2)
+Larger emblem with white backing (chest and back), slimmer head, stronger jump/slide/lane-change/crash poses. See `docs/18-improved-poses.png` (run, lane, jump, slide, game over). The portrait file could not be downloaded in the build environment, so face likeness is stylized and unverified against it.
