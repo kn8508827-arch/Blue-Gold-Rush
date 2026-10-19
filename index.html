@@ -115,22 +115,23 @@ button:disabled{opacity:.6;cursor:wait}
     function drawRoad(){const horizon=H*.27,base=H*1.04;let g=ctx.createLinearGradient(0,horizon,0,H);g.addColorStop(0,'#123a61');g.addColorStop(1,'#071426');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,horizon);ctx.lineTo(W,horizon);ctx.lineTo(W,base);ctx.lineTo(0,base);ctx.closePath();ctx.fill();for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle='#32cfff55';ctx.lineWidth=2;ctx.stroke()}for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=`rgba(73,203,255,${.04+d*.13})`;ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}}
     function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random();let type=r<.55?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
     function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
-    function drawItems(dt){
+    function drawItems(dt,update=true){
       for(const it of items){
-        it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4;
+        const previousD=it.d;
+        if(update){it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4}
         const d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);
         if(it.type==='blue'||it.type==='gold'){
           drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);
-          if(d>.78&&d<.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
+          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
         }else if(it.type==='block'){
           ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();
-          if(d>.82&&d<.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a block'}
+          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a block'}
         }else{
           ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#fff1a3';ctx.fillRect(-30,-10,60,18);ctx.fillStyle='#c47f00';ctx.fillRect(-30,-10,8,18);ctx.fillRect(22,-10,8,18);ctx.restore();
-          if(d>.82&&d<.96&&!it.got&&it.l===lane&&playerY<22&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a barrier'}
+          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<22&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a barrier'}
         }
       }
-      items=items.filter(it=>it.d<1.18&&!it.got);
+      if(update)items=items.filter(it=>it.d<1.18&&!it.got);
     }
     function roundRect(x,y,w,h,r){const min=Math.min(w/2,h/2);if(r>min)r=min;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
     function drawPlayer(dt){
@@ -160,7 +161,7 @@ button:disabled{opacity:.6;cursor:wait}
           drawCoin(W/2+90+Math.cos(idleT*1.2)*10,H*0.55+Math.sin(idleT*1.1)*8,22,goldImg,idleT+1);
           return null;
         }
-        drawRoad();drawItems(0);drawPlayer(0);drawParticles(0);crash=null;return null;
+        drawRoad();drawItems(0,false);drawPlayer(0);drawParticles(0);return null;
       },
       move(dir){
         if(dir==='left')lane=Math.max(0,lane-1);
@@ -472,6 +473,20 @@ button:disabled{opacity:.6;cursor:wait}
       camera.fov=camFov=camBase;camera.updateProjectionMatrix();
     }
     const laneToX=l=>(l-1)*LANE_W;
+    function sweptOverlap(prevZ,nextZ,halfDepth,playerStartX,playerEndX,itemX,halfWidth){
+      const dz=nextZ-prevZ;
+      let from=0,to=1;
+      if(Math.abs(dz)<1e-8){
+        if(Math.abs(prevZ)>halfDepth)return false;
+      }else{
+        const a=(-halfDepth-prevZ)/dz,b=(halfDepth-prevZ)/dz;
+        from=Math.max(0,Math.min(a,b));to=Math.min(1,Math.max(a,b));
+        if(from>to)return false;
+      }
+      const dx=playerEndX-playerStartX;
+      const closest=dx===0?from:clamp((itemX-playerStartX)/dx,from,to);
+      return Math.abs(playerStartX+dx*closest-itemX)<=halfWidth;
+    }
 
     function place(kind,x,z,yy){const m=acquire(kind);m.position.set(x,yy||0,z);return m}
     function addItem(type,l,z,yy){
@@ -576,18 +591,19 @@ button:disabled{opacity:.6;cursor:wait}
           runT+=0;
           // world + collisions
           let crash=null;
+          const playerStartX=laneX,playerEndX=laneX+(laneToX(lane)-laneX)*damp(16,dt);
           for(const it of items){
             const prev=it.z;it.z+=dz;it.mesh.position.z=it.z;
             if(it.type==='coin'){it.mesh.rotation.y=t*3.2+it.ph;it.mesh.position.y=it.y+Math.sin(t*3+it.ph)*.07}
             if(it.hit)continue;
-            const dxl=Math.abs(it.x-laneX);
             if(it.type==='coin'){
-              if(it.z>=-.9&&prev<=.9&&dxl<1.0&&Math.abs(it.y-(y+.9))<1.15){
+              if(sweptOverlap(prev,it.z,.9,playerStartX,playerEndX,it.x,.95)&&Math.abs(it.y-(y+.9))<1.15){
                 it.hit=true;game.addCoin(it.coin);game.addScore(5);auraT=.35;aura.material.color.set(it.coin==='gold'?0xffc847:0x35d0ff);
                 burst(12,it.x,it.mesh.position.y,it.z,it.coin==='gold'?0xffd36a:0x5fe6ff,2.6);release(it.kind,it.mesh)}
-            }else if(dxl<1.15){
+            }else{
               const win=it.type==='block'?.8:.65;
-              if(it.z>=-win&&prev<=win){
+              const halfWidth=(it.type==='block'?.9:1.15)+.4;
+              if(sweptOverlap(prev,it.z,win,playerStartX,playerEndX,it.x,halfWidth)){
                 if(it.type==='block'&&y<BLOCK_H-.1){it.hit=true;crash='You hit a barrier'}
                 else if(it.type==='gantry'&&slide<=0&&y<GANTRY_TOP+.05){it.hit=true;crash='You hit an overhead gantry'}
               }
@@ -769,7 +785,12 @@ button:disabled{opacity:.6;cursor:wait}
       try{
         const e3=createEngine3D(three);
         engine3D=e3;
-        e3.canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();fallbackTo2D('Graphics context lost – switched to 2D mode.')});
+        e3.canvas.addEventListener('webglcontextlost',ev=>{
+          ev.preventDefault();
+          if(pending3D===e3)pending3D=null;
+          if(engine3D===e3)engine3D=null;
+          if(engine===e3)fallbackTo2D('Graphics context lost – switched to 2D mode.');
+        });
         if(state==='run'||state==='pause'||state==='crash'){pending3D=e3}else useEngine(e3);
       }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
     }
