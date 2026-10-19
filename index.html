@@ -138,8 +138,6 @@ button:disabled{opacity:.6;cursor:wait}
         else if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP')}}
         else if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE')}}
       },
-      // test hook
-      _debug(){return {lane,playerY,isSliding,items}}
     };
   }
 
@@ -598,8 +596,6 @@ button:disabled{opacity:.6;cursor:wait}
         else if(dir==='up'){if(y===0&&!airborne){vy=JUMP_V;airborne=true;y=.001;slide=0;landT=0;burst(6,laneX,.1,0,0x9fe4ff,1.8);toast('JUMP')}else jumpBuf=.14}
         else if(dir==='down'){if(airborne){vy=-JUMP_V*1.3}if(slide<=0){slide=SLIDE_TIME;toast('SLIDE')}}
       },
-      _spawn(type,l,z){addItem(type,l,z,1.1)},
-      _debug(){return {lane,laneX,y,slide,speed,dist,airborne,items:items.map(i=>({type:i.type,kind:i.kind,l:i.l,z:i.z}))}}
     };
   }
 
@@ -735,11 +731,11 @@ button:disabled{opacity:.6;cursor:wait}
         const e3=createEngine3D(three);
         engine3D=e3;
         e3.canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();fallbackTo2D('Graphics context lost – switched to 2D mode.')});
-        if(state==='run'||state==='pause'){pending3D=e3}else useEngine(e3);
+        if(state==='run'||state==='pause'||state==='crash'){pending3D=e3}else useEngine(e3);
       }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
     }
   }
-  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},debug(){return engine&&engine._debug()},spawn(t,l,z){if(engine&&engine._spawn)engine._spawn(t,l,z)},stats(){return {score,blue,gold}}};
+  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},stats(){return {score,blue,gold}}};
   boot();
 })();
 </script>
