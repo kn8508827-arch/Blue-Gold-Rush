@@ -171,18 +171,22 @@
     const decals=[];
     if(emblemImg){
       const tex=new THREE.Texture(emblemImg);tex.needsUpdate=true;if(THREE.SRGBColorSpace)tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
-      const dm=new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.7,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2,depthWrite:false});
+      const dm=new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.7,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3,depthWrite:false});
+      const backMat=new THREE.MeshBasicMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1,depthWrite:false});
       const mk=(r,y,z,front)=>{
         const sx=front?surfX(y,z,torsoIdx,.03):surfXneg(y,z,torsoIdx,.03);
         if(Math.abs(sx)>1)return;
-        const g=new THREE.CircleGeometry(r,28);
-        const mesh=new THREE.Mesh(g,dm);mesh.name=front?'emblemFront':'emblemBack';
         const q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),front?Math.PI/2:-Math.PI/2);
-        placed(mesh,chestRest,new THREE.Vector3(sx+(front?.004:-.004),y,z),q);
+        const dir=front?1:-1;
+        // white backing disc keeps the blue emblem readable against the blue panels / from far away
+        const back=new THREE.Mesh(new THREE.CircleGeometry(r*1.18,28),backMat);back.name='emblemBacking';
+        placed(back,chestRest,new THREE.Vector3(sx+dir*.003,y,z),q);B.chest.add(back);decals.push(back);
+        const mesh=new THREE.Mesh(new THREE.CircleGeometry(r,28),dm);mesh.name=front?'emblemFront':'emblemBack';
+        placed(mesh,chestRest,new THREE.Vector3(sx+dir*.006,y,z),q);
         B.chest.add(mesh);decals.push(mesh);
       };
-      mk(.036,.07,.975,true);   // wearer's left chest
-      mk(.095,0,.98,false);     // large back print
+      mk(.05,.07,.975,true);    // wearer's left chest
+      mk(.14,0,.985,false);     // large back print (readable from the gameplay camera)
     }
 
     // ---- model placement: facing -Z, feet at y=0, scaled to TARGET_HEIGHT ----
@@ -247,6 +251,7 @@
       const rate=idle?.9:(2.1+clamp((s.speed||10)-10,0,24)*.045);
       runAct.timeScale=crashed?0:rate;
       mixer.update(dt);
+      B.head.scale.setScalar(.86); // slimmer head: more natural athletic proportions
       scene.updateMatrixWorld(true);
 
       const runK=clamp(1-W.air-W.slide-W.crash,0,1)*(1-W.idle*.85);
@@ -257,7 +262,8 @@
       const a=W.air,up=(s.vy||0)>0?1:.55;
       rotate(B.thL,AX_SIDE,-1.3*a*up);rotate(B.knL,AX_SIDE,1.5*a);
       rotate(B.thR,AX_SIDE,.2*a);rotate(B.knR,AX_SIDE,1.6*a);
-      rotate(B.shL,AX_SIDE,-2.2*a*up);rotate(B.shR,AX_SIDE,-2.0*a*up);rotate(B.shL,AX_FWD,-.35*a);rotate(B.shR,AX_FWD,.35*a);
+      rotate(B.thL,AX_FWD,-.35*a);rotate(B.thR,AX_FWD,.35*a);
+      rotate(B.shL,AX_SIDE,-2.2*a*up);rotate(B.shR,AX_SIDE,-2.0*a*up);rotate(B.shL,AX_FWD,-.6*a);rotate(B.shR,AX_FWD,.6*a);
       rotate(B.elL,AX_SIDE,-.35*a);rotate(B.elR,AX_SIDE,-.35*a);
       // slide: legs stretched forward, arms forward
       const sl=W.slide;
@@ -272,15 +278,18 @@
       rotate(B.thL,AX_SIDE,-1.0*cr);rotate(B.thR,AX_SIDE,-.5*cr);rotate(B.knL,AX_SIDE,1.5*cr);rotate(B.knR,AX_SIDE,1.3*cr);
       rotate(B.shL,AX_SIDE,-2.4*cr);rotate(B.shR,AX_SIDE,-2.2*cr);
       rotate(B.shL,AX_FWD,-.3*cr);rotate(B.shR,AX_FWD,.3*cr);
+      // lane change: lead arm swings out, body rolls into the turn
+      const ln=clamp(W.lean,-1,1)*runK;
+      rotate(B.shL,AX_FWD,-.7*Math.max(0,-ln)-.0);rotate(B.shR,AX_FWD,.7*Math.max(0,ln));
       // head stays level against body pitch; lane-change head tilt
       rotate(B.head,AX_SIDE,-(.15*W.slide)+.2*cr);
 
       // whole-body pose (pitch about the hips / roll for lane changes / height)
-      const pitch=-(.2*runK+.15*W.land)+.5*sl+.7*cr-.05*a;
-      const lean=clamp(-W.lean*.12,-.2,.2);
+      const pitch=-(.2*runK+.15*W.land)+.8*sl+.7*cr-.05*a;
+      const lean=clamp(-W.lean*.3,-.4,.4)+(-.5*cr);
       pivot.rotation.x+=(pitch-pivot.rotation.x)*damp(18,dt);
       pivot.rotation.z+=(lean-pivot.rotation.z)*damp(14,dt);
-      const dropY=-.38*sl-.32*cr-.12*W.land;
+      const dropY=-.5*sl-.32*cr-.12*W.land;
       pivot.position.y+=((baseY+dropY)-pivot.position.y)*damp(20,dt);
     }
 
