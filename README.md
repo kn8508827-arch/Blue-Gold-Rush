@@ -24,3 +24,6 @@ Renders with Three.js (WebGL, loaded from a CDN) and automatically falls back to
 4. Wait a few minutes and refresh the Pages section for the published URL.
 
 This is an original game and does not use Subway Surfers artwork, characters, or branding.
+
+## Sound
+Original Web Audio synthesized music and effects (`audio.js`, no external assets). Use the 🔊 button or **M** to mute and the slider for volume; settings persist in localStorage. Audio starts after the first click/tap/key. Run tests with `npm test`.

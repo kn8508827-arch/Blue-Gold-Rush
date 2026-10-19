@@ -23,6 +23,13 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 #pauseBtn{pointer-events:auto;position:absolute;z-index:70;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
 #toast{position:absolute;z-index:90;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
 #c3{display:none}
+#audioPanel{position:absolute;z-index:95;left:env(safe-area-inset-left,0);bottom:env(safe-area-inset-bottom,0);margin:14px;display:flex;align-items:center;gap:8px;background:#071a35e6;border:1px solid #9edfff88;border-radius:14px;padding:6px 10px}
+#muteBtn{padding:8px 12px;font-size:15px;min-width:44px;min-height:40px}
+#muteBtn[aria-pressed=true]{background:linear-gradient(100deg,#ffc847,#ffe08a)}
+#muteBtn[aria-pressed=false]{background:linear-gradient(100deg,#ff8a7a,#ffb3a8)}
+#volSlider{width:clamp(70px,18vw,120px);accent-color:var(--gold);cursor:pointer}
+#volLabel{font-size:12px;font-weight:800;min-width:34px;text-align:right;color:#c6e2f7}
+button:focus-visible,#volSlider:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 button:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
@@ -36,6 +43,7 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="stat"><div class="coinrow"><img id="goldIcon" src="./gold-collaboration-coin.png" alt=""><b id="goldCount">0</b></div><small>Gold coins</small></div>
 </div></div>
 <div id="toast"></div>
+<div id="audioPanel" role="group" aria-label="Sound controls"><button id="muteBtn" type="button" aria-pressed="true" aria-label="Sound on" title="Toggle sound (M)">🔊</button><input id="volSlider" type="range" min="0" max="100" step="1" value="70" aria-label="Volume"><span id="volLabel" aria-live="polite">70%</span></div>
 <button id="pauseBtn" hidden>Ⅱ Pause</button>
 <div class="overlay" id="menu"><div class="card">
 <div class="logos"><img id="logoBlue" src="./blue-team-coin.png" alt="Blue Team coin"><img id="logoGold" src="./gold-collaboration-coin.png" alt="Gold Collaboration coin"></div>
@@ -44,6 +52,7 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="hint">Desktop: ← → or A / D to change lanes · ↑ / Space to jump · ↓ to slide<br>Mobile: swipe left / right / up / down</div>
 </div></div>
 </div>
+<script src="./audio.js"></script>
 <script>
 (() => {
   'use strict';
@@ -60,11 +69,32 @@ button:disabled{opacity:.6;cursor:wait}
   let score = 0, blue = 0, gold = 0;
   let engine = null, raf = null, last = 0;
 
+  // ---------- audio ----------
+  const audio = window.BGRAudio.create();
+  function renderAudioUI(){
+    const on=audio.enabled&&audio.volume>0,b=$('muteBtn');
+    b.textContent=on?(audio.volume<.4?'🔉':'🔊'):'🔇';
+    b.setAttribute('aria-pressed',String(audio.enabled));
+    b.setAttribute('aria-label',audio.enabled?'Sound on – click to mute':'Sound off – click to unmute');
+    $('volSlider').value=Math.round(audio.volume*100);
+    $('volLabel').textContent=audio.enabled?Math.round(audio.volume*100)+'%':'Off';
+  }
+  audio.onChange(renderAudioUI);
+  // first legitimate gesture unlocks/resumes the AudioContext
+  const unlock=()=>{audio.init()};
+  ['pointerdown','touchend','keydown','click'].forEach(ev=>addEventListener(ev,unlock,{capture:true,passive:true}));
+  $('muteBtn').addEventListener('click',()=>{audio.init();audio.toggle();audio.play('click')});
+  $('volSlider').addEventListener('input',e=>{audio.init();audio.setVolume(e.target.value/100)});
+  $('volSlider').addEventListener('change',()=>audio.play('click'));
+  $('muteBtn').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')e.stopPropagation()});
+  $('volSlider').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')e.stopPropagation()});
+  renderAudioUI();
+
   function toast(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,900)}
   function updateHud(){$('score').textContent=Math.floor(score);$('blueCount').textContent=blue;$('goldCount').textContent=gold}
   const game = {
-    addScore(v){score+=v}, addCoin(kind){if(kind==='gold')gold++;else blue++;toast(kind==='gold'?'Golden!':'Blue!')},
-    toast
+    addScore(v){score+=v}, addCoin(kind){if(kind==='gold')gold++;else blue++;if(state==='run')audio.play(kind==='gold'?'coinGold':'coinBlue');toast(kind==='gold'?'Golden!':'Blue!')},
+    toast, audio
   };
 
   // ---------- 2D fallback engine (original Canvas 2D game) ----------
@@ -115,7 +145,7 @@ button:disabled{opacity:.6;cursor:wait}
     function drawParticles(dt){for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=320*dt;ctx.globalAlpha=Math.max(0,p.life/.6);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}particles=particles.filter(p=>p.life>0)}
 
     return {
-      name:'2D', canvas, resize, reset,
+      name:'2D', canvas, resize, reset, getLane(){return lane},
       step(dt,mode){
         ctx.clearRect(0,0,W,H);
         if(mode==='run'){
@@ -135,8 +165,8 @@ button:disabled{opacity:.6;cursor:wait}
       move(dir){
         if(dir==='left')lane=Math.max(0,lane-1);
         else if(dir==='right')lane=Math.min(2,lane+1);
-        else if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP')}}
-        else if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE')}}
+        else if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP');audio.play('jump')}}
+        else if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE');audio.play('slide')}}
       },
     };
   }
@@ -527,7 +557,7 @@ button:disabled{opacity:.6;cursor:wait}
     }
 
     return {
-      name:'3D',canvas,renderer,resize,reset,
+      name:'3D',canvas,renderer,resize,reset,getLane(){return lane},
       onCrash(){crashed=true;crashT=0;shake=.55;fovBoost=-4;burst(26,laneX,1.1,0,0xff7a5a,4.2);burst(14,laneX,1.1,0,0xffc847,3)},
       step(dt,mode){
         adaptQuality(dt);
@@ -593,8 +623,8 @@ button:disabled{opacity:.6;cursor:wait}
         if(crashed)return;
         if(dir==='left')lane=Math.max(0,lane-1);
         else if(dir==='right')lane=Math.min(2,lane+1);
-        else if(dir==='up'){if(y===0&&!airborne){vy=JUMP_V;airborne=true;y=.001;slide=0;landT=0;burst(6,laneX,.1,0,0x9fe4ff,1.8);toast('JUMP')}else jumpBuf=.14}
-        else if(dir==='down'){if(airborne){vy=-JUMP_V*1.3}if(slide<=0){slide=SLIDE_TIME;toast('SLIDE')}}
+        else if(dir==='up'){if(y===0&&!airborne){vy=JUMP_V;airborne=true;y=.001;slide=0;landT=0;burst(6,laneX,.1,0,0x9fe4ff,1.8);toast('JUMP');audio.play('jump')}else jumpBuf=.14}
+        else if(dir==='down'){if(airborne){vy=-JUMP_V*1.3}if(slide<=0){slide=SLIDE_TIME;toast('SLIDE');audio.play('slide')}}
       },
     };
   }
@@ -607,25 +637,31 @@ button:disabled{opacity:.6;cursor:wait}
     if((state!=='menu'&&state!=='over')||!engine)return;
     if(pending3D){useEngine(pending3D);pending3D=null}
     score=0;blue=0;gold=0;engine.reset();updateHud();
+    audio.init();audio.play('start');audio.setState('run');
     state='run';hideMenu();$('pauseBtn').hidden=false;$('pauseBtn').textContent='Ⅱ Pause';
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     last=performance.now();
   }
   function gameOver(reason){
-    state='over';
+    state='over';audio.setState('over');audio.play('gameover');
     $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>';
     $('menu').querySelector('.subtitle').innerHTML='Score: <b>'+Math.floor(score)+'</b><br>'+(reason||'You hit an obstacle.');
     $('startBtn').textContent='↺ RESTART';showMenu();updateHud();
   }
   function beginCrash(reason){
-    state='crash';crashT=0;crashReason=reason;$('pauseBtn').hidden=true;
+    state='crash';crashT=0;crashReason=reason;audio.play('crash');audio.setState('over');$('pauseBtn').hidden=true;
     if(engine&&engine.onCrash)engine.onCrash();
   }
   function pauseToggle(){
-    if(state==='run'){state='pause';$('pauseBtn').textContent='▶ Resume';toast('PAUSED')}
-    else if(state==='pause'){state='run';$('pauseBtn').textContent='Ⅱ Pause';last=performance.now()}
+    if(state==='run'){state='pause';audio.setState('pause');audio.play('click');$('pauseBtn').textContent='▶ Resume';toast('PAUSED')}
+    else if(state==='pause'){state='run';audio.setState('run');audio.play('click');$('pauseBtn').textContent='Ⅱ Pause';last=performance.now()}
   }
-  function move(dir){if(state==='run'&&engine)engine.move(dir)}
+  function move(dir){
+    if(state!=='run'||!engine)return;
+    const before=engine.getLane();
+    engine.move(dir);
+    if((dir==='left'||dir==='right')&&engine.getLane()!==before)audio.play('lane');
+  }
 
   // single animation loop for the whole page lifetime
   function frame(now){
@@ -674,10 +710,12 @@ button:disabled{opacity:.6;cursor:wait}
   // ---------- input (registered once) ----------
   addEventListener('resize',()=>{if(engine)engine.resize()});
   addEventListener('orientationchange',()=>setTimeout(()=>{if(engine)engine.resize()},200));
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='run')pauseToggle()});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='run')pauseToggle();audio.suspend()}else audio.resume()});
+  addEventListener('pagehide',()=>audio.dispose());
   addEventListener('keydown',e=>{
     const k=e.key.toLowerCase();
     if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();
+    if(k==='m'){if(!e.repeat){audio.init();audio.toggle()}return}
     if(state==='menu'||state==='over'){if(k==='enter'||k===' ')start();return}
     if(state==='crash')return;
     if(e.repeat&&k!=='arrowleft'&&k!=='arrowright'&&k!=='a'&&k!=='d')return;
@@ -716,6 +754,7 @@ button:disabled{opacity:.6;cursor:wait}
 
   $('startBtn').addEventListener('click',start);
   $('pauseBtn').addEventListener('click',pauseToggle);
+  $('pauseBtn').addEventListener('pointerdown',e=>e.stopPropagation());
 
   // ---------- boot ----------
   async function boot(){
