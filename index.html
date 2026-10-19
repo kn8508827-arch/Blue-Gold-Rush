@@ -10,19 +10,25 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#041126;color:#fff;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
 #game{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(#071b42 0%,#0a4e83 48%,#0b223c 100%)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.hud{position:absolute;z-index:6;top:env(safe-area-inset-top,10px);left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:14px clamp(10px,3vw,28px);gap:8px;pointer-events:none}
+.hud{position:absolute;z-index:60;top:env(safe-area-inset-top,10px);left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:14px clamp(10px,3vw,28px);gap:8px;pointer-events:none}
 .brand{font-weight:950;letter-spacing:.04em;text-shadow:0 2px 10px #00152d;font-size:clamp(16px,2.6vw,26px)}.brand span{color:var(--gold)}
 .stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.stat{pointer-events:auto;background:#06152dd9;border:1px solid #7bdfff66;border-radius:13px;padding:7px 11px;min-width:76px;text-align:center;box-shadow:0 6px 18px #001428}
 .coinrow{display:flex;align-items:center;justify-content:center;gap:8px}.coinrow img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid white}
-.overlay{position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.overlay{position:absolute;z-index:80;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .card{width:min(92vw,520px);padding:clamp(20px,5vw,34px);border:1px solid #7be1ff66;border-radius:18px;text-align:center;background:linear-gradient(155deg,#102d53f5,#06142cf5);box-shadow:0 20px 70px #00000055}
 .logos{display:flex;justify-content:center;gap:14px;margin-bottom:14px}.logos img{width:clamp(56px,14vw,84px);aspect-ratio:1;object-fit:cover;border-radius:50%;border:3px solid #ffffffd9;box-shadow:0 8px 24px #001725}
 h1{font-size:clamp(28px,7vw,42px);line-height:1;margin:8px 0 10px;font-weight:1000;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--gold)}.subtitle{color:#c6e2f7;line-height:1.5;margin:0 0 10px}
 button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:900;cursor:pointer;color:#03152c;background:linear-gradient(100deg,#35d4ff,#8ceaff);box-shadow:0 7px 22px #20bfff33}
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:#9fc5e2;margin-top:17px;line-height:1.6}
-#pauseBtn{pointer-events:auto;position:absolute;z-index:6;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
-#toast{position:absolute;z-index:9;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
-@media(max-width:520px){.hud{padding:10px}.stat{min-width:62px;padding:6px 8px}.stat small{font-size:9px}.brand{max-width:100px;line-height:1.05}.coinrow img{width:19px;height:19px}}
+#pauseBtn{pointer-events:auto;position:absolute;z-index:70;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
+#toast{position:absolute;z-index:90;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
+/* debug panel */
+#debugPanel{position:fixed;z-index:999;left:10px;bottom:10px;background:rgba(2,6,23,0.7);color:#cfefff;padding:8px 10px;border-radius:10px;font-size:12px;max-width:46vw;backdrop-filter:blur(4px)}
+#debugPanel b{display:block;font-weight:800;margin-bottom:6px}
+#debugPanel pre{white-space:pre-wrap;margin:0;font-size:11px}
+#debugActions{display:flex;gap:6px;margin-top:6px}
+#debugActions button{font-size:11px;padding:6px;border-radius:8px}
+@media(max-width:520px){#debugPanel{max-width:90vw;font-size:11px}}
 </style>
 </head>
 <body>
@@ -42,427 +48,124 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 <div class="hint">Desktop: ← → or A / D to change lanes · ↑ / Space to jump · ↓ to slide<br>Mobile: swipe left / right / up / down</div>
 </div></div>
 </div>
+<!-- debug panel added to aid diagnosis (mobile-friendly) -->
+<div id="debugPanel" aria-hidden="false">
+  <b>DEBUG</b>
+  <div id="debugState"><pre>loading…</pre></div>
+  <div id="debugActions">
+    <button id="dbgDump">Dump</button>
+    <button id="dbgForceStart">Force Start</button>
+    <button id="dbgForceClear">Clear Blur</button>
+    <button id="dbgToggleMenu">Toggle Menu DOM</button>
+  </div>
+</div>
 <script>
 (() => {
-  // Basic globals
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
   const $ = id => document.getElementById(id);
+
+  // store original menu node to reattach if we remove it
+  const originalMenu = $('menu');
+  let menuAttached = true;
 
   let W = 800, H = 600, dpr = 1;
   let state = 'menu'; // menu, run, pause, over
   let last = 0, raf = null, idleRaf = null;
 
-  // gameplay
+  // gameplay state
   let score = 0, blue = 0, gold = 0;
-  let speed = 320; // world speed (px per second)
-  let spawnTimer = 0; // seconds until next spawn
-  let items = []; // obstacles and coins
-  let particles = [];
-  let lane = 1; // 0,1,2
-  let playerY = 0, playerVY = 0, isSliding = 0; // sliding time left
-  let invuln = 0; // collision grace
-  let roadOffset = 0;
+  let speed = 320, spawnTimer = 0, items = [], particles = [];
+  let lane = 1, playerY = 0, playerVY = 0, isSliding = 0, invuln = 0, roadOffset = 0;
 
-  const blueImg = new Image();
-  const goldImg = new Image();
-  blueImg.src = './blue-team-coin.png';
-  goldImg.src = './gold-collaboration-coin.png';
+  const blueImg = new Image(), goldImg = new Image();
+  blueImg.src = './blue-team-coin.png'; goldImg.src = './gold-collaboration-coin.png';
+  let blueLoaded=false,goldLoaded=false; blueImg.onload=()=>blueLoaded=true; goldImg.onload=()=>goldLoaded=true;
 
-  // handle fallback if images fail
-  let blueLoaded = false, goldLoaded = false;
-  blueImg.onload = () => { blueLoaded = true; };
-  goldImg.onload = () => { goldLoaded = true; };
-  blueImg.onerror = () => { blueLoaded = false; console.warn('blue coin failed to load'); };
-  goldImg.onerror = () => { goldLoaded = false; console.warn('gold coin failed to load'); };
+  function resize(){dpr=Math.min(devicePixelRatio||1,2);W=canvas.clientWidth||window.innerWidth;H=canvas.clientHeight||window.innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+  window.addEventListener('resize',resize);resize();
 
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.clientWidth || window.innerWidth;
-    H = canvas.clientHeight || window.innerHeight;
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  window.addEventListener('resize', resize);
-  resize();
+  function toast(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,900)}
+  function updateHud(){$('score').textContent=Math.floor(score);$('blueCount').textContent=blue;$('goldCount').textContent=gold}
 
-  function toast(s) {
-    const el = $('toast');
-    el.textContent = s;
-    el.style.opacity = 1;
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.style.opacity = 0, 900);
+  function reset(){score=0;blue=0;gold=0;speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;updateHud();}
+
+  function stopIdle(){if(idleRaf){cancelAnimationFrame(idleRaf);idleRaf=null}}
+  function startIdle(){stopIdle(); function idleLoop(){ if(state==='run'){idleRaf=null;return;} ctx.clearRect(0,0,W,H); drawRoad(); const t=performance.now()/1000; drawCoin(W/2-90+Math.sin(t*1.4)*16,H*0.55+Math.cos(t*1.7)*10,22,blueImg,t); drawCoin(W/2+90+Math.cos(t*1.2)*10,H*0.55+Math.sin(t*1.1)*8,22,goldImg,t+1); idleRaf=requestAnimationFrame(idleLoop);} idleRaf=requestAnimationFrame(idleLoop)}
+
+  function attachMenu(){ if(!menuAttached && originalMenu){ document.getElementById('game').appendChild(originalMenu); menuAttached=true } }
+  function detachMenu(){ if(menuAttached && originalMenu){ originalMenu.remove(); menuAttached=false } }
+
+  function clearMenuStyles(){ const m=$('menu'); if(!m) return; m.style.backdropFilter='none'; m.style.webkitBackdropFilter='none'; m.style.pointerEvents='none'; m.style.visibility='hidden'; m.style.display='none' }
+  function showMenuStyles(){ const m=$('menu'); if(!m) return; m.style.backdropFilter='blur(4px)'; m.style.webkitBackdropFilter='blur(4px)'; m.style.pointerEvents='auto'; m.style.visibility='visible'; m.style.display='flex' }
+
+  function start(){
+    reset(); state='run'; last=performance.now(); // detach overlay from DOM to guarantee no lingering backdrop-filter
+    try{ detachMenu(); }catch(e){}
+    // clear any filters on ancestor
+    document.getElementById('game').style.filter='none'; document.body.style.webkitTransform='';
+    stopIdle(); if(raf){cancelAnimationFrame(raf);raf=null} raf=requestAnimationFrame(loop);
+    updateDebug(); console.log('[game] start -> state=',state,'raf=',raf,'menuAttached=',menuAttached)
   }
 
-  function updateHud() {
-    $('score').textContent = Math.floor(score);
-    $('blueCount').textContent = blue;
-    $('goldCount').textContent = gold;
+  function gameOver(reason){ state='over'; if(raf){cancelAnimationFrame(raf);raf=null} // ensure menu is attached and visible
+    attachMenu(); showMenuStyles(); $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>'; const p=$('menu').querySelector('.subtitle'); p.innerHTML=`Score: <b>${Math.floor(score)}</b><br>${reason||'You hit an obstacle.'}`; $('startBtn').textContent='↺ RESTART'; stopIdle(); startIdle(); updateDebug(); console.log('[game] gameOver -> state=',state,'menuAttached=',menuAttached)
   }
 
-  function reset() {
-    score = 0; blue = 0; gold = 0; speed = 320; spawnTimer = 0; items = []; particles = []; lane = 1; playerY = 0; playerVY = 0; isSliding = 0; invuln = 0; roadOffset = 0; updateHud();
+  function pauseToggle(){ if(state==='run'){state='pause'; if(raf){cancelAnimationFrame(raf);raf=null} $('pauseBtn').textContent='▶ Resume'; toast('PAUSED'); } else if(state==='pause'){ state='run'; $('pauseBtn').textContent='Ⅱ Pause'; last=performance.now(); if(!raf) raf=requestAnimationFrame(loop); } updateDebug(); }
+
+  function laneX(l,depth=1){const horizon=H*.28,base=H*.9;const y=horizon+(base-horizon)*depth;const roadW=W*(.22+.7*depth);return W/2+(l-1)*roadW*.29}
+
+  function drawRoad(){const horizon=H*.27,base=H*1.04;let g=ctx.createLinearGradient(0,horizon,0,H);g.addColorStop(0,'#123a61');g.addColorStop(1,'#071426');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(W/2-W*.5,horizon);ctx.lineTo(W/2+W*.5,horizon);ctx.lineTo(W/2+W*.5,base);ctx.lineTo(W/2-W*.5,base);ctx.closePath();ctx.fill();for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle='#32cfff55';ctx.lineWidth=2;ctx.stroke()}for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=`rgba(73,203,255,${.04+d*.13})`;ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}}
+
+  function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random();let type=r<.55?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
+
+  function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
+
+  function drawItems(dt){for(let it of items){it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4;let d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);if((it.type==='blue'||it.type==='gold')){drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);if(d>.78&&d<.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;if(it.type==='gold')gold++;else blue++;for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'});toast(it.type==='gold'?'Golden!':'Blue!');updateHud()}}else if(it.type==='block'){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();if(d>.82&&d<.96&&!it.got&&it.l===lane){if(playerY<18&&isSliding<=0&&invuln<=0){it.got=true;gameOver('You hit a block');return true}}}else if(it.type==='barrier'){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#fff1a3';ctx.fillRect(-30,-10,60,18);ctx.fillStyle='#c47f00';ctx.fillRect(-30,-10,8,18);ctx.fillRect(22,-10,8,18);ctx.restore();if(d>.82&&d<.96&&!it.got&&it.l===lane){if(playerY<22&&isSliding<=0&&invuln<=0){it.got=true;gameOver('You hit a barrier');return true}}}}items=items.filter(it=>it.d<1.18&&!it.got);return false}
+
+  function drawPlayer(dt){if(playerVY!==0||playerY>0){playerY+=playerVY*dt;playerVY-=1400*dt;if(playerY<0){playerY=0;playerVY=0}}if(isSliding>0)isSliding=Math.max(0,isSliding-dt);if(invuln>0)invuln=Math.max(0,invuln-dt);const x=laneX(lane,.92);const y=H*.82-playerY;ctx.save();ctx.translate(x,y);ctx.fillStyle='#001a31';ctx.beginPath();ctx.ellipse(0,34,22,7,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;if(isSliding>0){roundRect(ctx,-26,6,52,22,8);ctx.fillStyle='#12b9f5';ctx.fill();ctx.fillStyle='#e4f8ff';ctx.beginPath();ctx.arc(17,3,9,0,Math.PI*2);ctx.fill()}else{roundRect(ctx,-18,-6,36,44,9);ctx.fillStyle='#13bdf5';ctx.fill();ctx.fillStyle='#d9f6ff';ctx.beginPath();ctx.arc(0,-18,12,0,Math.PI*2);ctx.fill()}ctx.restore()}
+
+  function roundRect(ctx,x,y,w,h,r){const min=Math.min(w/2,h/2);if(r>min)r=min;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+  function drawParticles(dt){for(let p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=320*dt;ctx.globalAlpha=Math.max(0,p.life/.6);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}particles=particles.filter(p=>p.life>0)}
+
+  function loop(now){if(state!=='run'){raf=null;return}let dt=Math.min((now-last)/1000,0.04);last=now;score+=dt*10;speed=Math.min(750,speed+dt*2.5);roadOffset+=dt*speed/300;spawnTimer-=dt;if(spawnTimer<=0){spawnItem();spawnTimer=0.45+Math.random()*0.6-Math.min(0.3,score/400)}ctx.clearRect(0,0,W,H);drawRoad();const collided=drawItems(dt);if(collided){raf=null;updateDebug();return}drawPlayer(dt);drawParticles(dt);updateHud();if(state==='run')raf=requestAnimationFrame(loop);else raf=null;updateDebug()}
+
+  function move(dir){if(state!=='run')return;if(dir==='left')lane=Math.max(0,lane-1);if(dir==='right')lane=Math.min(2,lane+1);if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP')}}if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE')}}
   }
 
-  function stopIdle() {
-    if (idleRaf) { cancelAnimationFrame(idleRaf); idleRaf = null; }
-  }
-  function startIdle() {
-    stopIdle();
-    function idleLoop() {
-      if (state === 'run') { idleRaf = null; return; }
-      ctx.clearRect(0,0,W,H);
-      drawRoad();
-      const t = performance.now() / 1000;
-      const cx = W/2; const cy = H*0.55;
-      drawCoin(cx - 90 + Math.sin(t*1.4)*16, cy + Math.cos(t*1.7)*10, 22, blueImg, t);
-      drawCoin(cx + 90 + Math.cos(t*1.2)*10, cy + Math.sin(t*1.1)*8, 22, goldImg, t+1);
-      idleRaf = requestAnimationFrame(idleLoop);
-    }
-    idleRaf = requestAnimationFrame(idleLoop);
-  }
+  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();if(k==='arrowleft'||k==='a')move('left');if(k==='arrowright'||k==='d')move('right');if(k==='arrowup'||k===' '||k==='w')move('up');if(k==='arrowdown'||k==='s')move('down');if(k==='escape')pauseToggle()})
 
-  function start() {
-    // ensure single loop
-    reset();
-    state = 'run';
-    // fully hide menu overlay and remove any backdrop/filter to avoid Safari lingering blur
-    const menu = $('menu');
-    if (menu) {
-      menu.hidden = true;
-      menu.style.display = 'none';
-      menu.style.backdropFilter = 'none';
-      menu.style.webkitBackdropFilter = 'none';
-      menu.style.pointerEvents = 'none';
-      menu.style.visibility = 'hidden';
-    }
-    const gameEl = document.getElementById('game');
-    if (gameEl) { gameEl.style.filter = 'none'; }
+  // touch
+  let sx=0,sy=0,sT=0;
+  canvas.addEventListener('touchstart',e=>{ if($('menu')&&!$('menu').hidden) return; e.preventDefault();const t=e.changedTouches[0];sx=t.clientX;sy=t.clientY;sT=performance.now();},{passive:false});
+  canvas.addEventListener('touchend',e=>{ if($('menu')&&!$('menu').hidden) return; e.preventDefault();const t=e.changedTouches[0];const dx=t.clientX-sx;const dy=t.clientY-sy;const dt=performance.now()-sT;if(Math.abs(dx)<10&&Math.abs(dy)<10&&dt<300){if(state==='menu')start();else move('up');return}if(Math.abs(dx)>Math.abs(dy)){if(dx>30)move('right');else if(dx<-30)move('left')}else{if(dy<-30)move('up');else if(dy>30)move('down')}},{passive:false});
 
-    $('pauseBtn').hidden = false;
-    $('pauseBtn').textContent = 'Ⅱ Pause';
-    last = performance.now();
-    // stop idle animation and any leftover frames
-    stopIdle();
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
-    raf = requestAnimationFrame(loop);
-  }
+  canvas.addEventListener('click',e=>{if(state==='menu')start();else{const x=e.clientX;if(x<W/2-30)move('left');else if(x>W/2+30)move('right')}})
 
-  function gameOver(reason) {
-    // end game safely
-    state = 'over';
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
-    // show menu overlay and explicitly enable backdrop filter so Safari applies blur only while visible
-    const menu = $('menu');
-    if (menu) {
-      menu.hidden = false;
-      menu.style.display = 'flex';
-      menu.style.backdropFilter = 'blur(4px)';
-      menu.style.webkitBackdropFilter = 'blur(4px)';
-      menu.style.pointerEvents = 'auto';
-      menu.style.visibility = 'visible';
-    }
+  const startBtn=$('startBtn');
+  startBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();start()});
+  startBtn.addEventListener('click',()=>start());
+  $('pauseBtn').addEventListener('click',pauseToggle);
 
-    $('pauseBtn').hidden = true;
-    $('menu').querySelector('h1').innerHTML = 'RUN <em>OVER</em>';
-    const p = $('menu').querySelector('.subtitle');
-    p.innerHTML = `Score: <b>${Math.floor(score)}</b><br>${reason || 'You hit an obstacle.'}`;
-    $('startBtn').textContent = '↺ RESTART';
-    // restart idle menu animation
-    startIdle();
-  }
-
-  function pauseToggle() {
-    if (state === 'run') {
-      state = 'pause';
-      $('pauseBtn').textContent = '▶ Resume';
-      toast('PAUSED');
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-    } else if (state === 'pause') {
-      state = 'run';
-      $('pauseBtn').textContent = 'Ⅱ Pause';
-      last = performance.now();
-      if (!raf) raf = requestAnimationFrame(loop);
-    }
-  }
-
-  // lanes positions
-  function laneX(l, depth = 1) {
-    const horizon = H * 0.28;
-    const base = H * 0.9;
-    const y = horizon + (base - horizon) * depth;
-    const roadW = W * (0.22 + 0.7 * depth);
-    return W / 2 + (l - 1) * roadW * 0.29;
-  }
-
-  function drawRoad() {
-    const horizon = H * 0.27;
-    const base = H * 1.04;
-    let g = ctx.createLinearGradient(0, horizon, 0, H);
-    g.addColorStop(0, '#123a61');
-    g.addColorStop(1, '#071426');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.moveTo(W/2 - W*0.5, horizon);
-    ctx.lineTo(W/2 + W*0.5, horizon);
-    ctx.lineTo(W/2 + W*0.5, base);
-    ctx.lineTo(W/2 - W*0.5, base);
-    ctx.closePath();
-    ctx.fill();
-
-    // lane dividers
-    ctx.strokeStyle = '#32cfff55';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 2; i++) {
-      ctx.beginPath();
-      ctx.moveTo(W/2 + (i?1:-1) * W * 0.04, horizon);
-      ctx.lineTo(W/2 + (i?1:-1) * W * 0.49, base);
-      ctx.stroke();
-    }
-
-    // perspective tiles
-    for (let i = 0; i < 18; i++) {
-      let d = ((i/18 + (roadOffset % 1)) % 1);
-      let y = horizon + (base - horizon) * d * d;
-      let xW = W * (0.12 + 0.48 * d * d);
-      ctx.fillStyle = `rgba(73,203,255,${0.04 + d * 0.13})`;
-      ctx.fillRect(W/2 - xW, y, 2 * xW, Math.max(1, d * 4));
-    }
-  }
-
-  function spawnItem() {
-    // item types: blue coin, gold coin, block, barrier
-    let l = Math.floor(Math.random() * 3);
-    let r = Math.random();
-    let type = r < 0.55 ? 'coin' : r < 0.8 ? 'block' : 'barrier';
-    if (type === 'coin') type = Math.random() < 0.28 ? 'blue' : 'gold';
-    items.push({ type, l, d: 0, phase: Math.random() * Math.PI * 2, got: false });
-  }
-
-  function drawCoin(x, y, r, img, phase) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(Math.sin(phase) * 0.13);
-    ctx.shadowColor = img === goldImg ? '#ffc52c' : '#28d7ff';
-    ctx.shadowBlur = 14;
-    if ((img === goldImg && goldLoaded) || (img === blueImg && blueLoaded)) {
-      ctx.drawImage(img, -r, -r, r*2, r*2);
-    } else {
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fillStyle = img === goldImg ? '#ffcf66' : '#4fe3ff';
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#ffffff55';
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  function drawItems(dt) {
-    for (let it of items) {
-      it.d += dt * speed / Math.max(220, H * 0.9);
-      it.phase += dt * 4;
-      let d = Math.max(0, it.d);
-      let y = H * 0.28 + (H * 0.68) * d * d;
-      let x = laneX(it.l, d);
-      let scale = 0.18 + 0.9 * d;
-      let r = Math.max(6, 17 * scale);
-
-      if ((it.type === 'blue' || it.type === 'gold')) {
-        drawCoin(x, y, r, it.type === 'gold' ? goldImg : blueImg, it.phase);
-        if (d > 0.78 && d < 0.98 && !it.got && it.l === lane && playerY < 18 && isSliding <= 0) {
-          it.got = true;
-          if (it.type === 'gold') gold++; else blue++;
-          for (let i = 0; i < 8; i++) particles.push({ x, y, vx: (Math.random()-0.5)*220, vy: -Math.random()*180, life: 0.6, color: it.type === 'gold' ? '#ffd36a' : '#64f0ff' });
-          toast(it.type === 'gold' ? 'Golden!' : 'Blue!');
-          updateHud();
-        }
-      } else if (it.type === 'block') {
-        ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
-        ctx.fillStyle = '#f15b55'; ctx.fillRect(-22, -34, 44, 40);
-        ctx.fillStyle = '#ffb5a8'; ctx.fillRect(-16, -28, 32, 7);
-        ctx.restore();
-        if (d > 0.82 && d < 0.96 && !it.got && it.l === lane) {
-          if (playerY < 18 && isSliding <= 0 && invuln <= 0) {
-            it.got = true; // consume
-            gameOver('You hit a block');
-            return true; // signal collision
-          }
-        }
-      } else if (it.type === 'barrier') {
-        ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
-        ctx.fillStyle = '#fff1a3'; ctx.fillRect(-30, -10, 60, 18);
-        ctx.fillStyle = '#c47f00'; ctx.fillRect(-30, -10, 8, 18); ctx.fillRect(22, -10, 8, 18);
-        ctx.restore();
-        if (d > 0.82 && d < 0.96 && !it.got && it.l === lane) {
-          if (playerY < 22 && isSliding <= 0 && invuln <= 0) {
-            it.got = true; gameOver('You hit a barrier'); return true;
-          }
-        }
-      }
-    }
-    items = items.filter(it => it.d < 1.18 && !it.got);
-    return false;
-  }
-
-  function drawPlayer(dt) {
-    if (playerVY !== 0 || playerY > 0) {
-      playerY += playerVY * dt;
-      playerVY -= 1400 * dt; // gravity
-      if (playerY < 0) { playerY = 0; playerVY = 0; }
-    }
-    if (isSliding > 0) isSliding = Math.max(0, isSliding - dt);
-    if (invuln > 0) invuln = Math.max(0, invuln - dt);
-
-    const x = laneX(lane, 0.92);
-    const y = H * 0.82 - playerY;
-    ctx.save(); ctx.translate(x, y);
-    ctx.fillStyle = '#001a31'; ctx.beginPath(); ctx.ellipse(0, 34, 22, 7, 0, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-    if (isSliding > 0) {
-      roundRect(ctx, -26, 6, 52, 22, 8); ctx.fillStyle = '#12b9f5'; ctx.fill(); ctx.fillStyle = '#e4f8ff'; ctx.beginPath(); ctx.arc(17, 3, 9, 0, Math.PI*2); ctx.fill();
-    } else {
-      roundRect(ctx, -18, -6, 36, 44, 9); ctx.fillStyle = '#13bdf5'; ctx.fill(); ctx.fillStyle = '#d9f6ff'; ctx.beginPath(); ctx.arc(0, -18, 12, 0, Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function roundRect(ctx, x, y, w, h, r) {
-    const min = Math.min(w/2, h/2);
-    if (r > min) r = min;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
-
-  function drawParticles(dt) {
-    for (let p of particles) {
-      p.life -= dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vy += 320 * dt;
-      ctx.globalAlpha = Math.max(0, p.life / 0.6);
-      ctx.fillStyle = p.color;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-    particles = particles.filter(p => p.life > 0);
-  }
-
-  function loop(now) {
-    if (state !== 'run') { raf = null; return; }
-    let dt = Math.min((now - last) / 1000, 0.04);
-    last = now;
-
-    score += dt * 10;
-    speed = Math.min(750, speed + dt * 2.5);
-    roadOffset += dt * speed / 300;
-    spawnTimer -= dt;
-    if (spawnTimer <= 0) {
-      spawnItem();
-      spawnTimer = 0.45 + Math.random() * 0.6 - Math.min(0.3, score / 400);
-    }
-
-    ctx.clearRect(0, 0, W, H);
-    drawRoad();
-    const collided = drawItems(dt);
-    if (collided) { raf = null; return; }
-    drawPlayer(dt);
-    drawParticles(dt);
-
-    updateHud();
-
-    // schedule next only if still running
-    if (state === 'run') raf = requestAnimationFrame(loop); else raf = null;
-  }
-
-  // controls
-  function move(dir) {
-    if (state !== 'run') return;
-    if (dir === 'left') lane = Math.max(0, lane - 1);
-    if (dir === 'right') lane = Math.min(2, lane + 1);
-    if (dir === 'up') { if (playerY === 0) { playerVY = 620; toast('JUMP'); } }
-    if (dir === 'down') { if (playerY === 0 && isSliding <= 0) { isSliding = 0.55; toast('SLIDE'); } }
-  }
-
-  addEventListener('keydown', e => {
-    const k = e.key.toLowerCase();
-    if (['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k)) e.preventDefault();
-    if (k === 'arrowleft' || k === 'a') move('left');
-    if (k === 'arrowright' || k === 'd') move('right');
-    if (k === 'arrowup' || k === ' ' || k === 'w') move('up');
-    if (k === 'arrowdown' || k === 's') move('down');
-    if (k === 'escape') pauseToggle();
+  // debug UI
+  const dbgState=$('#debugState pre'); const dbgDump=$('dbgDump'), dbgForceStart=$('dbgForceStart'), dbgForceClear=$('dbgForceClear'), dbgToggleMenu=$('dbgToggleMenu');
+  function updateDebug(){try{const menuNode=$('menu');const menuComputed = menuNode?window.getComputedStyle(menuNode):null;const menuInfo = menuNode?{hidden:menuNode.hidden,display:menuNode.style.display||menuComputed.display,visibility:menuNode.style.visibility||menuComputed.visibility,backdrop:menuNode.style.backdropFilter||menuComputed.backdropFilter,attached:menuAttached}: {attached:menuAttached};const stateInfo={state,raf:!!raf,idle:!!idleRaf,last,menu:menuInfo}; dbgState.textContent=JSON.stringify(stateInfo,null,2)}catch(e){dbgState.textContent='err:'+e.message}}
+  dbgDump.addEventListener('click',()=>{console.log('STATE DUMP', {state,raf,idleRaf,last,menuAttached,itemsCount:items.length});alert('Dumped to console')});
+  dbgForceStart.addEventListener('click',()=>{start();alert('Forced start called')});
+  dbgForceClear.addEventListener('click',()=>{ // clear any backdrop/filter artifacts
+    const menu=$('menu'); if(menu){ menu.style.backdropFilter='none'; menu.style.webkitBackdropFilter='none'; menu.style.display='none'; menu.style.visibility='hidden'; }
+    document.getElementById('game').style.filter='none'; document.body.style.webkitTransform='none'; // force reflow
+    void document.body.offsetHeight; alert('Cleared blur styles')
   });
+  dbgToggleMenu.addEventListener('click',()=>{ if(menuAttached){ detachMenu(); alert('Menu detached') } else { attachMenu(); alert('Menu attached') } updateDebug() });
 
-  // touch / swipe (non-passive so we can prevent scrolling while interacting with canvas)
-  let sx = 0, sy = 0, sT = 0;
-  canvas.addEventListener('touchstart', e => {
-    if ($('menu') && !$('menu').hidden) return; // let overlay/button receive the touch
-    e.preventDefault(); const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; sT = performance.now();
-  }, { passive: false });
-  canvas.addEventListener('touchend', e => {
-    if ($('menu') && !$('menu').hidden) return; // ignore canvas touch while menu visible
-    e.preventDefault(); const t = e.changedTouches[0]; const dx = t.clientX - sx; const dy = t.clientY - sy; const dt = performance.now() - sT;
-    if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && dt < 300) {
-      // tap
-      if (state === 'menu') start(); else move('up');
-      return;
-    }
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 30) move('right'); else if (dx < -30) move('left');
-    } else {
-      if (dy < -30) move('up'); else if (dy > 30) move('down');
-    }
-  }, { passive: false });
+  // start idle and initial HUD
+  startIdle(); updateHud(); updateDebug(); setInterval(updateDebug,500);
 
-  // mouse clicks for lane changes (left/right halves)
-  canvas.addEventListener('click', e => {
-    if (state === 'menu') start();
-    else { const x = e.clientX; if (x < W/2 - 30) move('left'); else if (x > W/2 + 30) move('right'); }
-  });
-
-  // UI
-  // ensure pointerdown to improve reliability on iOS
-  const startBtn = $('startBtn');
-  startBtn.addEventListener('pointerdown', (ev) => { ev.preventDefault(); $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
-  startBtn.addEventListener('click', () => { $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
-  $('pauseBtn').addEventListener('click', pauseToggle);
-
-  // on load: start idle menu animation
-  startIdle();
-
-  // initial HUD update
-  updateHud();
-
-  // --- automated restart test (runs in console only if you call runRestartTest())
-  window.runRestartTest = function cycles(n=3, delay=400) {
-    console.log('Restart test start: cycles=',n);
-    let i=0;
-    function one(){
-      console.log('Start game',i+1);
-      startBtn.click();
-      // simulate immediate collision after short time by injecting an obstacle in same lane
-      setTimeout(()=>{
-        items.push({type:'block',l:lane,d:0.86,phase:0,got:false});
-      }, 200);
-      // wait for gameOver then restart
-      setTimeout(()=>{
-        if (state==='over'){
-          console.log('Game over reached');
-          startBtn.click();
-          i++; if (i<n) setTimeout(one, delay);
-        } else { console.warn('Game did not reach over state in expected time, current state=', state); }
-      }, 900);
-    }
-    one();
-  };
+  // helper for repeated restart testing
+  window.runRestartTest=function cycles(n=3,delay=400){console.log('Restart test start: cycles=',n);let i=0;function one(){console.log('Start game',i+1);start();setTimeout(()=>{items.push({type:'block',l:lane,d:0.86,phase:0,got:false})},200);setTimeout(()=>{if(state==='over'){console.log('Game over reached');start();i++;if(i<n)setTimeout(one,delay)}else{console.warn('Did not reach over state, state=',state)}},900)}one()}
 
 })();
 </script>
