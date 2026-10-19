@@ -22,18 +22,14 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:#9fc5e2;margin-top:17px;line-height:1.6}
 #pauseBtn{pointer-events:auto;position:absolute;z-index:70;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
 #toast{position:absolute;z-index:90;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
-/* debug panel */
-#debugPanel{position:fixed;z-index:999;left:10px;bottom:10px;background:rgba(2,6,23,0.7);color:#cfefff;padding:8px 10px;border-radius:10px;font-size:12px;max-width:46vw;backdrop-filter:blur(4px)}
-#debugPanel b{display:block;font-weight:800;margin-bottom:6px}
-#debugPanel pre{white-space:pre-wrap;margin:0;font-size:11px}
-#debugActions{display:flex;gap:6px;margin-top:6px}
-#debugActions button{font-size:11px;padding:6px;border-radius:8px}
-@media(max-width:520px){#debugPanel{max-width:90vw;font-size:11px}}
+#c3{display:none}
+button:disabled{opacity:.6;cursor:wait}
 </style>
 </head>
 <body>
 <div id="game">
 <canvas id="c" aria-label="Blue-Gold-Rush endless runner game"></canvas>
+<canvas id="c3" aria-label="Blue-Gold-Rush 3D endless runner game"></canvas>
 <div class="hud"><div class="brand">BLUE <span>GOLD</span><br>RUSH ⚡</div><div class="stats">
 <div class="stat"><b id="score">0</b><small>Score</small></div>
 <div class="stat"><div class="coinrow"><img id="blueIcon" src="./blue-team-coin.png" alt=""><b id="blueCount">0</b></div><small>Blue coins</small></div>
@@ -44,129 +40,388 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 <div class="overlay" id="menu"><div class="card">
 <div class="logos"><img id="logoBlue" src="./blue-team-coin.png" alt="Blue Team coin"><img id="logoGold" src="./gold-collaboration-coin.png" alt="Gold Collaboration coin"></div>
 <h1>BLUE <em>GOLD</em> RUSH</h1><p class="subtitle">Run fast. Dodge obstacles. Collect blue Team coins and golden Collaboration coins!</p>
-<button id="startBtn">▶ START RUN</button>
+<button id="startBtn" disabled>Loading…</button>
 <div class="hint">Desktop: ← → or A / D to change lanes · ↑ / Space to jump · ↓ to slide<br>Mobile: swipe left / right / up / down</div>
 </div></div>
 </div>
-<!-- debug panel added to aid diagnosis (mobile-friendly) -->
-<div id="debugPanel" aria-hidden="false">
-  <b>DEBUG</b>
-  <div id="debugState"><pre>loading…</pre></div>
-  <div id="debugActions">
-    <button id="dbgDump">Dump</button>
-    <button id="dbgForceStart">Force Start</button>
-    <button id="dbgForceClear">Clear Blur</button>
-    <button id="dbgToggleMenu">Toggle Menu DOM</button>
-  </div>
-</div>
 <script>
 (() => {
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
+  'use strict';
   const $ = id => document.getElementById(id);
+  const BLUE_SRC = './blue-team-coin.png', GOLD_SRC = './gold-collaboration-coin.png';
+  const THREE_URLS = [
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+    'https://unpkg.com/three@0.160.0/build/three.min.js'
+  ];
 
-  // store original menu node to reattach if we remove it
-  const originalMenu = $('menu');
-  let menuAttached = true;
-
-  let W = 800, H = 600, dpr = 1;
+  // ---------- shared game state ----------
   let state = 'menu'; // menu, run, pause, over
-  let last = 0, raf = null, idleRaf = null;
-
-  // gameplay state
   let score = 0, blue = 0, gold = 0;
-  let speed = 320, spawnTimer = 0, items = [], particles = [];
-  let lane = 1, playerY = 0, playerVY = 0, isSliding = 0, invuln = 0, roadOffset = 0;
-
-  const blueImg = new Image(), goldImg = new Image();
-  blueImg.src = './blue-team-coin.png'; goldImg.src = './gold-collaboration-coin.png';
-  let blueLoaded=false,goldLoaded=false; blueImg.onload=()=>blueLoaded=true; goldImg.onload=()=>goldLoaded=true;
-
-  function resize(){dpr=Math.min(devicePixelRatio||1,2);W=canvas.clientWidth||window.innerWidth;H=canvas.clientHeight||window.innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
-  window.addEventListener('resize',resize);resize();
+  let engine = null, raf = null, last = 0;
 
   function toast(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,900)}
   function updateHud(){$('score').textContent=Math.floor(score);$('blueCount').textContent=blue;$('goldCount').textContent=gold}
+  const game = {
+    addScore(v){score+=v}, addCoin(kind){if(kind==='gold')gold++;else blue++;toast(kind==='gold'?'Golden!':'Blue!')},
+    toast
+  };
 
-  function reset(){score=0;blue=0;gold=0;speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;updateHud();}
+  // ---------- 2D fallback engine (original Canvas 2D game) ----------
+  function createEngine2D(){
+    const canvas = $('c'), ctx = canvas.getContext('2d');
+    if(!ctx) return null;
+    let W=800,H=600,dpr=1;
+    let speed=320,spawnTimer=0,items=[],particles=[];
+    let lane=1,playerY=0,playerVY=0,isSliding=0,invuln=0,roadOffset=0,crash=null,idleT=0;
+    const blueImg=new Image(),goldImg=new Image();
+    let blueLoaded=false,goldLoaded=false;
+    blueImg.onload=()=>blueLoaded=true;goldImg.onload=()=>goldLoaded=true;
+    blueImg.src=BLUE_SRC;goldImg.src=GOLD_SRC;
 
-  function stopIdle(){if(idleRaf){cancelAnimationFrame(idleRaf);idleRaf=null}}
-  function startIdle(){stopIdle(); function idleLoop(){ if(state==='run'){idleRaf=null;return;} ctx.clearRect(0,0,W,H); drawRoad(); const t=performance.now()/1000; drawCoin(W/2-90+Math.sin(t*1.4)*16,H*0.55+Math.cos(t*1.7)*10,22,blueImg,t); drawCoin(W/2+90+Math.cos(t*1.2)*10,H*0.55+Math.sin(t*1.1)*8,22,goldImg,t+1); idleRaf=requestAnimationFrame(idleLoop);} idleRaf=requestAnimationFrame(idleLoop)}
+    function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=canvas.clientWidth||window.innerWidth;H=canvas.clientHeight||window.innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+    function reset(){speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;crash=null}
+    function laneX(l,depth=1){const roadW=W*(.22+.7*depth);return W/2+(l-1)*roadW*.29}
+    function drawRoad(){const horizon=H*.27,base=H*1.04;let g=ctx.createLinearGradient(0,horizon,0,H);g.addColorStop(0,'#123a61');g.addColorStop(1,'#071426');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,horizon);ctx.lineTo(W,horizon);ctx.lineTo(W,base);ctx.lineTo(0,base);ctx.closePath();ctx.fill();for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle='#32cfff55';ctx.lineWidth=2;ctx.stroke()}for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=`rgba(73,203,255,${.04+d*.13})`;ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}}
+    function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random();let type=r<.55?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
+    function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
+    function drawItems(dt){
+      for(const it of items){
+        it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4;
+        const d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);
+        if(it.type==='blue'||it.type==='gold'){
+          drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);
+          if(d>.78&&d<.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
+        }else if(it.type==='block'){
+          ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();
+          if(d>.82&&d<.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a block'}
+        }else{
+          ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#fff1a3';ctx.fillRect(-30,-10,60,18);ctx.fillStyle='#c47f00';ctx.fillRect(-30,-10,8,18);ctx.fillRect(22,-10,8,18);ctx.restore();
+          if(d>.82&&d<.96&&!it.got&&it.l===lane&&playerY<22&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a barrier'}
+        }
+      }
+      items=items.filter(it=>it.d<1.18&&!it.got);
+    }
+    function roundRect(x,y,w,h,r){const min=Math.min(w/2,h/2);if(r>min)r=min;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+    function drawPlayer(dt){
+      if(playerVY!==0||playerY>0){playerY+=playerVY*dt;playerVY-=1400*dt;if(playerY<0){playerY=0;playerVY=0}}
+      if(isSliding>0)isSliding=Math.max(0,isSliding-dt);if(invuln>0)invuln=Math.max(0,invuln-dt);
+      const x=laneX(lane,.92),y=H*.82-playerY;
+      ctx.save();ctx.translate(x,y);ctx.fillStyle='#001a31';ctx.beginPath();ctx.ellipse(0,34,22,7,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+      if(isSliding>0){roundRect(-26,6,52,22,8);ctx.fillStyle='#12b9f5';ctx.fill();ctx.fillStyle='#e4f8ff';ctx.beginPath();ctx.arc(17,3,9,0,Math.PI*2);ctx.fill()}
+      else{roundRect(-18,-6,36,44,9);ctx.fillStyle='#13bdf5';ctx.fill();ctx.fillStyle='#d9f6ff';ctx.beginPath();ctx.arc(0,-18,12,0,Math.PI*2);ctx.fill()}
+      ctx.restore();
+    }
+    function drawParticles(dt){for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=320*dt;ctx.globalAlpha=Math.max(0,p.life/.6);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}particles=particles.filter(p=>p.life>0)}
 
-  function attachMenu(){ if(!menuAttached && originalMenu){ document.getElementById('game').appendChild(originalMenu); menuAttached=true } }
-  function detachMenu(){ if(menuAttached && originalMenu){ originalMenu.remove(); menuAttached=false } }
+    return {
+      name:'2D', canvas, resize, reset,
+      step(dt,mode){
+        ctx.clearRect(0,0,W,H);
+        if(mode==='run'){
+          game.addScore(dt*10);speed=Math.min(750,speed+dt*2.5);roadOffset+=dt*speed/300;spawnTimer-=dt;
+          if(spawnTimer<=0){spawnItem();spawnTimer=0.45+Math.random()*0.6-Math.min(0.3,score/400)}
+          drawRoad();crash=null;drawItems(dt);drawPlayer(dt);drawParticles(dt);
+          return crash;
+        }
+        if(mode==='idle'){
+          idleT+=dt;drawRoad();
+          drawCoin(W/2-90+Math.sin(idleT*1.4)*16,H*0.55+Math.cos(idleT*1.7)*10,22,blueImg,idleT);
+          drawCoin(W/2+90+Math.cos(idleT*1.2)*10,H*0.55+Math.sin(idleT*1.1)*8,22,goldImg,idleT+1);
+          return null;
+        }
+        drawRoad();drawItems(0);drawPlayer(0);drawParticles(0);crash=null;return null;
+      },
+      move(dir){
+        if(dir==='left')lane=Math.max(0,lane-1);
+        else if(dir==='right')lane=Math.min(2,lane+1);
+        else if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP')}}
+        else if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE')}}
+      },
+      // test hook
+      _debug(){return {lane,playerY,isSliding,items}}
+    };
+  }
 
-  function clearMenuStyles(){ const m=$('menu'); if(!m) return; m.style.backdropFilter='none'; m.style.webkitBackdropFilter='none'; m.style.pointerEvents='none'; m.style.visibility='hidden'; m.style.display='none' }
-  function showMenuStyles(){ const m=$('menu'); if(!m) return; m.style.backdropFilter='blur(4px)'; m.style.webkitBackdropFilter='blur(4px)'; m.style.pointerEvents='auto'; m.style.visibility='visible'; m.style.display='flex' }
+  // ---------- Three.js 3D engine ----------
+  function createEngine3D(THREE){
+    const canvas = $('c3');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false, powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x071b42,1);
+
+    const LANE_W=2.2, SPAWN_Z=-80, DESPAWN_Z=8, PLAYER_R=0.45;
+    const GRAVITY=30, JUMP_V=10, SLIDE_TIME=0.6, BLOCK_H=0.95, BAR_BOTTOM=1.05;
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x071b42);
+    scene.fog=new THREE.Fog(0x071b42,25,85);
+    const camera=new THREE.PerspectiveCamera(62,1,0.1,200);
+    camera.position.set(0,3.8,7);camera.lookAt(0,1,-8);
+
+    scene.add(new THREE.HemisphereLight(0xbfe8ff,0x10315a,1.0));
+    const sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(4,10,6);scene.add(sun);
+
+    // track
+    const track=new THREE.Mesh(new THREE.PlaneGeometry(LANE_W*3+0.6,200),new THREE.MeshStandardMaterial({color:0x123a61,roughness:.9}));
+    track.rotation.x=-Math.PI/2;track.position.set(0,0,-80);scene.add(track);
+    for(const sx of[-1,1]){
+      const rail=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.5,200),new THREE.MeshStandardMaterial({color:0x20c8ff,emissive:0x0a6a8a}));
+      rail.position.set(sx*(LANE_W*1.5+0.45),0.25,-80);scene.add(rail);
+      const side=new THREE.Mesh(new THREE.PlaneGeometry(30,200),new THREE.MeshStandardMaterial({color:0x0b2547,roughness:1}));
+      side.rotation.x=-Math.PI/2;side.position.set(sx*(LANE_W*1.5+16),-0.05,-80);scene.add(side);
+    }
+    const dashGeo=new THREE.BoxGeometry(0.1,0.02,1.6),dashMat=new THREE.MeshBasicMaterial({color:0x6fdcff});
+    const dashes=[];const DASH_GAP=4,DASH_N=24;
+    for(const lx of[-LANE_W/2,LANE_W/2])for(let i=0;i<DASH_N;i++){const m=new THREE.Mesh(dashGeo,dashMat);m.position.set(lx,0.02,-i*DASH_GAP);scene.add(m);dashes.push(m)}
+    // side pillars for sense of speed
+    const pillarGeo=new THREE.BoxGeometry(0.6,3,0.6),pillarMat=new THREE.MeshStandardMaterial({color:0xffc847,emissive:0x5a3f00});
+    const pillars=[];
+    for(const sx of[-1,1])for(let i=0;i<12;i++){const m=new THREE.Mesh(pillarGeo,pillarMat);m.position.set(sx*(LANE_W*1.5+2.2),1.5,-i*8);scene.add(m);pillars.push(m)}
+
+    // coin textures (original team logo assets)
+    const loader=new THREE.TextureLoader();
+    function coinMats(src,fallback){
+      const side=new THREE.MeshBasicMaterial({color:fallback});
+      const face=new THREE.MeshBasicMaterial({color:fallback});
+      loader.load(src,tex=>{if(THREE.SRGBColorSpace)tex.colorSpace=THREE.SRGBColorSpace;face.map=tex;face.color.set(0xffffff);face.needsUpdate=true},undefined,()=>console.warn('[game] coin texture failed',src));
+      return [side,face,face];
+    }
+    const coinGeo=new THREE.CylinderGeometry(0.55,0.55,0.12,40);coinGeo.rotateX(Math.PI/2);
+    const coinMat={blue:coinMats(BLUE_SRC,0x28d7ff),gold:coinMats(GOLD_SRC,0xffc847)};
+    const blockGeo=new THREE.BoxGeometry(LANE_W*0.8,BLOCK_H,1.2),blockMat=new THREE.MeshStandardMaterial({color:0xf15b55,emissive:0x3a0f0d});
+    const postGeo=new THREE.BoxGeometry(0.2,2.4,0.4),postMat=new THREE.MeshStandardMaterial({color:0xc47f00});
+    const barGeo=new THREE.BoxGeometry(LANE_W*0.9,0.6,0.4),barMat=new THREE.MeshStandardMaterial({color:0xfff1a3,emissive:0x5a4a00});
+
+    // player
+    const player=new THREE.Group();
+    const bodyMat=new THREE.MeshStandardMaterial({color:0x13bdf5}),headMat=new THREE.MeshStandardMaterial({color:0xd9f6ff});
+    const body=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.9,0.5),bodyMat);body.position.y=0.95;
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.28,20,16),headMat);head.position.y=1.65;
+    const legL=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.5,0.3),bodyMat),legR=legL.clone();
+    legL.position.set(-0.2,0.25,0);legR.position.set(0.2,0.25,0);
+    const shadow=new THREE.Mesh(new THREE.CircleGeometry(0.5,20),new THREE.MeshBasicMaterial({color:0x001a31,transparent:true,opacity:.5}));
+    shadow.rotation.x=-Math.PI/2;shadow.position.y=0.03;
+    const figure=new THREE.Group();figure.add(body,head,legL,legR);
+    player.add(figure);scene.add(player,shadow);
+
+    let items=[],speed=16,distAcc=0,nextSpawn=0,lane=1,laneX=0,y=0,vy=0,slide=0,runT=0,idleT=0,w=1,h=1;
+
+    function clearItems(){for(const it of items)scene.remove(it.mesh);items=[]}
+    function reset(){clearItems();speed=16;nextSpawn=12;lane=1;laneX=0;y=0;vy=0;slide=0;runT=0;distAcc=0;
+      figure.scale.set(1,1,1);figure.rotation.set(0,0,0);figure.position.set(0,0,0)}
+    function resize(){
+      w=canvas.clientWidth||window.innerWidth;h=canvas.clientHeight||window.innerHeight;
+      renderer.setSize(w,h,false);camera.aspect=w/h;
+      camera.fov=camera.aspect<1?Math.min(95,62+(1-camera.aspect)*45):62;
+      camera.updateProjectionMatrix();
+    }
+    function laneToX(l){return (l-1)*LANE_W}
+    function addItem(type,l,z){
+      let mesh;
+      if(type==='coin-blue'||type==='coin-gold'){mesh=new THREE.Mesh(coinGeo,coinMat[type.slice(5)]);mesh.position.set(laneToX(l),1.1,z)}
+      else if(type==='block'){mesh=new THREE.Mesh(blockGeo,blockMat);mesh.position.set(laneToX(l),BLOCK_H/2,z)}
+      else{
+        mesh=new THREE.Group();const bar=new THREE.Mesh(barGeo,barMat);bar.position.y=BAR_BOTTOM+0.3;
+        const p1=new THREE.Mesh(postGeo,postMat),p2=new THREE.Mesh(postGeo,postMat);
+        p1.position.set(-LANE_W*0.42,1.2,0);p2.position.set(LANE_W*0.42,1.2,0);mesh.add(bar,p1,p2);mesh.position.set(laneToX(l),0,z)}
+      scene.add(mesh);
+      items.push({type,l,z,mesh,hit:false,half:type==='block'?0.6:0.2});
+    }
+    function spawn(){
+      const l=Math.floor(Math.random()*3),r=Math.random();
+      if(r<.55){const kind=Math.random()<.3?'coin-blue':'coin-gold';for(let i=0;i<4;i++)addItem(kind,l,SPAWN_Z-i*2.2)}
+      else if(r<.8)addItem('block',l,SPAWN_Z);
+      else addItem('barrier',l,SPAWN_Z);
+    }
+
+    return {
+      name:'3D', canvas, renderer, resize, reset,
+      step(dt,mode){
+        if(mode==='run'){
+          game.addScore(dt*10);speed=Math.min(36,speed+dt*0.35);
+          const dz=speed*dt;distAcc+=dz;runT+=dt*speed*0.6;
+          nextSpawn-=dz;if(nextSpawn<=0){spawn();nextSpawn=Math.max(8,18-speed*0.25)+Math.random()*8}
+          // player physics
+          if(y>0||vy>0){y+=vy*dt;vy-=GRAVITY*dt;if(y<=0){y=0;vy=0}}
+          if(slide>0)slide=Math.max(0,slide-dt);
+          const tx=laneToX(lane);laneX+=(tx-laneX)*Math.min(1,dt*14);
+          // world movement + collisions
+          let crash=null;
+          for(const it of items){
+            it.z+=dz;it.mesh.position.z=it.z;
+            if(it.type.startsWith('coin')){it.mesh.rotation.y+=dt*3}
+            if(it.hit||it.l!==lane)continue;
+            const dist=Math.abs(it.z);
+            if(it.type.startsWith('coin')){
+              if(dist<0.9){it.hit=true;scene.remove(it.mesh);game.addCoin(it.type.slice(5));game.addScore(5)}
+            }else if(dist<it.half+PLAYER_R){
+              if(it.type==='block'&&y<BLOCK_H-0.1){it.hit=true;crash='You hit a block'}
+              else if(it.type==='barrier'&&slide<=0&&y<BAR_BOTTOM+0.6){it.hit=true;crash='You hit a barrier'}
+            }
+          }
+          items=items.filter(it=>{if(it.hit||it.z>DESPAWN_Z){scene.remove(it.mesh);return false}return true});
+          animate(dt,true);
+          render();
+          return crash;
+        }
+        if(mode==='idle'){idleT+=dt;animate(dt,false);camera.position.x=Math.sin(idleT*0.5)*1.5;camera.lookAt(0,1,-8)}
+        else camera.position.x=0;
+        render();return null;
+      },
+      move(dir){
+        if(dir==='left')lane=Math.max(0,lane-1);
+        else if(dir==='right')lane=Math.min(2,lane+1);
+        else if(dir==='up'){if(y===0){vy=JUMP_V;slide=0;toast('JUMP')}}
+        else if(dir==='down'){if(y>0){vy=-JUMP_V}if(slide<=0){slide=SLIDE_TIME;toast('SLIDE')}}
+      },
+      _debug(){return {lane,y,slide,items:items.map(i=>({type:i.type,l:i.l,z:i.z}))}}
+    };
+
+    function animate(dt,running){
+      const wrap=(arr,gap,n)=>{const span=gap*n;for(const m of arr){m.position.z+=speedFor(running)*dt;if(m.position.z>DESPAWN_Z)m.position.z-=span}};
+      wrap(dashes.slice(0,DASH_N),DASH_GAP,DASH_N);wrap(dashes.slice(DASH_N),DASH_GAP,DASH_N);
+      wrap(pillars.slice(0,12),8,12);wrap(pillars.slice(12),8,12);
+      player.position.set(laneX,y,0);shadow.position.x=laneX;shadow.scale.setScalar(Math.max(.4,1-y*.25));
+      const sliding=slide>0;
+      figure.scale.set(1,sliding?0.45:1,1);
+      figure.rotation.x=sliding?-0.5:0;
+      const s=Math.sin(runT*2);
+      legL.rotation.x=y>0?0.4:s*0.8;legR.rotation.x=y>0?-0.4:-s*0.8;
+      camera.position.x=laneX*0.4;camera.lookAt(laneX*0.2,1,-8);
+    }
+    function speedFor(running){return running?speed:5}
+    function render(){renderer.render(scene,camera)}
+  }
+
+  // ---------- flow ----------
+  function showMenu(){const m=$('menu');m.style.display='flex';$('pauseBtn').hidden=true}
+  function hideMenu(){$('menu').style.display='none'}
 
   function start(){
-    reset(); state='run'; last=performance.now(); // detach overlay from DOM to guarantee no lingering backdrop-filter
-    try{ detachMenu(); }catch(e){}
-    // clear any filters on ancestor
-    document.getElementById('game').style.filter='none'; document.body.style.webkitTransform='';
-    stopIdle(); if(raf){cancelAnimationFrame(raf);raf=null} raf=requestAnimationFrame(loop);
-    updateDebug(); console.log('[game] start -> state=',state,'raf=',raf,'menuAttached=',menuAttached)
+    if(state==='run'||!engine)return;
+    score=0;blue=0;gold=0;engine.reset();updateHud();
+    state='run';hideMenu();$('pauseBtn').hidden=false;$('pauseBtn').textContent='Ⅱ Pause';
+    if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+    last=performance.now();
+  }
+  function gameOver(reason){
+    state='over';
+    $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>';
+    $('menu').querySelector('.subtitle').innerHTML='Score: <b>'+Math.floor(score)+'</b><br>'+(reason||'You hit an obstacle.');
+    $('startBtn').textContent='↺ RESTART';showMenu();updateHud();
+  }
+  function pauseToggle(){
+    if(state==='run'){state='pause';$('pauseBtn').textContent='▶ Resume';toast('PAUSED')}
+    else if(state==='pause'){state='run';$('pauseBtn').textContent='Ⅱ Pause';last=performance.now()}
+  }
+  function move(dir){if(state==='run'&&engine)engine.move(dir)}
+
+  // single animation loop for the whole page lifetime
+  function frame(now){
+    raf=requestAnimationFrame(frame);
+    if(!engine)return;
+    const dt=Math.min(Math.max((now-last)/1000,0),0.05);last=now;
+    try{
+      const mode=state==='run'?'run':(state==='pause'?'frozen':'idle');
+      const crash=engine.step(dt,mode);
+      if(state==='run'){updateHud();if(crash)gameOver(crash)}
+    }catch(err){console.error('[game] frame error',err);if(engine.name==='3D')fallbackTo2D('Renderer error – switched to 2D mode.')}
   }
 
-  function gameOver(reason){ state='over'; if(raf){cancelAnimationFrame(raf);raf=null} // ensure menu is attached and visible
-    attachMenu(); showMenuStyles(); $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>'; const p=$('menu').querySelector('.subtitle'); p.innerHTML=`Score: <b>${Math.floor(score)}</b><br>${reason||'You hit an obstacle.'}`; $('startBtn').textContent='↺ RESTART'; stopIdle(); startIdle(); updateDebug(); console.log('[game] gameOver -> state=',state,'menuAttached=',menuAttached)
+  // ---------- renderer selection / fallback ----------
+  let engine3D=null;
+  function useEngine(e){
+    engine=e;
+    $('c').style.display=e.name==='2D'?'block':'none';
+    $('c3').style.display=e.name==='3D'?'block':'none';
+    e.resize();
+  }
+  function fallbackTo2D(msg){
+    if(engine&&engine.name==='2D')return;
+    console.warn('[game] falling back to 2D:',msg);
+    const e=createEngine2D();if(!e)return;
+    const wasRunning=state==='run'||state==='pause';
+    useEngine(e);e.reset();
+    if(wasRunning){gameOver(msg)}else toast('2D mode');
+  }
+  function loadThree(){
+    return new Promise((resolve,reject)=>{
+      if(window.THREE)return resolve(window.THREE);
+      let i=0,done=false;
+      const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Three.js load timeout'))}},7000);
+      (function next(){
+        if(i>=THREE_URLS.length){if(!done){done=true;clearTimeout(timer);reject(new Error('Three.js failed to load'))}return}
+        const s=document.createElement('script');s.src=THREE_URLS[i++];s.async=true;
+        s.onload=()=>{if(done)return;if(window.THREE){done=true;clearTimeout(timer);resolve(window.THREE)}else next()};
+        s.onerror=()=>{s.remove();if(!done)next()};
+        document.head.appendChild(s);
+      })();
+    });
   }
 
-  function pauseToggle(){ if(state==='run'){state='pause'; if(raf){cancelAnimationFrame(raf);raf=null} $('pauseBtn').textContent='▶ Resume'; toast('PAUSED'); } else if(state==='pause'){ state='run'; $('pauseBtn').textContent='Ⅱ Pause'; last=performance.now(); if(!raf) raf=requestAnimationFrame(loop); } updateDebug(); }
+  // ---------- input (registered once) ----------
+  addEventListener('resize',()=>{if(engine)engine.resize()});
+  addEventListener('orientationchange',()=>setTimeout(()=>{if(engine)engine.resize()},200));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='run')pauseToggle()});
+  addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase();
+    if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();
+    if(state==='menu'||state==='over'){if((k==='enter'||k===' ')&&!$('startBtn').disabled)start();return}
+    if(e.repeat&&k!=='arrowleft'&&k!=='arrowright'&&k!=='a'&&k!=='d')return;
+    if(k==='arrowleft'||k==='a')move('left');
+    else if(k==='arrowright'||k==='d')move('right');
+    else if(k==='arrowup'||k===' '||k==='w')move('up');
+    else if(k==='arrowdown'||k==='s')move('down');
+    else if(k==='escape'||k==='p')pauseToggle();
+  });
 
-  function laneX(l,depth=1){const horizon=H*.28,base=H*.9;const y=horizon+(base-horizon)*depth;const roadW=W*(.22+.7*depth);return W/2+(l-1)*roadW*.29}
+  const gameEl=$('game');
+  let ptr=null;
+  gameEl.addEventListener('pointerdown',e=>{
+    if(state!=='run'||e.target.closest('button'))return;
+    ptr={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),fired:false,type:e.pointerType};
+  });
+  gameEl.addEventListener('pointermove',e=>{
+    if(!ptr||ptr.id!==e.pointerId||ptr.fired)return;
+    const dx=e.clientX-ptr.x,dy=e.clientY-ptr.y;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<28)return;
+    ptr.fired=true;
+    if(Math.abs(dx)>Math.abs(dy))move(dx>0?'right':'left');else move(dy<0?'up':'down');
+  });
+  const endPtr=e=>{
+    if(!ptr||ptr.id!==e.pointerId)return;
+    const p=ptr;ptr=null;
+    if(e.type==='pointercancel'||p.fired)return;
+    if(performance.now()-p.t<400){
+      if(p.type==='mouse'){const x=e.clientX,w=gameEl.clientWidth;if(x<w/2-30)move('left');else if(x>w/2+30)move('right')}
+      else move('up');
+    }
+  };
+  gameEl.addEventListener('pointerup',endPtr);
+  gameEl.addEventListener('pointercancel',endPtr);
+  gameEl.addEventListener('touchmove',e=>{if(state==='run')e.preventDefault()},{passive:false});
 
-  function drawRoad(){const horizon=H*.27,base=H*1.04;let g=ctx.createLinearGradient(0,horizon,0,H);g.addColorStop(0,'#123a61');g.addColorStop(1,'#071426');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(W/2-W*.5,horizon);ctx.lineTo(W/2+W*.5,horizon);ctx.lineTo(W/2+W*.5,base);ctx.lineTo(W/2-W*.5,base);ctx.closePath();ctx.fill();for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle='#32cfff55';ctx.lineWidth=2;ctx.stroke()}for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=`rgba(73,203,255,${.04+d*.13})`;ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}}
-
-  function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random();let type=r<.55?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
-
-  function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
-
-  function drawItems(dt){for(let it of items){it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4;let d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);if((it.type==='blue'||it.type==='gold')){drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);if(d>.78&&d<.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;if(it.type==='gold')gold++;else blue++;for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'});toast(it.type==='gold'?'Golden!':'Blue!');updateHud()}}else if(it.type==='block'){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();if(d>.82&&d<.96&&!it.got&&it.l===lane){if(playerY<18&&isSliding<=0&&invuln<=0){it.got=true;gameOver('You hit a block');return true}}}else if(it.type==='barrier'){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#fff1a3';ctx.fillRect(-30,-10,60,18);ctx.fillStyle='#c47f00';ctx.fillRect(-30,-10,8,18);ctx.fillRect(22,-10,8,18);ctx.restore();if(d>.82&&d<.96&&!it.got&&it.l===lane){if(playerY<22&&isSliding<=0&&invuln<=0){it.got=true;gameOver('You hit a barrier');return true}}}}items=items.filter(it=>it.d<1.18&&!it.got);return false}
-
-  function drawPlayer(dt){if(playerVY!==0||playerY>0){playerY+=playerVY*dt;playerVY-=1400*dt;if(playerY<0){playerY=0;playerVY=0}}if(isSliding>0)isSliding=Math.max(0,isSliding-dt);if(invuln>0)invuln=Math.max(0,invuln-dt);const x=laneX(lane,.92);const y=H*.82-playerY;ctx.save();ctx.translate(x,y);ctx.fillStyle='#001a31';ctx.beginPath();ctx.ellipse(0,34,22,7,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;if(isSliding>0){roundRect(ctx,-26,6,52,22,8);ctx.fillStyle='#12b9f5';ctx.fill();ctx.fillStyle='#e4f8ff';ctx.beginPath();ctx.arc(17,3,9,0,Math.PI*2);ctx.fill()}else{roundRect(ctx,-18,-6,36,44,9);ctx.fillStyle='#13bdf5';ctx.fill();ctx.fillStyle='#d9f6ff';ctx.beginPath();ctx.arc(0,-18,12,0,Math.PI*2);ctx.fill()}ctx.restore()}
-
-  function roundRect(ctx,x,y,w,h,r){const min=Math.min(w/2,h/2);if(r>min)r=min;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-
-  function drawParticles(dt){for(let p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=320*dt;ctx.globalAlpha=Math.max(0,p.life/.6);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}particles=particles.filter(p=>p.life>0)}
-
-  function loop(now){if(state!=='run'){raf=null;return}let dt=Math.min((now-last)/1000,0.04);last=now;score+=dt*10;speed=Math.min(750,speed+dt*2.5);roadOffset+=dt*speed/300;spawnTimer-=dt;if(spawnTimer<=0){spawnItem();spawnTimer=0.45+Math.random()*0.6-Math.min(0.3,score/400)}ctx.clearRect(0,0,W,H);drawRoad();const collided=drawItems(dt);if(collided){raf=null;updateDebug();return}drawPlayer(dt);drawParticles(dt);updateHud();if(state==='run')raf=requestAnimationFrame(loop);else raf=null;updateDebug()}
-
-  function move(dir){if(state!=='run')return;if(dir==='left')lane=Math.max(0,lane-1);if(dir==='right')lane=Math.min(2,lane+1);if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP')}}if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE')}}
-  }
-
-  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();if(k==='arrowleft'||k==='a')move('left');if(k==='arrowright'||k==='d')move('right');if(k==='arrowup'||k===' '||k==='w')move('up');if(k==='arrowdown'||k==='s')move('down');if(k==='escape')pauseToggle()})
-
-  // touch
-  let sx=0,sy=0,sT=0;
-  canvas.addEventListener('touchstart',e=>{ if($('menu')&&!$('menu').hidden) return; e.preventDefault();const t=e.changedTouches[0];sx=t.clientX;sy=t.clientY;sT=performance.now();},{passive:false});
-  canvas.addEventListener('touchend',e=>{ if($('menu')&&!$('menu').hidden) return; e.preventDefault();const t=e.changedTouches[0];const dx=t.clientX-sx;const dy=t.clientY-sy;const dt=performance.now()-sT;if(Math.abs(dx)<10&&Math.abs(dy)<10&&dt<300){if(state==='menu')start();else move('up');return}if(Math.abs(dx)>Math.abs(dy)){if(dx>30)move('right');else if(dx<-30)move('left')}else{if(dy<-30)move('up');else if(dy>30)move('down')}},{passive:false});
-
-  canvas.addEventListener('click',e=>{if(state==='menu')start();else{const x=e.clientX;if(x<W/2-30)move('left');else if(x>W/2+30)move('right')}})
-
-  const startBtn=$('startBtn');
-  startBtn.addEventListener('pointerdown',ev=>{ev.preventDefault();start()});
-  startBtn.addEventListener('click',()=>start());
+  $('startBtn').addEventListener('click',start);
   $('pauseBtn').addEventListener('click',pauseToggle);
 
-  // debug UI
-  const dbgState=$('#debugState pre'); const dbgDump=$('dbgDump'), dbgForceStart=$('dbgForceStart'), dbgForceClear=$('dbgForceClear'), dbgToggleMenu=$('dbgToggleMenu');
-  function updateDebug(){try{const menuNode=$('menu');const menuComputed = menuNode?window.getComputedStyle(menuNode):null;const menuInfo = menuNode?{hidden:menuNode.hidden,display:menuNode.style.display||menuComputed.display,visibility:menuNode.style.visibility||menuComputed.visibility,backdrop:menuNode.style.backdropFilter||menuComputed.backdropFilter,attached:menuAttached}: {attached:menuAttached};const stateInfo={state,raf:!!raf,idle:!!idleRaf,last,menu:menuInfo}; dbgState.textContent=JSON.stringify(stateInfo,null,2)}catch(e){dbgState.textContent='err:'+e.message}}
-  dbgDump.addEventListener('click',()=>{console.log('STATE DUMP', {state,raf,idleRaf,last,menuAttached,itemsCount:items.length});alert('Dumped to console')});
-  dbgForceStart.addEventListener('click',()=>{start();alert('Forced start called')});
-  dbgForceClear.addEventListener('click',()=>{ // clear any backdrop/filter artifacts
-    const menu=$('menu'); if(menu){ menu.style.backdropFilter='none'; menu.style.webkitBackdropFilter='none'; menu.style.display='none'; menu.style.visibility='hidden'; }
-    document.getElementById('game').style.filter='none'; document.body.style.webkitTransform='none'; // force reflow
-    void document.body.offsetHeight; alert('Cleared blur styles')
-  });
-  dbgToggleMenu.addEventListener('click',()=>{ if(menuAttached){ detachMenu(); alert('Menu detached') } else { attachMenu(); alert('Menu attached') } updateDebug() });
-
-  // start idle and initial HUD
-  startIdle(); updateHud(); updateDebug(); setInterval(updateDebug,500);
-
-  // helper for repeated restart testing
-  window.runRestartTest=function cycles(n=3,delay=400){console.log('Restart test start: cycles=',n);let i=0;function one(){console.log('Start game',i+1);start();setTimeout(()=>{items.push({type:'block',l:lane,d:0.86,phase:0,got:false})},200);setTimeout(()=>{if(state==='over'){console.log('Game over reached');start();i++;if(i<n)setTimeout(one,delay)}else{console.warn('Did not reach over state, state=',state)}},900)}one()}
-
+  // ---------- boot ----------
+  async function boot(){
+    updateHud();
+    useEngine(createEngine2D()); // 2D is always available immediately as the safe default
+    last=performance.now();raf=requestAnimationFrame(frame);
+    let three=null;
+    try{three=await loadThree()}catch(err){console.warn('[game]',err.message,'– using 2D fallback')}
+    if(three&&state==='menu'){
+      try{
+        const e3=createEngine3D(three);
+        engine3D=e3;
+        e3.canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();fallbackTo2D('Graphics context lost – switched to 2D mode.')});
+        useEngine(e3);
+      }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
+    }
+    const b=$('startBtn');b.disabled=false;b.textContent='▶ START RUN';
+  }
+  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},debug(){return engine&&engine._debug()},stats(){return {score,blue,gold}}};
+  boot();
 })();
 </script>
 </body>
