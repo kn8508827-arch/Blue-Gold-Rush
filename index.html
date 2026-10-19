@@ -40,7 +40,7 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="overlay" id="menu"><div class="card">
 <div class="logos"><img id="logoBlue" src="./blue-team-coin.png" alt="Blue Team coin"><img id="logoGold" src="./gold-collaboration-coin.png" alt="Gold Collaboration coin"></div>
 <h1>BLUE <em>GOLD</em> RUSH</h1><p class="subtitle">Run fast. Dodge obstacles. Collect blue Team coins and golden Collaboration coins!</p>
-<button id="startBtn" disabled>Loading…</button>
+<button id="startBtn">▶ START RUN</button>
 <div class="hint">Desktop: ← → or A / D to change lanes · ↑ / Space to jump · ↓ to slide<br>Mobile: swipe left / right / up / down</div>
 </div></div>
 </div>
@@ -298,6 +298,7 @@ button:disabled{opacity:.6;cursor:wait}
 
   function start(){
     if(state==='run'||!engine)return;
+    if(pending3D){useEngine(pending3D);pending3D=null}
     score=0;blue=0;gold=0;engine.reset();updateHud();
     state='run';hideMenu();$('pauseBtn').hidden=false;$('pauseBtn').textContent='Ⅱ Pause';
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
@@ -328,7 +329,7 @@ button:disabled{opacity:.6;cursor:wait}
   }
 
   // ---------- renderer selection / fallback ----------
-  let engine3D=null;
+  let engine3D=null,pending3D=null;
   function useEngine(e){
     engine=e;
     $('c').style.display=e.name==='2D'?'block':'none';
@@ -365,7 +366,7 @@ button:disabled{opacity:.6;cursor:wait}
   addEventListener('keydown',e=>{
     const k=e.key.toLowerCase();
     if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(k))e.preventDefault();
-    if(state==='menu'||state==='over'){if((k==='enter'||k===' ')&&!$('startBtn').disabled)start();return}
+    if(state==='menu'||state==='over'){if(k==='enter'||k===' ')start();return}
     if(e.repeat&&k!=='arrowleft'&&k!=='arrowright'&&k!=='a'&&k!=='d')return;
     if(k==='arrowleft'||k==='a')move('left');
     else if(k==='arrowright'||k==='d')move('right');
@@ -405,20 +406,21 @@ button:disabled{opacity:.6;cursor:wait}
 
   // ---------- boot ----------
   async function boot(){
+    document.querySelectorAll('#debugPanel,[id^="dbg"]').forEach(n=>n.remove());
+    showMenu();$('pauseBtn').hidden=true;
     updateHud();
     useEngine(createEngine2D()); // 2D is always available immediately as the safe default
     last=performance.now();raf=requestAnimationFrame(frame);
     let three=null;
     try{three=await loadThree()}catch(err){console.warn('[game]',err.message,'– using 2D fallback')}
-    if(three&&state==='menu'){
+    if(three&&!engine3D){
       try{
         const e3=createEngine3D(three);
         engine3D=e3;
         e3.canvas.addEventListener('webglcontextlost',ev=>{ev.preventDefault();fallbackTo2D('Graphics context lost – switched to 2D mode.')});
-        useEngine(e3);
+        if(state==='run'||state==='pause'){pending3D=e3}else useEngine(e3);
       }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
     }
-    const b=$('startBtn');b.disabled=false;b.textContent='▶ START RUN';
   }
   window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},debug(){return engine&&engine._debug()},stats(){return {score,blue,gold}}};
   boot();
