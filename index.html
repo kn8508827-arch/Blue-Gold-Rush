@@ -14,7 +14,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .brand{font-weight:950;letter-spacing:.04em;text-shadow:0 2px 10px #00152d;font-size:clamp(16px,2.6vw,26px)}.brand span{color:var(--gold)}
 .stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.stat{pointer-events:auto;background:#06152dd9;border:1px solid #7bdfff66;border-radius:13px;padding:7px 11px;min-width:76px;text-align:center;box-shadow:0 6px 18px #001428}
 .coinrow{display:flex;align-items:center;justify-content:center;gap:8px}.coinrow img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid white}
-.overlay{position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px)}
+.overlay{position:absolute;z-index:8;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .card{width:min(92vw,520px);padding:clamp(20px,5vw,34px);border:1px solid #7be1ff66;border-radius:18px;text-align:center;background:linear-gradient(155deg,#102d53f5,#06142cf5);box-shadow:0 20px 70px #00000055}
 .logos{display:flex;justify-content:center;gap:14px;margin-bottom:14px}.logos img{width:clamp(56px,14vw,84px);aspect-ratio:1;object-fit:cover;border-radius:50%;border:3px solid #ffffffd9;box-shadow:0 8px 24px #001725}
 h1{font-size:clamp(28px,7vw,42px);line-height:1;margin:8px 0 10px;font-weight:1000;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--gold)}.subtitle{color:#c6e2f7;line-height:1.5;margin:0 0 10px}
@@ -127,7 +127,19 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     // ensure single loop
     reset();
     state = 'run';
-    $('menu').hidden = true;
+    // fully hide menu overlay and remove any backdrop/filter to avoid Safari lingering blur
+    const menu = $('menu');
+    if (menu) {
+      menu.hidden = true;
+      menu.style.display = 'none';
+      menu.style.backdropFilter = 'none';
+      menu.style.webkitBackdropFilter = 'none';
+      menu.style.pointerEvents = 'none';
+      menu.style.visibility = 'hidden';
+    }
+    const gameEl = document.getElementById('game');
+    if (gameEl) { gameEl.style.filter = 'none'; }
+
     $('pauseBtn').hidden = false;
     $('pauseBtn').textContent = 'Ⅱ Pause';
     last = performance.now();
@@ -141,8 +153,18 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     // end game safely
     state = 'over';
     if (raf) { cancelAnimationFrame(raf); raf = null; }
+    // show menu overlay and explicitly enable backdrop filter so Safari applies blur only while visible
+    const menu = $('menu');
+    if (menu) {
+      menu.hidden = false;
+      menu.style.display = 'flex';
+      menu.style.backdropFilter = 'blur(4px)';
+      menu.style.webkitBackdropFilter = 'blur(4px)';
+      menu.style.pointerEvents = 'auto';
+      menu.style.visibility = 'visible';
+    }
+
     $('pauseBtn').hidden = true;
-    $('menu').hidden = false;
     $('menu').querySelector('h1').innerHTML = 'RUN <em>OVER</em>';
     const p = $('menu').querySelector('.subtitle');
     p.innerHTML = `Score: <b>${Math.floor(score)}</b><br>${reason || 'You hit an obstacle.'}`;
@@ -266,7 +288,7 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
           if (playerY < 18 && isSliding <= 0 && invuln <= 0) {
             it.got = true; // consume
             gameOver('You hit a block');
-            return; // stop further checks this frame
+            return true; // signal collision
           }
         }
       } else if (it.type === 'barrier') {
@@ -276,12 +298,13 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
         ctx.restore();
         if (d > 0.82 && d < 0.96 && !it.got && it.l === lane) {
           if (playerY < 22 && isSliding <= 0 && invuln <= 0) {
-            it.got = true; gameOver('You hit a barrier'); return;
+            it.got = true; gameOver('You hit a barrier'); return true;
           }
         }
       }
     }
     items = items.filter(it => it.d < 1.18 && !it.got);
+    return false;
   }
 
   function drawPlayer(dt) {
@@ -348,13 +371,15 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 
     ctx.clearRect(0, 0, W, H);
     drawRoad();
-    drawItems(dt);
+    const collided = drawItems(dt);
+    if (collided) { raf = null; return; }
     drawPlayer(dt);
     drawParticles(dt);
 
     updateHud();
 
-    raf = requestAnimationFrame(loop);
+    // schedule next only if still running
+    if (state === 'run') raf = requestAnimationFrame(loop); else raf = null;
   }
 
   // controls
@@ -378,8 +403,12 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 
   // touch / swipe (non-passive so we can prevent scrolling while interacting with canvas)
   let sx = 0, sy = 0, sT = 0;
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; sT = performance.now(); }, { passive: false });
+  canvas.addEventListener('touchstart', e => {
+    if ($('menu') && !$('menu').hidden) return; // let overlay/button receive the touch
+    e.preventDefault(); const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; sT = performance.now();
+  }, { passive: false });
   canvas.addEventListener('touchend', e => {
+    if ($('menu') && !$('menu').hidden) return; // ignore canvas touch while menu visible
     e.preventDefault(); const t = e.changedTouches[0]; const dx = t.clientX - sx; const dy = t.clientY - sy; const dt = performance.now() - sT;
     if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && dt < 300) {
       // tap
@@ -400,7 +429,10 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
   });
 
   // UI
-  $('startBtn').addEventListener('click', () => { $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
+  // ensure pointerdown to improve reliability on iOS
+  const startBtn = $('startBtn');
+  startBtn.addEventListener('pointerdown', (ev) => { ev.preventDefault(); $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
+  startBtn.addEventListener('click', () => { $('menu').querySelector('h1').innerHTML = 'BLUE <em>GOLD</em> RUSH'; start(); });
   $('pauseBtn').addEventListener('click', pauseToggle);
 
   // on load: start idle menu animation
@@ -415,7 +447,7 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
     let i=0;
     function one(){
       console.log('Start game',i+1);
-      $('startBtn').click();
+      startBtn.click();
       // simulate immediate collision after short time by injecting an obstacle in same lane
       setTimeout(()=>{
         items.push({type:'block',l:lane,d:0.86,phase:0,got:false});
@@ -424,7 +456,7 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
       setTimeout(()=>{
         if (state==='over'){
           console.log('Game over reached');
-          $('startBtn').click();
+          startBtn.click();
           i++; if (i<n) setTimeout(one, delay);
         } else { console.warn('Game did not reach over state in expected time, current state=', state); }
       }, 900);
