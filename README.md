@@ -31,5 +31,8 @@ This is an original game and does not use Subway Surfers artwork, characters, or
 ## Sound
 Original Web Audio synthesized music and effects (`audio.js`, no external assets). Use the 🔊 button or **M** to mute and the slider for volume; settings persist in localStorage. Audio starts after the first click/tap/key. Run tests with `npm test`.
 
+## Levels and stages
+Earn XP from score, level up for bonus XP, and complete each stage's score objective to unlock the next. Stage targets and runner difficulty increase as you progress, with no fixed stage cap. Level, XP, unlocked/completed stages, and best score are saved in browser localStorage.
+
 ### Runner refinement (v2)
 Larger emblem with white backing (chest and back), slimmer head, stronger jump/slide/lane-change/crash poses. See `docs/18-improved-poses.png` (run, lane, jump, slide, game over). The portrait file could not be downloaded in the build environment, so face likeness is stylized and unverified against it.
