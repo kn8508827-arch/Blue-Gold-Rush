@@ -82,8 +82,10 @@
       storeKey: STORE_KEY,
       snapshot,
       addXP(amount) {
+        const previousWholeXP = Math.floor(data.xp);
         const result = awardXP(amount);
-        if (amount > 0 && Number.isFinite(amount)) save({ type: 'xp', ...result });
+        if (amount > 0 && Number.isFinite(amount) &&
+            (result.levels.length || Math.floor(data.xp) !== previousWholeXP)) save({ type: 'xp', ...result });
         return result;
       },
       completeStage(stage, rewardXP) {

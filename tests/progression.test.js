@@ -25,6 +25,16 @@ test('XP thresholds grow and level-ups award bonus XP', () => {
   assert.equal(progression.snapshot().xp, 30);
 });
 
+test('fractional XP is applied continuously and persisted when it reaches a whole point', () => {
+  const first = makeProgression();
+  first.progression.addXP(0.4);
+  assert.equal(first.progression.snapshot().xp, 0.4);
+  assert.equal(first.store[STORE_KEY], undefined);
+  first.progression.addXP(0.6);
+  assert.equal(first.progression.snapshot().xp, 1);
+  assert.equal(JSON.parse(first.store[STORE_KEY]).xp, 1);
+});
+
 test('stage completion unlocks the next stage and duplicate completion pays once', () => {
   const { progression } = makeProgression();
   assert.equal(progression.completeStage(1, 30), true);

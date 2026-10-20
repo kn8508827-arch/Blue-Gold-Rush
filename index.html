@@ -36,6 +36,7 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 #volLabel{font-size:12px;font-weight:800;min-width:34px;text-align:right;color:#c6e2f7}
 button:focus-visible,#volSlider:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 button:disabled{opacity:.6;cursor:wait}
+@media(max-width:600px){.hud{gap:4px;padding:10px 8px}.brand{font-size:15px}.stats{gap:4px;max-width:calc(100% - 68px)}.stat{min-width:60px;padding:5px 6px}.stat small{font-size:10px}.xpTrack{width:60px}.coinrow{gap:4px}.coinrow img{width:19px;height:19px}}
 </style>
 </head>
 <body>
@@ -78,7 +79,7 @@ button:disabled{opacity:.6;cursor:wait}
   let state = 'menu'; // menu, run, pause, crash, over
   let crashT = 0, crashReason = '';
   let score = 0, blue = 0, gold = 0;
-  let currentStage = 1, stageScore = 0, xpScoreAwarded = 0, levelUpTimer = null;
+  let currentStage = 1, stageScore = 0, levelUpTimer = null;
   let engine = null, raf = null, last = 0;
 
   // ---------- saved player progression ----------
@@ -143,8 +144,7 @@ button:disabled{opacity:.6;cursor:wait}
     addScore(v){
       if(!Number.isFinite(v)||v<=0)return;
       score+=v;stageScore+=v;
-      const earned=Math.floor(score/10)-xpScoreAwarded;
-      if(earned>0){xpScoreAwarded+=earned;progression.addXP(earned)}
+      progression.addXP(v/10);
       while(stageScore>=stageTarget(currentStage)){
         stageScore-=stageTarget(currentStage);
         const completed=currentStage,rewardXP=25+completed*5;
@@ -732,7 +732,7 @@ button:disabled{opacity:.6;cursor:wait}
   function start(){
     if((state!=='menu'&&state!=='over')||!engine)return;
     if(pending3D){useEngine(pending3D);pending3D=null}
-    score=0;blue=0;gold=0;currentStage=progression.snapshot().unlockedStages;stageScore=0;xpScoreAwarded=0;engine.reset();updateHud();
+    score=0;blue=0;gold=0;currentStage=progression.snapshot().unlockedStages;stageScore=0;engine.reset();updateHud();
     audio.init();audio.play('start');audio.setState('run');
     state='run';hideMenu();$('pauseBtn').hidden=false;$('pauseBtn').textContent='Ⅱ Pause';
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
