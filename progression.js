@@ -87,7 +87,7 @@
         return result;
       },
       completeStage(stage, rewardXP) {
-        if (!Number.isSafeInteger(stage) || stage < 1 || stage >= data.unlockedStages ||
+        if (!Number.isSafeInteger(stage) || stage < 1 || stage > data.unlockedStages ||
             data.completedStages.includes(stage)) return false;
         data.completedStages.push(stage);
         data.completedStages.sort((a, b) => a - b);

@@ -1,5 +1,5 @@
 {
   "name": "blue-gold-rush",
   "private": true,
-  "scripts": { "test": "node --test tests/audio.test.js tests/assets.test.js" }
+  "scripts": { "test": "node --test tests/audio.test.js tests/assets.test.js tests/progression.test.js" }
 }
