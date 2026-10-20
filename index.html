@@ -14,6 +14,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .brand{font-weight:950;letter-spacing:.04em;text-shadow:0 2px 10px #00152d;font-size:clamp(16px,2.6vw,26px)}.brand span{color:var(--gold)}
 .stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.stat{pointer-events:auto;background:#06152dd9;border:1px solid #7bdfff66;border-radius:13px;padding:7px 11px;min-width:76px;text-align:center;box-shadow:0 6px 18px #001428}
 .coinrow{display:flex;align-items:center;justify-content:center;gap:8px}.coinrow img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid white}
+.stat small{display:block}.xpTrack{width:88px;height:6px;margin:5px auto 2px;overflow:hidden;border-radius:99px;background:#ffffff33}.xpTrack span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#27d2ff,#ffc847);transition:width .2s}.stageTrack span{background:linear-gradient(90deg,#ffc847,#ff8d56)}
 .overlay{position:absolute;z-index:80;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03112670;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .card{width:min(92vw,520px);padding:clamp(20px,5vw,34px);border:1px solid #7be1ff66;border-radius:18px;text-align:center;background:linear-gradient(155deg,#102d53f5,#06142cf5);box-shadow:0 20px 70px #00000055}
 .logos{display:flex;justify-content:center;gap:14px;margin-bottom:14px}.logos img{width:clamp(56px,14vw,84px);aspect-ratio:1;object-fit:cover;border-radius:50%;border:3px solid #ffffffd9;box-shadow:0 8px 24px #001725}
@@ -22,6 +23,10 @@ button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:#9fc5e2;margin-top:17px;line-height:1.6}
 #pauseBtn{pointer-events:auto;position:absolute;z-index:70;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
 #toast{position:absolute;z-index:90;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
+#levelUpNotification{position:absolute;z-index:100;top:34%;left:50%;transform:translate(-50%,-16px) scale(.85);padding:14px 22px;border:2px solid var(--gold);border-radius:18px;background:#071a35f2;box-shadow:0 0 36px #ffc84799;text-align:center;font-size:clamp(18px,5vw,28px);font-weight:1000;color:var(--gold);opacity:0;pointer-events:none}
+#levelUpNotification.show{animation:levelUpPop 1.8s ease both}
+@keyframes levelUpPop{0%{opacity:0;transform:translate(-50%,-16px) scale(.75)}15%,75%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-8px) scale(.95)}}
+#saveSummary{font-size:12px;color:#9fc5e2;margin:14px 0 0}
 #c3{display:none}
 #audioPanel{position:absolute;z-index:95;left:env(safe-area-inset-left,0);bottom:env(safe-area-inset-bottom,0);margin:14px;display:flex;align-items:center;gap:8px;background:#071a35e6;border:1px solid #9edfff88;border-radius:14px;padding:6px 10px}
 #muteBtn{padding:8px 12px;font-size:15px;min-width:44px;min-height:40px}
@@ -39,21 +44,26 @@ button:disabled{opacity:.6;cursor:wait}
 <canvas id="c3" aria-label="Blue-Gold-Rush 3D endless runner game"></canvas>
 <div class="hud"><div class="brand">BLUE <span>GOLD</span><br>RUSH ⚡</div><div class="stats">
 <div class="stat"><b id="score">0</b><small>Score</small></div>
+<div class="stat"><b id="level">Level 1</b><div class="xpTrack" role="progressbar" aria-label="XP progress"><span id="xpFill"></span></div><small id="xpText">0 / 100 XP</small></div>
+<div class="stat"><b id="stage">Stage 1</b><div class="xpTrack stageTrack" role="progressbar" aria-label="Stage objective progress"><span id="stageFill"></span></div><small id="stageText">0 / 100 pts</small></div>
 <div class="stat"><div class="coinrow"><img id="blueIcon" src="./blue-team-coin.png" alt=""><b id="blueCount">0</b></div><small>Blue coins</small></div>
 <div class="stat"><div class="coinrow"><img id="goldIcon" src="./gold-collaboration-coin.png" alt=""><b id="goldCount">0</b></div><small>Gold coins</small></div>
 </div></div>
 <div id="toast"></div>
+<div id="levelUpNotification" aria-live="polite"></div>
 <div id="audioPanel" role="group" aria-label="Sound controls"><button id="muteBtn" type="button" aria-pressed="true" aria-label="Sound on" title="Toggle sound (M)">🔊</button><input id="volSlider" type="range" min="0" max="100" step="1" value="70" aria-label="Volume"><span id="volLabel" aria-live="polite">70%</span></div>
 <button id="pauseBtn" hidden>Ⅱ Pause</button>
 <div class="overlay" id="menu"><div class="card">
 <div class="logos"><img id="logoBlue" src="./blue-team-coin.png" alt="Blue Team coin"><img id="logoGold" src="./gold-collaboration-coin.png" alt="Gold Collaboration coin"></div>
 <h1>BLUE <em>GOLD</em> RUSH</h1><p class="subtitle">Run fast. Dodge obstacles. Collect blue Team coins and golden Collaboration coins!</p>
 <button id="startBtn">▶ START RUN</button>
+<p id="saveSummary" aria-live="polite"></p>
 <div class="hint">Desktop: ← → or A / D to change lanes · ↑ / Space to jump · ↓ to slide<br>Mobile: swipe left / right / up / down</div>
 </div></div>
 </div>
 <script src="./audio.js"></script>
 <script src="./human-runner.js"></script>
+<script src="./progression.js"></script>
 <script>
 (() => {
   'use strict';
@@ -68,7 +78,21 @@ button:disabled{opacity:.6;cursor:wait}
   let state = 'menu'; // menu, run, pause, crash, over
   let crashT = 0, crashReason = '';
   let score = 0, blue = 0, gold = 0;
+  let currentStage = 1, stageScore = 0, xpScoreAwarded = 0, levelUpTimer = null;
   let engine = null, raf = null, last = 0;
+
+  // ---------- saved player progression ----------
+  let progressStorage = null;
+  try { progressStorage = window.localStorage; } catch (_) {}
+  const progression = window.BGRProgression.create({
+    storage: progressStorage,
+    onChange(snapshot, event) {
+      updateHud();
+      if (event.levels && event.levels.length) showLevelUp(snapshot.level, event.bonusXP);
+      if (event.type === 'stageComplete') toast('STAGE ' + event.stage + ' COMPLETE · +' + (25 + event.stage * 5) + ' XP · +1 GOLD');
+    }
+  });
+  const stageTarget = stage => 100 + (stage - 1) * 8 + Math.floor(Math.sqrt(stage - 1) * 12);
 
   // ---------- audio ----------
   const audio = window.BGRAudio.create();
@@ -91,10 +115,44 @@ button:disabled{opacity:.6;cursor:wait}
   $('volSlider').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')e.stopPropagation()});
   renderAudioUI();
 
-  function toast(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,900)}
-  function updateHud(){$('score').textContent=Math.floor(score);$('blueCount').textContent=blue;$('goldCount').textContent=gold}
+  function toast(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,1500)}
+  function showLevelUp(level, bonusXP) {
+    const el = $('levelUpNotification');
+    el.textContent = 'LEVEL UP! · LEVEL ' + level + ' · +' + bonusXP + ' BONUS XP';
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(levelUpTimer);
+    levelUpTimer = setTimeout(() => el.classList.remove('show'), 1900);
+  }
+  function updateHud(){
+    $('score').textContent=Math.floor(score);$('blueCount').textContent=blue;$('goldCount').textContent=gold;
+    const saved=progression.snapshot(),need=saved.xpToNextLevel,target=stageTarget(currentStage);
+    $('level').textContent='Level '+saved.level;$('xpText').textContent=Math.floor(saved.xp)+' / '+need+' XP';
+    $('xpFill').style.width=Math.min(100,saved.xp/need*100)+'%';
+    $('xpFill').parentNode.setAttribute('aria-valuenow',Math.floor(saved.xp));
+    $('xpFill').parentNode.setAttribute('aria-valuemax',need);
+    $('stage').textContent='Stage '+currentStage;$('stageText').textContent=Math.floor(stageScore)+' / '+target+' pts';
+    $('stageFill').style.width=Math.min(100,stageScore/target*100)+'%';
+    $('stageFill').parentNode.setAttribute('aria-valuenow',Math.floor(stageScore));
+    $('stageFill').parentNode.setAttribute('aria-valuemax',target);
+    $('saveSummary').textContent='Level '+saved.level+' · Stage '+saved.unlockedStages+' unlocked · Best score '+Math.floor(saved.bestScore);
+  }
   const game = {
-    addScore(v){score+=v}, addCoin(kind){if(kind==='gold')gold++;else blue++;if(state==='run')audio.play(kind==='gold'?'coinGold':'coinBlue');toast(kind==='gold'?'Golden!':'Blue!')},
+    get stage(){return currentStage},
+    addScore(v){
+      if(!Number.isFinite(v)||v<=0)return;
+      score+=v;stageScore+=v;
+      const earned=Math.floor(score/10)-xpScoreAwarded;
+      if(earned>0){xpScoreAwarded+=earned;progression.addXP(earned)}
+      while(stageScore>=stageTarget(currentStage)){
+        stageScore-=stageTarget(currentStage);
+        const completed=currentStage,rewardXP=25+completed*5;
+        if(progression.completeStage(completed,rewardXP)){gold++;updateHud()}
+        currentStage++;
+      }
+    },
+    addCoin(kind){if(kind==='gold')gold++;else blue++;if(state==='run')audio.play(kind==='gold'?'coinGold':'coinBlue');toast(kind==='gold'?'Golden!':'Blue!')},
     toast, audio
   };
 
@@ -114,7 +172,7 @@ button:disabled{opacity:.6;cursor:wait}
     function reset(){speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;crash=null}
     function laneX(l,depth=1){const roadW=W*(.22+.7*depth);return W/2+(l-1)*roadW*.29}
     function drawRoad(){const horizon=H*.27,base=H*1.04;let g=ctx.createLinearGradient(0,horizon,0,H);g.addColorStop(0,'#123a61');g.addColorStop(1,'#071426');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,horizon);ctx.lineTo(W,horizon);ctx.lineTo(W,base);ctx.lineTo(0,base);ctx.closePath();ctx.fill();for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle='#32cfff55';ctx.lineWidth=2;ctx.stroke()}for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=`rgba(73,203,255,${.04+d*.13})`;ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}}
-    function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random();let type=r<.55?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
+    function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random(),coinChance=Math.max(.3,.55-(game.stage-1)*.0025);let type=r<coinChance?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
     function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
     function drawItems(dt,update=true){
       for(const it of items){
@@ -123,7 +181,7 @@ button:disabled{opacity:.6;cursor:wait}
         const d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);
         if(it.type==='blue'||it.type==='gold'){
           drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);
-          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
+          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);game.addScore(5);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
         }else if(it.type==='block'){
           ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();
           if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a block'}
@@ -151,8 +209,8 @@ button:disabled{opacity:.6;cursor:wait}
       step(dt,mode){
         ctx.clearRect(0,0,W,H);
         if(mode==='run'){
-          game.addScore(dt*10);speed=Math.min(750,speed+dt*2.5);roadOffset+=dt*speed/300;spawnTimer-=dt;
-          if(spawnTimer<=0){spawnItem();spawnTimer=0.45+Math.random()*0.6-Math.min(0.3,score/400)}
+          game.addScore(dt*10);const difficulty=Math.min(game.stage-1,80);speed=Math.min(750+difficulty*3,speed+dt*(2.5+difficulty*.08));roadOffset+=dt*speed/300;spawnTimer-=dt;
+          if(spawnTimer<=0){spawnItem();spawnTimer=Math.max(.16,.45+Math.random()*.6-Math.min(.3,score/400)-Math.min(.25,difficulty*.004))}
           drawRoad();crash=null;drawItems(dt);drawPlayer(dt);drawParticles(dt);
           return crash;
         }
@@ -520,14 +578,15 @@ button:disabled{opacity:.6;cursor:wait}
     }
     function spawnRow(){
       const z=SPAWN_Z,l=Math.floor(Math.random()*3),r=Math.random(),others=[0,1,2].filter(x=>x!==l);
+      const difficulty=Math.min(game.stage-1,80),multiStart=Math.max(.45,.65-difficulty*.0025),multiEnd=Math.min(.98,multiStart+.2+difficulty*.0025);
       const kind=Math.random()<.5?'coinBlue':'coinGold';
       const blue=Math.random()<.3?'coinBlue':'coinGold';
       if(r<.3){coinLine(l,z,5,blue)}
       else if(r<.45){addItem('block',l,z-3.3);coinLine(l,z+0.9,5,blue,true)}
-      else if(r<.65){addItem(Math.random()<.6?'block':'gantry',l,z)}
-      else if(r<.85){const a=others[0],b=others[1];addItem('block',a,z);addItem(Math.random()<.5?'block':'gantry',b,z);if(Math.random()<.7)coinLine(l,z,4,blue)}
+      else if(r<multiStart){addItem(Math.random()<.6?'block':'gantry',l,z)}
+      else if(r<multiEnd){const a=others[0],b=others[1];addItem('block',a,z);addItem(Math.random()<.5?'block':'gantry',b,z);if(Math.random()<.7)coinLine(l,z,4,blue)}
       else{addItem(Math.random()<.5?'block':'gantry',others[Math.floor(Math.random()*2)],z);coinLine(l,z,5,kind)}
-      return 14+Math.random()*6;
+      return Math.max(7,14+Math.random()*6-Math.min(game.stage-1,60)*.09);
     }
 
     function setPose(dt){
@@ -597,7 +656,8 @@ button:disabled{opacity:.6;cursor:wait}
       step(dt,mode){
         adaptQuality(dt);curMode=mode;
         if(mode==='run'){
-          game.addScore(dt*10);speed=Math.min(34,speed+dt*.32);
+          const difficulty=Math.min(game.stage-1,80);
+          game.addScore(dt*10);speed=Math.min(34+difficulty*.2,speed+dt*(.32+Math.min(difficulty,60)*.012));
           const dz=speed*dt;dist+=dz;runT+=dt*(5+speed*.34);
           nextSpawn-=dz;if(nextSpawn<=0)nextSpawn=spawnRow()+speed*.35;
           // vertical motion
@@ -672,13 +732,14 @@ button:disabled{opacity:.6;cursor:wait}
   function start(){
     if((state!=='menu'&&state!=='over')||!engine)return;
     if(pending3D){useEngine(pending3D);pending3D=null}
-    score=0;blue=0;gold=0;engine.reset();updateHud();
+    score=0;blue=0;gold=0;currentStage=progression.snapshot().unlockedStages;stageScore=0;xpScoreAwarded=0;engine.reset();updateHud();
     audio.init();audio.play('start');audio.setState('run');
     state='run';hideMenu();$('pauseBtn').hidden=false;$('pauseBtn').textContent='Ⅱ Pause';
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     last=performance.now();
   }
   function gameOver(reason){
+    progression.recordBestScore(score);
     state='over';audio.setState('over');audio.play('gameover');
     $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>';
     $('menu').querySelector('.subtitle').innerHTML='Score: <b>'+Math.floor(score)+'</b><br>'+(reason||'You hit an obstacle.');
@@ -815,7 +876,7 @@ button:disabled{opacity:.6;cursor:wait}
       }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
     }
   }
-  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},stats(){return {score,blue,gold}}};
+  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},stats(){return {score,blue,gold,stage:currentStage,stageScore,progress:progression.snapshot()}}};
   boot();
 })();
 </script>
