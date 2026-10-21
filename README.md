@@ -32,7 +32,7 @@ This is an original game and does not use Subway Surfers artwork, characters, or
 Original Web Audio synthesized music and effects (`audio.js`, no external assets). Use the 🔊 button or **M** to mute and the slider for volume; settings persist in localStorage. Audio starts after the first click/tap/key. Run tests with `npm test`.
 
 ## Levels and stages
-Earn XP from score, level up for bonus XP, and complete each stage's score objective to unlock the next. Stage targets and runner difficulty increase as you progress, with no fixed stage cap. Level, XP, unlocked/completed stages, and best score are saved in browser localStorage.
+Earn XP from score, level up for bonus XP, and complete each stage's score objective to unlock the next. Seven named ranks unlock at Levels 1, 3, 5, 8, 12, 18, and 25. Each stage cycles through eight visual worlds—Blue Harbor, Gold Dunes, Jade Jungle, Neon Metro, Frost Peak, Coral Coast, Emerald Canyon, and Cosmic Rush—with stage-tinted skies, track lighting, and color transitions. Stage targets and runner difficulty increase as you progress, with no fixed stage cap. Level, XP, unlocked/completed stages, and best score stay saved in browser localStorage.
 
 ### Runner refinement (v2)
 Larger emblem with white backing (chest and back), slimmer head, stronger jump/slide/lane-change/crash poses. See `docs/18-improved-poses.png` (run, lane, jump, slide, game over). The portrait file could not be downloaded in the build environment, so face likeness is stylized and unverified against it.
