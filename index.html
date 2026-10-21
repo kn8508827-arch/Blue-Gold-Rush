@@ -117,7 +117,11 @@ button:disabled{opacity:.6;cursor:wait}
     { name: 'Frost Peak', bg: 0x345c79, sky: 0xc7f1ff, gnd: 0x16334e, sun: 0xf4feff, sunI: 2.1, night: 0.36, road: 0x8eb6d0, accent: 0x72e3ff },
     { name: 'Coral Coast', bg: 0x713a58, sky: 0xffb29e, gnd: 0x38264c, sun: 0xffd9a0, sunI: 2.15, night: 0.42, road: 0x89627e, accent: 0xff9bb4 },
     { name: 'Emerald Canyon', bg: 0x3c5d42, sky: 0xc7df88, gnd: 0x25392e, sun: 0xffe8a0, sunI: 1.95, night: 0.24, road: 0x76714a, accent: 0xbde36c },
-    { name: 'Cosmic Rush', bg: 0x090d33, sky: 0x6d7cf2, gnd: 0x111841, sun: 0x70e3ff, sunI: 1.15, night: 1.0, road: 0x414894, accent: 0x6ee9ff }
+    { name: 'Cosmic Rush', bg: 0x090d33, sky: 0x6d7cf2, gnd: 0x111841, sun: 0x70e3ff, sunI: 1.15, night: 1.0, road: 0x414894, accent: 0x6ee9ff },
+    { name: 'Sky Islands', bg: 0x526a99, sky: 0xb8dfff, gnd: 0x334b78, sun: 0xfff1c1, sunI: 2.0, night: 0.35, road: 0x6c8baa, accent: 0x79e0ff },
+    { name: 'Volcano Run', bg: 0x431b28, sky: 0xe45e47, gnd: 0x24131f, sun: 0xffc36c, sunI: 2.1, night: 0.42, road: 0x5d3337, accent: 0xff5438 },
+    { name: 'Crystal Caverns', bg: 0x261b52, sky: 0x876acb, gnd: 0x180f35, sun: 0xe9b8ff, sunI: 1.3, night: 0.82, road: 0x5a4b8f, accent: 0xba7aff },
+    { name: 'Lunar Station', bg: 0x293444, sky: 0xb2bdce, gnd: 0x17212e, sun: 0xe8f2ff, sunI: 1.6, night: 0.52, road: 0x727d91, accent: 0x97ddff }
   ];
   const stageTarget = stage => 100 + (stage - 1) * 8 + Math.floor(Math.sqrt(stage - 1) * 12);
   const rankForLevel = level => RANKS.slice().reverse().find(rank => level >= rank.level) || RANKS[0];
@@ -435,7 +439,14 @@ button:disabled{opacity:.6;cursor:wait}
       palm:std(0x95643a,{roughness:.9}),coral:std(0xff668c,{roughness:.65}),coralGold:std(0xffbd65,{roughness:.6}),
       canyon:std(0xb75f43,{roughness:1}),canyonLight:std(0xe28b58,{roughness:1}),
       cosmic:std(0x7767e8,{roughness:.4,metalness:.2,emissive:0x21165d}),cosmicGlow:std(0x60eaff,{roughness:.3,metalness:.25,emissive:0x165b7a}),
-      signal:new THREE.MeshBasicMaterial({color:0xffd76a})
+      signal:new THREE.MeshBasicMaterial({color:0xffd76a}),
+      cloud:std(0xeaf6ff,{roughness:1}),skyRock:std(0x64718d,{roughness:1}),
+      basalt:std(0x292c38,{roughness:.95}),lava:std(0xff4b1f,{roughness:.4,emissive:0xa51e00,emissiveIntensity:1.3}),
+      smoke:std(0x58515d,{roughness:1,transparent:true,opacity:.68}),
+      caveRock:std(0x373052,{roughness:.95}),crystal:std(0x9c69e8,{roughness:.25,metalness:.16,emissive:0x32105d,emissiveIntensity:.8}),
+      crystalGlow:std(0x55e9ff,{roughness:.2,metalness:.12,emissive:0x147488,emissiveIntensity:.8}),
+      lunar:std(0x858b96,{roughness:1}),module:std(0xc8d0d8,{roughness:.5,metalness:.45}),
+      stationBlue:std(0x57b8e8,{roughness:.4,metalness:.3,emissive:0x123d5c})
     };
     function addWorldProp(worldIndex,side,z,variant){
       const prop=new THREE.Group(),outside=ROAD_W/2+9+(variant%2)*5;
@@ -493,6 +504,41 @@ button:disabled{opacity:.6;cursor:wait}
         const ring=add(prop,new THREE.TorusGeometry(3.4,.11,8,36),ENV.cosmicGlow,0,6.8,0,false);ring.rotation.x=.38;ring.rotation.y=.22;
         add(prop,new THREE.ConeGeometry(1.5,5,5),ENV.cosmicGlow,side*2.4,2.5,-1);
         add(prop,G.sph(.6),ENV.signal,-side*2.1,9.2,.8,false);
+      }else if(worldIndex===8){
+        const island=add(prop,new THREE.ConeGeometry(5.1,6.3,7),ENV.skyRock,0,5.2,0);island.rotation.z=Math.PI;
+        add(prop,G.cyl(4.45,4.85,.72,7),ENV.leaf,0,8.0,0);
+        add(prop,G.sph(2.2),ENV.cloud,0,10.4,0,false).scale.set(1.5,.52,1.05);
+        add(prop,G.sph(1.65),ENV.cloud,-2.3,9.9,-.2,false).scale.set(1.3,.48,1);
+        add(prop,G.sph(1.55),ENV.cloud,2.15,10.0,.2,false).scale.set(1.25,.46,1);
+        add(prop,new THREE.ConeGeometry(1.15,3.2,5),ENV.crystalGlow,side*1.3,9.8,-.5);
+      }else if(worldIndex===9){
+        add(prop,new THREE.ConeGeometry(6.2,14,7),ENV.basalt,0,7,0);
+        const stream=add(prop,G.box(.78,7.6,.38),ENV.lava,side*1.35,5.2,.4,false);stream.rotation.z=-side*.18;
+        const stream2=add(prop,G.box(.42,4.8,.35),ENV.lava,-side*1.8,3.4,-.35,false);stream2.rotation.z=side*.28;
+        const crater=add(prop,new THREE.TorusGeometry(1.35,.28,8,18),ENV.lava,0,13.45,0,false);crater.rotation.x=Math.PI/2;
+        add(prop,G.sph(1.15),ENV.smoke,-.65,15.8,0,false).scale.set(1.2,1.5,1.1);
+        add(prop,G.sph(1.45),ENV.smoke,.7,18.0,-.2,false).scale.set(1.25,1.5,1.2);
+      }else if(worldIndex===10){
+        const pillar=add(prop,new THREE.ConeGeometry(5.2,13,6),ENV.caveRock,0,6.5,0);pillar.rotation.y=.35;
+        for(let j=0;j<4;j++){
+          const x=(j-1.5)*1.45,z=(j%2)*.7-.35,h=4.2+(j%3)*1.45;
+          const gem=add(prop,new THREE.ConeGeometry(.7+(j%2)*.2,h,5),j%2?ENV.crystal:ENV.crystalGlow,x,h/2+.35,z,false);
+          gem.rotation.z=(j-1.5)*.08;
+          add(prop,G.sph(.48),j%2?ENV.crystalGlow:ENV.crystal,x,h+.5,z,false);
+        }
+        add(prop,new THREE.ConeGeometry(2.7,7,6),ENV.caveRock,side*3.3,3.5,-1);
+      }else if(worldIndex===11){
+        add(prop,G.sph(3.1),ENV.lunar,side*2.7,1.0,-.5).scale.set(1.25,.58,1.1);
+        add(prop,G.sph(2.0),ENV.lunar,-side*3.0,.68,.7).scale.set(1.3,.55,.95);
+        const habitat=new THREE.Group();habitat.position.set(0,0,0);prop.add(habitat);
+        add(habitat,G.box(4.2,2.8,3.4),ENV.module,0,3.6,0);
+        add(habitat,G.box(3.2,.28,2.5),ENV.stationBlue,side*4.0,4.0,0,false);
+        add(habitat,G.box(3.2,.28,2.5),ENV.stationBlue,-side*4.0,4.0,0,false);
+        add(habitat,G.cyl(.14,.14,2.4,8),ENV.module,0,6.2,-.7,false);
+        const dish=add(habitat,new THREE.TorusGeometry(.9,.1,8,20),ENV.stationBlue,0,7.4,-.7,false);dish.rotation.x=.65;
+        add(habitat,G.sph(.28),ENV.signal,0,7.4,-.7,false);
+        add(habitat,G.box(.7,.55,.4),ENV.lunar,0,1.95,2.0);
+        for(const wx of[-1.7,1.7])add(habitat,G.cyl(.42,.42,.24,10),ENV.basalt,wx,1.95,1.95,false).rotation.x=Math.PI/2;
       }
       worldSceneGroups[worldIndex].add(prop);worldProps[worldIndex].push(prop);
     }
