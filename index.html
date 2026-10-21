@@ -344,6 +344,7 @@ button:disabled{opacity:.6;cursor:wait}
     const PALETTES=WORLD_THEMES;
     const cur={bg:new THREE.Color(),sky:new THREE.Color(),gnd:new THREE.Color(),sun:new THREE.Color(),road:new THREE.Color(),accent:new THREE.Color(),sunI:2,night:.2};
     const cA=new THREE.Color(),cB=new THREE.Color();
+    let activeSceneIndex=-1;
     scene.background=cur.bg;scene.fog=new THREE.Fog(0x12315f,30,105);scene.fog.color=cur.bg;
     const camera=new THREE.PerspectiveCamera(62,1,0.1,240);
     const hemi=new THREE.HemisphereLight(0x8fd0ff,0x0a2146,1.5);scene.add(hemi);
@@ -362,6 +363,12 @@ button:disabled{opacity:.6;cursor:wait}
       road.material.color.copy(cur.road);for(const walk of walks)walk.material.color.copy(cur.road);
       M.ground.color.copy(cur.gnd);M.curb.color.copy(cur.accent);M.neonBlue.color.copy(cur.accent);M.neon.color.copy(cur.sun);
       sunSprite.material.color.copy(cur.sun);
+      const sceneIndex=f<.5?i:n;
+      if(sceneIndex!==activeSceneIndex){
+        for(let k=0;k<worldSceneGroups.length;k++)worldSceneGroups[k].visible=k===sceneIndex;
+        for(const item of cityElements)item.visible=sceneIndex===3;
+        activeSceneIndex=sceneIndex;
+      }
       for(const m of windowMats)m.emissiveIntensity=0.35+cur.night*0.9;
       starMat.opacity=clamp((cur.night-0.6)*2.5,0,0.9);lampGlowMat.opacity=0.25+cur.night*0.6;
     }
@@ -414,8 +421,87 @@ button:disabled{opacity:.6;cursor:wait}
     walkTex.repeat.set(2,220/6);
 
     // wrapping scenery sets
-    const scenery=[];
+    const scenery=[],cityElements=[];
     function wrapSet(items,span,onWrap){scenery.push({items,span,onWrap})}
+
+    // Each unlocked stage uses its own lightweight 3D landmark set.
+    const worldSceneGroups=WORLD_THEMES.map(()=>{const group=new THREE.Group();group.visible=false;scene.add(group);return group});
+    const worldProps=WORLD_THEMES.map(()=>[]);
+    const ENV={
+      water:std(0x167f9f,{roughness:.45,metalness:.18}),foam:std(0xc7f4ff,{roughness:.55}),
+      lighthouse:std(0xe8f3f0,{roughness:.8}),sand:std(0xd7a85c,{roughness:1}),sandShadow:std(0x98643e,{roughness:1}),
+      cactus:std(0x31845d,{roughness:.9}),trunk:std(0x70513a,{roughness:1}),leaf:std(0x3f9c54,{roughness:.9}),
+      snow:std(0xc9f5ff,{roughness:.55}),ice:std(0x69bad5,{roughness:.35,metalness:.15}),
+      palm:std(0x95643a,{roughness:.9}),coral:std(0xff668c,{roughness:.65}),coralGold:std(0xffbd65,{roughness:.6}),
+      canyon:std(0xb75f43,{roughness:1}),canyonLight:std(0xe28b58,{roughness:1}),
+      cosmic:std(0x7767e8,{roughness:.4,metalness:.2,emissive:0x21165d}),cosmicGlow:std(0x60eaff,{roughness:.3,metalness:.25,emissive:0x165b7a}),
+      signal:new THREE.MeshBasicMaterial({color:0xffd76a})
+    };
+    function addWorldProp(worldIndex,side,z,variant){
+      const prop=new THREE.Group(),outside=ROAD_W/2+9+(variant%2)*5;
+      prop.position.set(side*outside,0,z);
+      if(worldIndex===0){
+        if(variant%3===0){
+          add(prop,G.cyl(.48,.72,5.4,10),ENV.lighthouse,0,2.7,0);
+          add(prop,G.cyl(.58,.58,.22,10),ENV.coral,0,5.1,0,false);
+          add(prop,new THREE.ConeGeometry(.72,1.15,8),ENV.sandShadow,0,5.78,0,false);
+          add(prop,G.sph(.28),ENV.signal,0,5.4,0,false);
+        }else{
+          add(prop,G.box(3.6,.45,5.2),ENV.water,0,.45,0);
+          add(prop,G.box(.14,3.5,.14),ENV.lighthouse,0,2.35,0,false);
+          add(prop,new THREE.ConeGeometry(1.15,1.5,3),ENV.foam,.55,2.55,0,false).rotation.z=-.15;
+        }
+      }else if(worldIndex===1){
+        if(variant%2===0){
+          const pyramid=add(prop,new THREE.ConeGeometry(6,12,4),ENV.sand,0,6,0);pyramid.rotation.y=Math.PI/4;
+          const ridge=add(prop,new THREE.ConeGeometry(3.3,7,4),ENV.sandShadow,side*2.4,3.5,-4);ridge.rotation.y=Math.PI/4;
+        }else{
+          add(prop,G.cyl(.3,.42,5.2,8),ENV.cactus,0,2.6,0);
+          const arm=add(prop,G.cyl(.13,.17,2.2,8),ENV.cactus,-.55,3.25,0);arm.rotation.z=Math.PI/2;
+          const arm2=add(prop,G.cyl(.13,.17,1.8,8),ENV.cactus,.52,2.7,0);arm2.rotation.z=Math.PI/2;
+          add(prop,G.cyl(.13,.16,1.25,8),ENV.cactus,.95,3.2,0);
+        }
+      }else if(worldIndex===2){
+        add(prop,G.cyl(.36,.58,7.5,8),ENV.trunk,0,3.75,0);
+        add(prop,G.sph(3.2),ENV.leaf,0,7.4,0);
+        add(prop,G.sph(2.25),ENV.leaf,side*1.8,6.4,-.5);
+        add(prop,G.sph(2.1),ENV.leaf,-side*1.6,6.2,.5);
+      }else if(worldIndex===4){
+        if(variant%2===0){
+          const peak=add(prop,new THREE.ConeGeometry(6,17,5),ENV.ice,0,8.5,0);peak.rotation.y=.4;
+          add(prop,new THREE.ConeGeometry(2.3,7,5),ENV.snow,0,13.2,-.12);
+        }else{
+          add(prop,G.cyl(.22,.4,1.4,8),ENV.trunk,0,.7,0);
+          add(prop,new THREE.ConeGeometry(3.2,5,8),ENV.leaf,0,3.2,0);
+          add(prop,new THREE.ConeGeometry(2.4,4.5,8),ENV.snow,0,6.6,0);
+          add(prop,new THREE.ConeGeometry(1.5,3.6,8),ENV.snow,0,9.2,0);
+        }
+      }else if(worldIndex===5){
+        if(variant%2===0){
+          const trunk=add(prop,G.cyl(.22,.38,7.3,8),ENV.palm,0,3.65,0);trunk.rotation.z=side*.1;
+          for(let j=0;j<5;j++){const leaf=add(prop,G.box(3.4,.16,.32),ENV.leaf,Math.cos(j*1.256)*1.25,7.1+Math.sin(j*1.256)*.25,Math.sin(j*1.256)*1.25);leaf.rotation.y=j*1.256;leaf.rotation.z=Math.sin(j*1.256)*.18}
+        }else{
+          for(let j=0;j<3;j++)add(prop,new THREE.ConeGeometry(1.1+j*.18,3.2+j*.4,6),j%2?ENV.coral:ENV.coralGold,(j-1)*1.6,1.8,0);
+        }
+      }else if(worldIndex===6){
+        const height=11+(variant%3)*4;
+        const rock=add(prop,new THREE.ConeGeometry(4.5, height, 5),variant%2?ENV.canyon:ENV.canyonLight,0,height/2,0);rock.rotation.y=.3;
+        add(prop,G.sph(3.2),ENV.canyon,side*.8,height*.58,-.5);
+        add(prop,new THREE.ConeGeometry(2.7,height*.65,5),ENV.canyonLight,-side*2.2,height*.33,-1.2);
+      }else if(worldIndex===7){
+        const planet=add(prop,G.sph(2.3),ENV.cosmic,0,6.8,0);
+        const ring=add(prop,new THREE.TorusGeometry(3.4,.11,8,36),ENV.cosmicGlow,0,6.8,0,false);ring.rotation.x=.38;ring.rotation.y=.22;
+        add(prop,new THREE.ConeGeometry(1.5,5,5),ENV.cosmicGlow,side*2.4,2.5,-1);
+        add(prop,G.sph(.6),ENV.signal,-side*2.1,9.2,.8,false);
+      }
+      worldSceneGroups[worldIndex].add(prop);worldProps[worldIndex].push(prop);
+    }
+    const propsPerSide=MOBILE?4:5;
+    WORLD_THEMES.forEach((_,worldIndex)=>{
+      if(worldIndex===3)return; // Neon Metro reuses the existing city scene.
+      for(const side of[-1,1])for(let i=0;i<propsPerSide;i++)addWorldProp(worldIndex,side,-14-i*(220/propsPerSide),i);
+      wrapSet(worldProps[worldIndex],220,()=>{});
+    });
     // buildings with UV-corrected window textures
     function buildingGeo(w,h,d){
       const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes.uv,dims=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];
@@ -426,7 +512,7 @@ button:disabled{opacity:.6;cursor:wait}
     const NB=MOBILE?7:10,BSPACE=16,buildings=[];
     for(const sx of[-1,1])for(let i=0;i<NB;i++){
       const m=new THREE.Mesh(bGeos[0],windowMats[0]);m.userData.side=sx;m.userData.j=i;m.position.z=-i*BSPACE+rand(-2,2);
-      scene.add(m);buildings.push(m);
+      scene.add(m);buildings.push(m);cityElements.push(m);
     }
     function shuffleBuilding(m){
       const k=Math.floor(Math.random()*BH.length);m.geometry=bGeos[k];m.material=windowMats[Math.floor(Math.random()*windowMats.length)];
@@ -443,7 +529,7 @@ button:disabled{opacity:.6;cursor:wait}
       const g=new THREE.Group();add(g,poleGeo,M.metal,0,2.6,0,false);
       add(g,armGeo,M.metal,-sx*0.5,5.15,0,false);add(g,headGeo,M.lampHead,-sx*1.05,5.05,0,false);
       const gl=new THREE.Sprite(lampGlowMat);gl.scale.set(3,3,1);gl.position.set(-sx*1.05,5.05,0);g.add(gl);
-      g.position.set(sx*(ROAD_W/2+0.9),0.18,-i*LSPACE-(sx>0?LSPACE/2:0));scene.add(g);lamps.push(g)}
+      g.position.set(sx*(ROAD_W/2+0.9),0.18,-i*LSPACE-(sx>0?LSPACE/2:0));scene.add(g);lamps.push(g);cityElements.push(g)}
     wrapSet(lamps,NL*LSPACE,()=>{});
 
     // billboards using the team coin art, gantries
@@ -452,7 +538,7 @@ button:disabled{opacity:.6;cursor:wait}
       const g=new THREE.Group();add(g,G.cyl(.1,.12,6,8),M.metal,0,3,0,false);
       const disc=add(g,bbGeo,i%2?coinFace.gold:coinFace.blue,0,6.7,0.0,false);disc.rotation.y=-sx*Math.PI/2;disc.position.x=-sx*0.15;
       add(g,new THREE.TorusGeometry(1.72,.07,8,40),i%2?M.neon:M.neonBlue,-sx*0.12,6.7,0,false).rotation.y=-sx*Math.PI/2;
-      g.position.set(sx*(ROAD_W/2+7.5),0.18,-i*80-(sx>0?40:10));scene.add(g);billboards.push(g)}
+      g.position.set(sx*(ROAD_W/2+7.5),0.18,-i*80-(sx>0?40:10));scene.add(g);billboards.push(g);cityElements.push(g)}
     wrapSet(billboards,240,g=>{g.position.x=g.position.x>0?ROAD_W/2+rand(6.5,8.5):-(ROAD_W/2+rand(6.5,8.5))});
     const arches=[];
     for(let i=0;i<2;i++){
@@ -460,7 +546,7 @@ button:disabled{opacity:.6;cursor:wait}
       for(const sx of[-1,1])add(g,G.box(0.35,7,0.5),M.metal,sx*(ROAD_W/2+0.9),3.5,0,false);
       add(g,G.box(ROAD_W+2.6,0.5,0.6),M.metal,0,7,0,false);add(g,G.box(ROAD_W+2.6,0.14,0.62),M.neon,0,6.65,0,false);
       add(g,G.box(ROAD_W+2.6,0.1,0.64),M.neonBlue,0,7.35,0,false);
-      g.position.z=-i*110-30;scene.add(g);arches.push(g)}
+      g.position.z=-i*110-30;scene.add(g);arches.push(g);cityElements.push(g)}
     wrapSet(arches,220,()=>{});
 
     // sky: sun glow + stars
