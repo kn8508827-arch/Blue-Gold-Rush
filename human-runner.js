@@ -167,26 +167,26 @@
     placed(headGroup,headRest,new THREE.Vector3());
     B.head.add(headGroup);
 
-    // ---- team emblem decal (chest-left + larger on the back) ----
+    // ---- team emblem decal (wearer's chest only) ----
     const decals=[];
     if(emblemImg){
       const tex=new THREE.Texture(emblemImg);tex.needsUpdate=true;if(THREE.SRGBColorSpace)tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
       const dm=new THREE.MeshStandardMaterial({map:tex,transparent:true,roughness:.7,polygonOffset:true,polygonOffsetFactor:-3,polygonOffsetUnits:-3,depthWrite:false});
-      const backMat=new THREE.MeshBasicMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1,depthWrite:false});
+      const backingMat=new THREE.MeshBasicMaterial({color:0xffffff,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1,depthWrite:false});
       const mk=(r,y,z,front)=>{
         const sx=front?surfX(y,z,torsoIdx,.03):surfXneg(y,z,torsoIdx,.03);
         if(Math.abs(sx)>1)return;
         const q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),front?Math.PI/2:-Math.PI/2);
         const dir=front?1:-1;
         // white backing disc keeps the blue emblem readable against the blue panels / from far away
-        const back=new THREE.Mesh(new THREE.CircleGeometry(r*1.18,28),backMat);back.name='emblemBacking';
+        const back=new THREE.Mesh(new THREE.CircleGeometry(r*1.18,28),backingMat);back.name='emblemBacking';
         placed(back,chestRest,new THREE.Vector3(sx+dir*.003,y,z),q);B.chest.add(back);decals.push(back);
         const mesh=new THREE.Mesh(new THREE.CircleGeometry(r,28),dm);mesh.name=front?'emblemFront':'emblemBack';
         placed(mesh,chestRest,new THREE.Vector3(sx+dir*.006,y,z),q);
         B.chest.add(mesh);decals.push(mesh);
       };
-      mk(.05,.07,.975,true);    // wearer's left chest
-      mk(.14,0,.985,false);     // large back print (readable from the gameplay camera)
+      mk(.05,.07,.975,true);    // wearer's left chest only
+      // No rear decal; leave the model's back and any gear unobstructed.
     }
 
     // ---- model placement: facing -Z, feet at y=0, scaled to TARGET_HEIGHT ----
