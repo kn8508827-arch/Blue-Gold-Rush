@@ -22,6 +22,7 @@ h1{font-size:clamp(28px,7vw,42px);line-height:1;margin:8px 0 10px;font-weight:10
 button{border:0;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:900;cursor:pointer;color:#03152c;background:linear-gradient(100deg,#35d4ff,#8ceaff);box-shadow:0 7px 22px #20bfff33}
 .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:#9fc5e2;margin-top:17px;line-height:1.6}
 #pauseBtn{pointer-events:auto;position:absolute;z-index:70;bottom:18px;right:18px;background:#071a35d9;color:white;border:1px solid #9edfff88;padding:10px 14px;font-size:13px}
+#skyBikeHud{white-space:nowrap;position:absolute;z-index:80;top:calc(env(safe-area-inset-top,0px) + 86px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 12px;border:1.5px solid var(--gold);border-radius:99px;background:#06152de0;box-shadow:0 0 18px #ffc84766;font-weight:900;font-size:13px;pointer-events:none;transition:opacity .25s}#skyBikeHud[hidden]{display:none}#skyBikeHud .track{width:90px;height:6px;border-radius:99px;background:#ffffff33;overflow:hidden}#skyBikeHud .track span{display:block;height:100%;width:100%;border-radius:inherit;background:linear-gradient(90deg,#27d2ff,#ffc847)}
 #toast{position:absolute;z-index:90;top:25%;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:99px;background:#06152de8;color:white;font-weight:900;opacity:0;transition:opacity .2s}
 #levelUpNotification{position:absolute;z-index:100;top:34%;left:50%;max-width:calc(100% - 24px);transform:translate(-50%,-16px) scale(.85);padding:14px 22px;border:2px solid var(--gold);border-radius:18px;background:#071a35f2;box-shadow:0 0 36px #ffc84799;text-align:center;font-size:clamp(18px,5vw,28px);font-weight:1000;color:var(--gold);opacity:0;pointer-events:none}
 #levelUpNotification.show{animation:levelUpPop 1.8s ease both}
@@ -50,6 +51,7 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="stat"><div class="coinrow"><img id="blueIcon" src="./blue-team-coin.png" alt=""><b id="blueCount">0</b></div><small>Blue coins</small></div>
 <div class="stat"><div class="coinrow"><img id="goldIcon" src="./gold-collaboration-coin.png" alt=""><b id="goldCount">0</b></div><small>Gold coins</small></div>
 </div></div>
+<div id="skyBikeHud" hidden>🚲 SKY BIKE <span id="skyBikeAlt">0 m</span><div class="track"><span id="skyBikeFill"></span></div></div>
 <div id="toast"></div>
 <div id="levelUpNotification" aria-live="polite"></div>
 <div id="audioPanel" role="group" aria-label="Sound controls"><button id="muteBtn" type="button" aria-pressed="true" aria-label="Sound on" title="Toggle sound (M)">🔊</button><input id="volSlider" type="range" min="0" max="100" step="1" value="70" aria-label="Volume"><span id="volLabel" aria-live="polite">70%</span></div>
@@ -65,6 +67,7 @@ button:disabled{opacity:.6;cursor:wait}
 <script src="./audio.js"></script>
 <script src="./human-runner.js"></script>
 <script src="./progression.js"></script>
+<script src="./powerups.js"></script>
 <script>
 (() => {
   'use strict';
@@ -100,15 +103,8 @@ button:disabled{opacity:.6;cursor:wait}
       }
     }
   });
-  const RANKS = [
-    { level: 1, title: 'Rookie', badge: '🏃' },
-    { level: 3, title: 'Blue Scout', badge: '🔷' },
-    { level: 5, title: 'Gold Runner', badge: '🪙' },
-    { level: 8, title: 'Rush Ace', badge: '⚡' },
-    { level: 12, title: 'Champion', badge: '🏆' },
-    { level: 18, title: 'Legend', badge: '🌟' },
-    { level: 25, title: 'Mythic', badge: '👑' }
-  ];
+  const POWER = window.BGRPowerups;
+  const RANKS = POWER.RANKS;
   const WORLD_THEMES = [
     { name: 'Blue Harbor', bg: 0x12315f, sky: 0x8fdcff, gnd: 0x08365b, sun: 0xe5fbff, sunI: 1.9, night: 0.18, road: 0x6286a6, accent: 0x41d7ff },
     { name: 'Gold Dunes', bg: 0x5d394c, sky: 0xffcc84, gnd: 0x38253a, sun: 0xffdd9d, sunI: 2.3, night: 0.22, road: 0x987064, accent: 0xffc45c },
@@ -124,7 +120,7 @@ button:disabled{opacity:.6;cursor:wait}
     { name: 'Lunar Station', bg: 0x293444, sky: 0xb2bdce, gnd: 0x17212e, sun: 0xe8f2ff, sunI: 1.6, night: 0.52, road: 0x727d91, accent: 0x97ddff }
   ];
   const stageTarget = stage => 100 + (stage - 1) * 8 + Math.floor(Math.sqrt(stage - 1) * 12);
-  const rankForLevel = level => RANKS.slice().reverse().find(rank => level >= rank.level) || RANKS[0];
+  const rankForLevel = POWER.rankForLevel;
   const themeForStage = stage => WORLD_THEMES[(Math.max(1, stage) - 1) % WORLD_THEMES.length];
   const cssColor = color => '#' + color.toString(16).padStart(6, '0');
   const rgbaColor = (color, alpha) => {
@@ -199,9 +195,22 @@ button:disabled{opacity:.6;cursor:wait}
       }
       if(stageChanged)updateHud();
     },
-    addCoin(kind){if(kind==='gold')gold++;else blue++;if(state==='run')audio.play(kind==='gold'?'coinGold':'coinBlue');toast(kind==='gold'?'Golden!':'Blue!')},
+    addCoin(kind){if(kind==='gold')gold++;else blue++;if(state==='run')audio.play(kind==='gold'?'coinGold':'coinBlue');if(!skyHudOn)toast(kind==='gold'?'Golden!':'Blue!')},
+    // Sky Bike: returns the flight time (longer for higher ranks)
+    startSkyBike(){const d=POWER.skyBikeDuration(progression.snapshot().level);audio.play('skyBike');toast('🚲 SKY BIKE! '+d.toFixed(1)+'s');return d},
+    landSkyBike(){audio.play('land');setSkyHud(null)},
+    setSkyHud,
     toast, audio
   };
+
+  let skyHudOn=false;
+  function setSkyHud(info){
+    const el=$('skyBikeHud');
+    if(!info||state!=='run'){if(skyHudOn){el.hidden=true;skyHudOn=false}return}
+    if(!skyHudOn){el.hidden=false;skyHudOn=true}
+    $('skyBikeFill').style.width=Math.max(0,Math.min(100,info.left/info.total*100))+'%';
+    $('skyBikeAlt').textContent=Math.round(info.alt)+' m';
+  }
 
   // ---------- 2D fallback engine (original Canvas 2D game) ----------
   function createEngine2D(){
@@ -210,13 +219,15 @@ button:disabled{opacity:.6;cursor:wait}
     let W=800,H=600,dpr=1;
     let speed=320,spawnTimer=0,items=[],particles=[];
     let lane=1,playerY=0,playerVY=0,isSliding=0,invuln=0,roadOffset=0,crash=null,idleT=0;
+    let flyT=0,flyDur=0,alt=0,lastBike=-1e9,travelled=0; // Sky Bike (alt in metres)
+    const altPx=()=>alt/POWER.SKY_BIKE.maxAltitude*H*.42;
     const blueImg=new Image(),goldImg=new Image();
     let blueLoaded=false,goldLoaded=false;
     blueImg.onload=()=>blueLoaded=true;goldImg.onload=()=>goldLoaded=true;
     blueImg.src=BLUE_SRC;goldImg.src=GOLD_SRC;
 
     function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=canvas.clientWidth||window.innerWidth;H=canvas.clientHeight||window.innerHeight;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
-    function reset(){speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;crash=null}
+    function reset(){speed=320;spawnTimer=0;items=[];particles=[];lane=1;playerY=0;playerVY=0;isSliding=0;invuln=0;roadOffset=0;crash=null;flyT=0;flyDur=0;alt=0;lastBike=-1e9;travelled=0}
     function laneX(l,depth=1){const roadW=W*(.22+.7*depth);return W/2+(l-1)*roadW*.29}
     function drawRoad(){
       const world=themeForStage(game.stage),horizon=H*.27,base=H*1.04;
@@ -230,32 +241,52 @@ button:disabled{opacity:.6;cursor:wait}
       for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(W/2+(i?1:-1)*W*.04,horizon);ctx.lineTo(W/2+(i?1:-1)*W*.49,base);ctx.strokeStyle=rgbaColor(world.accent,.62);ctx.lineWidth=2;ctx.stroke()}
       for(let i=0;i<18;i++){let d=((i/18+(roadOffset%1))%1);let y=horizon+(base-horizon)*d*d;let xW=W*(.12+.48*d*d);ctx.fillStyle=rgbaColor(world.accent,.04+d*.13);ctx.fillRect(W/2-xW,y,2*xW,Math.max(1,d*4))}
     }
-    function spawnItem(){let l=Math.floor(Math.random()*3),r=Math.random(),coinChance=Math.max(.3,.55-(game.stage-1)*.0025);let type=r<coinChance?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
+    function spawnItem(){
+      if(flyDur>0){if(flyT<flyDur-POWER.SKY_BIKE.landTime-1)items.push({type:Math.random()<.5?'blue':'gold',sky:true,l:Math.floor(Math.random()*3),d:0,phase:Math.random()*Math.PI*2,got:false});return}
+      if(POWER.shouldSpawnSkyBike(game.stage,travelled-lastBike)){lastBike=travelled;items.push({type:'bike',l:Math.floor(Math.random()*3),d:0,phase:0,got:false});return}
+      let l=Math.floor(Math.random()*3),r=Math.random(),coinChance=Math.max(.3,.55-(game.stage-1)*.0025);let type=r<coinChance?'coin':r<.8?'block':'barrier';if(type==='coin')type=Math.random()<.28?'blue':'gold';items.push({type,l,d:0,phase:Math.random()*Math.PI*2,got:false})}
     function drawCoin(x,y,r,img,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase)*.13);ctx.shadowColor=img===goldImg?'#ffc52c':'#28d7ff';ctx.shadowBlur=14;if((img===goldImg&&goldLoaded)||(img===blueImg&&blueLoaded)){ctx.drawImage(img,-r,-r,r*2,r*2)}else{ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=img===goldImg?'#ffcf66':'#4fe3ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff55';ctx.stroke()}ctx.restore()}
     function drawItems(dt,update=true){
       for(const it of items){
         const previousD=it.d;
         if(update){it.d+=dt*speed/Math.max(220,H*.9);it.phase+=dt*4}
         const d=Math.max(0,it.d),y=H*.28+(H*.68)*d*d,x=laneX(it.l,d),scale=.18+.9*d,r=Math.max(6,17*scale);
-        if(it.type==='blue'||it.type==='gold'){
+        if(it.type==='bike'){
+          ctx.save();ctx.translate(x,y-r*.6);ctx.scale(scale,scale);drawBike(1+Math.sin(it.phase*2)*.08);ctx.restore();
+          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&flyDur<=0){it.got=true;flyDur=game.startSkyBike();flyT=0;playerVY=0;playerY=0;isSliding=0;for(let i=0;i<14;i++)particles.push({x,y,vx:(Math.random()-0.5)*260,vy:-Math.random()*220,life:.6,color:'#ffd36a'})}
+        }else if(it.sky){
+          const sy=y-(H*.42)*Math.min(1,d*1.1);
+          drawCoin(x,sy,r,it.type==='gold'?goldImg:blueImg,it.phase);
+          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&alt>4){it.got=true;game.addCoin(it.type);game.addScore(5);for(let i=0;i<8;i++)particles.push({x,y:sy,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
+        }else if(it.type==='blue'||it.type==='gold'){
           drawCoin(x,y,r,it.type==='gold'?goldImg:blueImg,it.phase);
-          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0){it.got=true;game.addCoin(it.type);game.addScore(5);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
+          if(update&&it.d>=.78&&previousD<=.98&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&alt<1){it.got=true;game.addCoin(it.type);game.addScore(5);for(let i=0;i<8;i++)particles.push({x,y,vx:(Math.random()-0.5)*220,vy:-Math.random()*180,life:.6,color:it.type==='gold'?'#ffd36a':'#64f0ff'})}
         }else if(it.type==='block'){
           ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#f15b55';ctx.fillRect(-22,-34,44,40);ctx.fillStyle='#ffb5a8';ctx.fillRect(-16,-28,32,7);ctx.restore();
-          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a block'}
+          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<18&&isSliding<=0&&invuln<=0&&alt<3){it.got=true;crash='You hit a block'}
         }else{
           ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#fff1a3';ctx.fillRect(-30,-10,60,18);ctx.fillStyle='#c47f00';ctx.fillRect(-30,-10,8,18);ctx.fillRect(22,-10,8,18);ctx.restore();
-          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<22&&isSliding<=0&&invuln<=0){it.got=true;crash='You hit a barrier'}
+          if(update&&it.d>=.82&&previousD<=.96&&!it.got&&it.l===lane&&playerY<22&&isSliding<=0&&invuln<=0&&alt<3){it.got=true;crash='You hit a barrier'}
         }
       }
       if(update)items=items.filter(it=>it.d<1.18&&!it.got);
     }
     function roundRect(x,y,w,h,r){const min=Math.min(w/2,h/2);if(r>min)r=min;ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+    function drawBike(s){
+      ctx.lineWidth=4;ctx.strokeStyle='#20c8ff';ctx.shadowColor='#5fe6ff';ctx.shadowBlur=10;
+      for(const wx of[-18,18]){ctx.beginPath();ctx.arc(wx,0,11*s,0,Math.PI*2);ctx.stroke()}
+      ctx.shadowBlur=0;ctx.strokeStyle='#ffc847';ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(-2,-14);ctx.lineTo(16,-14);ctx.lineTo(18,0);ctx.moveTo(-2,-14);ctx.lineTo(4,0);ctx.stroke();
+      ctx.fillStyle='#ffc847';ctx.beginPath();ctx.moveTo(-6,-10);ctx.lineTo(-30*s,-22);ctx.lineTo(-10,-4);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(6,-10);ctx.lineTo(30*s,-22);ctx.lineTo(10,-4);ctx.closePath();ctx.fill();
+    }
     function drawPlayer(dt){
-      if(playerVY!==0||playerY>0){playerY+=playerVY*dt;playerVY-=1400*dt;if(playerY<0){playerY=0;playerVY=0}}
+      if(flyDur>0&&dt>0){flyT+=dt;alt=POWER.skyBikeAltitude(flyT,flyDur);game.setSkyHud({left:flyDur-flyT,total:flyDur,alt});
+        if(flyT>=flyDur){flyDur=0;flyT=0;alt=0;invuln=POWER.SKY_BIKE.landingGrace;game.landSkyBike()}}
+      else if(playerVY!==0||playerY>0){playerY+=playerVY*dt;playerVY-=1400*dt;if(playerY<0){playerY=0;playerVY=0}}
       if(isSliding>0)isSliding=Math.max(0,isSliding-dt);if(invuln>0)invuln=Math.max(0,invuln-dt);
-      const x=laneX(lane,.92),y=H*.82-playerY;
-      ctx.save();ctx.translate(x,y);ctx.fillStyle='#001a31';ctx.beginPath();ctx.ellipse(0,34,22,7,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+      const x=laneX(lane,.92),y=H*.82-playerY-altPx();
+      ctx.save();ctx.translate(x,H*.82-playerY);ctx.fillStyle='#001a31';ctx.globalAlpha=Math.max(.25,1-alt/12);ctx.beginPath();ctx.ellipse(0,34,22,7,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.translate(x,y);ctx.shadowBlur=0;
+      if(flyDur>0){ctx.save();ctx.translate(0,40);drawBike(1);ctx.restore()}
       if(isSliding>0){roundRect(-26,6,52,22,8);ctx.fillStyle='#12b9f5';ctx.fill();ctx.fillStyle='#e4f8ff';ctx.beginPath();ctx.arc(17,3,9,0,Math.PI*2);ctx.fill()}
       else{roundRect(-18,-6,36,44,9);ctx.fillStyle='#13bdf5';ctx.fill();ctx.fillStyle='#d9f6ff';ctx.beginPath();ctx.arc(0,-18,12,0,Math.PI*2);ctx.fill()}
       ctx.restore();
@@ -264,10 +295,12 @@ button:disabled{opacity:.6;cursor:wait}
 
     return {
       name:'2D', canvas, resize, reset, getLane(){return lane},
+      debug(){return {flying:flyDur>0,altitude:alt,flyT,flyDur,items:items.length}},
+      giveSkyBike(){if(flyDur<=0){flyDur=game.startSkyBike();flyT=0}},
       step(dt,mode){
         ctx.clearRect(0,0,W,H);
         if(mode==='run'){
-          game.addScore(dt*10);const difficulty=Math.min(game.stage-1,80);speed=Math.min(750+difficulty*3,speed+dt*(2.5+difficulty*.08));roadOffset+=dt*speed/300;spawnTimer-=dt;
+          game.addScore(dt*10);const difficulty=Math.min(game.stage-1,80);speed=Math.min(750+difficulty*3,speed+dt*(2.5+difficulty*.08));roadOffset+=dt*speed/300;travelled+=dt*speed/20;spawnTimer-=dt;
           if(spawnTimer<=0){spawnItem();spawnTimer=Math.max(.16,.45+Math.random()*.6-Math.min(.3,score/400)-Math.min(.25,difficulty*.004))}
           drawRoad();crash=null;drawItems(dt);drawPlayer(dt);drawParticles(dt);
           return crash;
@@ -283,6 +316,7 @@ button:disabled{opacity:.6;cursor:wait}
       move(dir){
         if(dir==='left')lane=Math.max(0,lane-1);
         else if(dir==='right')lane=Math.min(2,lane+1);
+        else if(flyDur>0)return;
         else if(dir==='up'){if(playerY===0){playerVY=620;toast('JUMP');audio.play('jump')}}
         else if(dir==='down'){if(playerY===0&&isSliding<=0){isSliding=0.55;toast('SLIDE');audio.play('slide')}}
       },
@@ -667,6 +701,25 @@ button:disabled{opacity:.6;cursor:wait}
     const coinGeo=(()=>{const g=new THREE.CylinderGeometry(.55,.55,.1,40);g.rotateX(Math.PI/2);return g})();
     const blobGeo=new THREE.PlaneGeometry(2.4,1.8),blobMat=new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false});
     function withBlob(g,w=1){const b=new THREE.Mesh(blobGeo,blobMat);b.rotation.x=-Math.PI/2;b.position.y=0.035;b.scale.set(w,1,1);g.add(b)}
+    // ----- Sky Bike (original design: blue wheels, gold frame, small gold wings) -----
+    const skyWheelGeo=new THREE.TorusGeometry(.34,.07,10,28),skyHubGeo=new THREE.CylinderGeometry(.08,.08,.12,10);
+    const skyWingMat=new THREE.MeshStandardMaterial({color:0xffc847,emissive:0x6a4500,metalness:.5,roughness:.35,side:THREE.DoubleSide});
+    const skyGlowMat=new THREE.MeshBasicMaterial({color:0x5fe6ff,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false});
+    function buildSkyBike(scale){
+      const g=new THREE.Group(),b=new THREE.Group();b.scale.setScalar(scale);g.add(b);
+      const wheels=[];
+      for(const z of[-.62,.62]){const w=new THREE.Mesh(skyWheelGeo,M.blue);w.rotation.y=Math.PI/2;w.position.set(0,.36,z);w.castShadow=true;b.add(w);wheels.push(w);
+        const hub=new THREE.Mesh(skyHubGeo,M.gold);hub.rotation.z=Math.PI/2;hub.position.set(0,.36,z);b.add(hub);
+        const glow=new THREE.Mesh(new THREE.TorusGeometry(.4,.03,6,28),skyGlowMat);glow.rotation.y=Math.PI/2;glow.position.set(0,.36,z);b.add(glow)}
+      add(b,G.box(.09,.09,1.25),M.gold,0,.62,0);
+      const down=add(b,G.box(.08,.08,.75),M.gold,0,.48,.25);down.rotation.x=.7;
+      add(b,G.box(.08,.5,.08),M.gold,0,.6,-.55);
+      add(b,G.box(.5,.06,.06),M.metal,0,.86,-.55);
+      add(b,G.box(.22,.06,.34),M.blueDark,0,.72,.32);
+      for(const sx of[-1,1]){const wing=new THREE.Mesh(new THREE.PlaneGeometry(.9,.36),skyWingMat);wing.position.set(sx*.5,.62,.15);wing.rotation.set(-Math.PI/2,0,sx*.25);b.add(wing)}
+      g.userData.wheels=wheels;return g;
+    }
+    const rideBike=buildSkyBike(1.15);rideBike.visible=false;rideBike.position.y=-.1;player.add(rideBike);
     const BUILD={
       coinBlue(){const m=new THREE.Mesh(coinGeo,[coinRim.blue,coinFace.blue,coinFace.blue]);return m},
       coinGold(){const m=new THREE.Mesh(coinGeo,[coinRim.gold,coinFace.gold,coinFace.gold]);return m},
@@ -679,6 +732,7 @@ button:disabled{opacity:.6;cursor:wait}
         for(const y of[.1,.82])add(g,G.box(1.64,.14,.94),M.gold,0,y,0);
         for(const x of[-.78,.78])add(g,G.box(.1,.94,.94),M.gold,x,.47,0);
         add(g,G.box(.8,.5,.02),M.white,0,.46,-.46,false).material=M.stripe;withBlob(g);return g},
+      skyBike(){const g=buildSkyBike(1);const ring=new THREE.Mesh(new THREE.TorusGeometry(1.05,.05,8,40),new THREE.MeshBasicMaterial({color:0xffc847,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}));ring.position.y=.85;g.add(ring);g.userData.ring=ring;withBlob(g,.8);return g},
       gantry(){const g=new THREE.Group();
         for(const x of[-1,1])add(g,G.box(.16,2.7,.3),M.metal,x,1.35,0);
         add(g,G.box(2.3,.5,.36),M.stripe,0,1.35,0);
@@ -688,7 +742,7 @@ button:disabled{opacity:.6;cursor:wait}
     const pools={};
     function acquire(kind){const p=pools[kind]||(pools[kind]=[]);let m=p.pop();if(!m){m=BUILD[kind]();scene.add(m)}m.visible=true;m.rotation.set(0,0,0);return m}
     function release(kind,m){m.visible=false;(pools[kind]||(pools[kind]=[])).push(m)}
-    for(const k of['coinBlue','coinGold','jersey','crate','gantry']){pools[k]=[];for(let i=0;i<(k.startsWith('coin')?8:4);i++){const m=BUILD[k]();m.visible=false;scene.add(m);pools[k].push(m)}}
+    for(const k of['coinBlue','coinGold','jersey','crate','gantry','skyBike']){pools[k]=[];for(let i=0;i<(k.startsWith('coin')?8:k==='skyBike'?1:4);i++){const m=BUILD[k]();m.visible=false;scene.add(m);pools[k].push(m)}}
 
     // ----- particles (single Points draw call) -----
     const NP=90,pPos=new Float32Array(NP*3),pCol=new Float32Array(NP*3),pVel=new Float32Array(NP*3),pLife=new Float32Array(NP),pMax=new Float32Array(NP),pBase=new Float32Array(NP*3);
@@ -716,6 +770,7 @@ button:disabled{opacity:.6;cursor:wait}
     // ----- game state -----
     let items=[],speed=16,dist=0,nextSpawn=0,lane=1,laneX=0,y=0,vy=0,slide=0,runT=0,idleT=0,w=1,h=1,t=0;
     let landT=0,jumpBuf=0,airborne=false,crashT=0,crashed=false,shake=0,fovBoost=0,auraT=0,frameEma=.016,slowT=0;
+    let flyT=0,flyDur=0,graceT=0,lastBikeDist=-1e9,camFollow=.3;
     const camPos=new THREE.Vector3(0,3.8,7.5),camLook=new THREE.Vector3(0,1.2,-9),tmpV=new THREE.Vector3();
     let camFov=62,camBase=62,camDist=7.5,camH=3.8;
     const pose={tL:0,sL:0,tR:0,sR:0,aL:0,eL:0,aR:0,eR:0,tx:0,by:.96,br:0,sc:1};
@@ -723,6 +778,7 @@ button:disabled{opacity:.6;cursor:wait}
     function clearItems(){for(const it of items)release(it.kind,it.mesh);items=[]}
     function reset(){
       clearItems();speed=16;nextSpawn=14;lane=1;laneX=0;y=0;vy=0;slide=0;runT=0;dist=0;landT=0;jumpBuf=0;airborne=false;crashT=0;crashed=false;shake=0;fovBoost=0;auraT=0;
+      flyT=0;flyDur=0;graceT=0;lastBikeDist=-1e9;camFollow=.3;rideBike.visible=false;
       for(let k=0;k<NP;k++)pLife[k]=0;
       Object.assign(pose,{tL:0,sL:0,tR:0,sR:0,aL:0,eL:0,aR:0,eR:0,tx:0,by:.96,br:0,sc:1});
       body.rotation.set(0,0,0);body.position.y=.96;rig.scale.setScalar(.88);applyPalette(0);
@@ -756,14 +812,31 @@ button:disabled{opacity:.6;cursor:wait}
     function addItem(type,l,z,yy){
       let kind=type;
       if(type==='block')kind=Math.random()<.5?'jersey':'crate';
-      const x=laneToX(l),isCoin=type==='coinBlue'||type==='coinGold';
-      const m=place(kind,x,z,isCoin?yy:0);
-      items.push({type:isCoin?'coin':type,kind,coin:isCoin?(type==='coinBlue'?'blue':'gold'):null,l,x,z,y:isCoin?yy:0,mesh:m,hit:false,ph:Math.random()*6.28});
+      const x=laneToX(l),isCoin=type==='coinBlue'||type==='coinGold',floats=isCoin||type==='skyBike';
+      const m=place(kind,x,z,floats?yy:0);
+      items.push({type:isCoin?'coin':type,kind,coin:isCoin?(type==='coinBlue'?'blue':'gold'):null,l,x,z,y:floats?(yy||0):0,mesh:m,hit:false,ph:Math.random()*6.28});
     }
     function coinLine(l,z,n,kind,arcOverBlock){
       for(let i=0;i<n;i++){const zz=z-i*(arcOverBlock?1.5:2.2);addItem(kind,l,zz,arcOverBlock?1.0+1.25*Math.sin(Math.PI*i/(n-1)):1.1)}
     }
+    const flying=()=>flyDur>0;
+    function skyRow(arriveT){
+      // a curvy line of coins at the bike's height when the row reaches the runner
+      const l=Math.floor(Math.random()*3),kind=Math.random()<.5?'coinBlue':'coinGold';
+      for(let i=0;i<6;i++){const tt=arriveT+i*2.2/speed;const alt=POWER.skyBikeAltitude(tt,flyDur);if(alt<4)break;addItem(kind,l,SPAWN_Z-i*2.2,alt+.95)}
+      return 13+Math.random()*4;
+    }
     function spawnRow(){
+      if(flying()){
+        const arriveT=flyT+(-SPAWN_Z)/speed;
+        if(arriveT<flyDur-POWER.SKY_BIKE.landTime-.4)return skyRow(arriveT);
+        if(arriveT<flyDur+POWER.SKY_BIKE.landingGrace)return 12; // leave the landing zone clear
+      }
+      if(!flying()&&POWER.shouldSpawnSkyBike(game.stage,dist-lastBikeDist)){
+        const bl=Math.floor(Math.random()*3);lastBikeDist=dist;
+        addItem('skyBike',bl,SPAWN_Z,0);coinLine(bl,SPAWN_Z+11,4,'coinGold');
+        return 18;
+      }
       const z=SPAWN_Z,l=Math.floor(Math.random()*3),r=Math.random(),others=[0,1,2].filter(x=>x!==l);
       const difficulty=Math.min(game.stage-1,80),multiStart=Math.max(.45,.65-difficulty*.0025),multiEnd=Math.min(.98,multiStart+.2+difficulty*.0025);
       const kind=Math.random()<.5?'coinBlue':'coinGold';
@@ -804,8 +877,9 @@ button:disabled{opacity:.6;cursor:wait}
 
     function updateCamera(dt,tx){
       const kP=damp(5,dt),kL=damp(7,dt);
-      tmpV.set(laneX*.5,camH+y*.3,camDist);camPos.lerp(tmpV,kP);
-      tmpV.set(laneX*.3,1.2+y*.15,-9);camLook.lerp(tmpV,kL);
+      camFollow+=((flying()?1:.3)-camFollow)*damp(3,dt);
+      tmpV.set(laneX*.5,camH+y*camFollow,camDist-(flying()?.8:0));camPos.lerp(tmpV,kP);
+      tmpV.set(laneX*.3,1.2+y*(camFollow*.8),-9);camLook.lerp(tmpV,kL);
       const tf=camBase+fovBoost+clamp((speed-16)*.18,0,3.5);camFov+=(tf-camFov)*damp(3,dt);
       if(Math.abs(camera.fov-camFov)>.01){camera.fov=camFov;camera.updateProjectionMatrix()}
       camera.position.copy(camPos);
@@ -839,6 +913,8 @@ button:disabled{opacity:.6;cursor:wait}
 
     return {
       name:'3D',canvas,renderer,resize,reset,getLane(){return lane},
+      debug(){return {flying:flying(),altitude:y,flyT,flyDur,graceT,items:items.length}},
+      giveSkyBike(){if(!flying()){flyDur=game.startSkyBike();flyT=0;rideBike.visible=true;fovBoost=6}},
       onCrash(){crashed=true;crashT=0;shake=.55;fovBoost=-4;burst(26,laneX,1.1,0,0xff7a5a,4.2);burst(14,laneX,1.1,0,0xffc847,3)},
       step(dt,mode){
         adaptQuality(dt);curMode=mode;
@@ -850,7 +926,15 @@ button:disabled{opacity:.6;cursor:wait}
           // vertical motion
           if(jumpBuf>0)jumpBuf-=dt;
           const wasAir=airborne;
-          if(y>0||vy>0){y+=vy*dt;vy-=GRAVITY*dt;if(y<=0){y=0;vy=0}}
+          if(flying()){
+            flyT+=dt;slide=0;jumpBuf=0;vy=0;
+            y=POWER.skyBikeAltitude(flyT,flyDur);
+            for(const w of rideBike.userData.wheels)w.rotation.x-=dt*speed*1.6;
+            if(Math.random()<dt*14)burst(1,laneX+rand(-.4,.4),y+.3,.9,0x9fe4ff,1.2);
+            game.setSkyHud({left:flyDur-flyT,total:flyDur,alt:y});
+            if(flyT>=flyDur){flyDur=0;flyT=0;y=0;graceT=POWER.SKY_BIKE.landingGrace;rideBike.visible=false;landT=.2;fovBoost=0;burst(16,laneX,.1,0,0xffc847,2.6);game.landSkyBike()}
+          }else if(y>0||vy>0){y+=vy*dt;vy-=GRAVITY*dt;if(y<=0){y=0;vy=0}}
+          if(graceT>0)graceT-=dt;
           airborne=y>0;
           if(wasAir&&!airborne){landT=.2;burst(8,laneX,.1,0,0x9fe4ff,2.2);if(jumpBuf>0){vy=JUMP_V;airborne=true;y=.001;landT=0;jumpBuf=0}}
           if(landT>0)landT-=dt;
@@ -862,21 +946,26 @@ button:disabled{opacity:.6;cursor:wait}
           for(const it of items){
             const prev=it.z;it.z+=dz;it.mesh.position.z=it.z;
             if(it.type==='coin'){it.mesh.rotation.y=t*3.2+it.ph;it.mesh.position.y=it.y+Math.sin(t*3+it.ph)*.07}
+            if(it.type==='skyBike'){it.mesh.rotation.y=t*1.8;it.mesh.position.y=.25+Math.sin(t*3)*.12;const r=it.mesh.userData.ring;if(r){r.rotation.x=t*2;r.material.opacity=.45+.35*Math.sin(t*6)}}
             if(it.hit)continue;
-            if(it.type==='coin'){
+            if(it.type==='skyBike'){
+              if(!flying()&&sweptOverlap(prev,it.z,1,playerStartX,playerEndX,it.x,1.1)&&y<2.5){
+                it.hit=true;release(it.kind,it.mesh);flyDur=game.startSkyBike();flyT=0;vy=0;slide=0;rideBike.visible=true;fovBoost=6;auraT=.6;aura.material.color.set(0xffc847);
+                burst(24,it.x,1,it.z,0xffc847,3.4);burst(14,it.x,1,it.z,0x5fe6ff,3)}
+            }else if(it.type==='coin'){
               if(sweptOverlap(prev,it.z,.9,playerStartX,playerEndX,it.x,.95)&&Math.abs(it.y-(y+.9))<1.15){
                 it.hit=true;game.addCoin(it.coin);game.addScore(5);auraT=.35;aura.material.color.set(it.coin==='gold'?0xffc847:0x35d0ff);
                 burst(12,it.x,it.mesh.position.y,it.z,it.coin==='gold'?0xffd36a:0x5fe6ff,2.6);release(it.kind,it.mesh)}
             }else{
               const win=it.type==='block'?.8:.65;
               const halfWidth=(it.type==='block'?.9:1.15)+.4;
-              if(sweptOverlap(prev,it.z,win,playerStartX,playerEndX,it.x,halfWidth)){
+              if(!(flying()&&POWER.isAboveObstacles(y))&&graceT<=0&&sweptOverlap(prev,it.z,win,playerStartX,playerEndX,it.x,halfWidth)){
                 if(it.type==='block'&&y<BLOCK_H-.1){it.hit=true;crash='You hit a barrier'}
                 else if(it.type==='gantry'&&slide<=0&&y<GANTRY_TOP+.05){it.hit=true;crash='You hit an overhead gantry'}
               }
             }
           }
-          items=items.filter(it=>{if(it.hit&&it.coin){return false}if(it.z>DESPAWN_Z){release(it.kind,it.mesh);return false}return true});
+          items=items.filter(it=>{if(it.hit&&(it.coin||it.type==='skyBike')){return false}if(it.z>DESPAWN_Z){release(it.kind,it.mesh);return false}return true});
           setPose(dt);updateWorld(dz,dt,speed);finishFrame(dt,true);render();
           return crash;
         }
@@ -906,6 +995,7 @@ button:disabled{opacity:.6;cursor:wait}
         if(crashed)return;
         if(dir==='left')lane=Math.max(0,lane-1);
         else if(dir==='right')lane=Math.min(2,lane+1);
+        else if(flyDur>0)return; // steering only while on the Sky Bike
         else if(dir==='up'){if(y===0&&!airborne){vy=JUMP_V;airborne=true;y=.001;slide=0;landT=0;burst(6,laneX,.1,0,0x9fe4ff,1.8);toast('JUMP');audio.play('jump')}else jumpBuf=.14}
         else if(dir==='down'){if(airborne){vy=-JUMP_V*1.3}if(slide<=0){slide=SLIDE_TIME;toast('SLIDE');audio.play('slide')}}
       },
@@ -927,13 +1017,13 @@ button:disabled{opacity:.6;cursor:wait}
   }
   function gameOver(reason){
     progression.recordBestScore(score);
-    state='over';audio.setState('over');audio.play('gameover');
+    state='over';setSkyHud(null);audio.setState('over');audio.play('gameover');
     $('menu').querySelector('h1').innerHTML='RUN <em>OVER</em>';
     $('menu').querySelector('.subtitle').innerHTML='Score: <b>'+Math.floor(score)+'</b><br>'+(reason||'You hit an obstacle.');
     $('startBtn').textContent='↺ RESTART';showMenu();updateHud();
   }
   function beginCrash(reason){
-    state='crash';crashT=0;crashReason=reason;audio.play('crash');audio.setState('over');$('pauseBtn').hidden=true;
+    state='crash';setSkyHud(null);crashT=0;crashReason=reason;audio.play('crash');audio.setState('over');$('pauseBtn').hidden=true;
     if(engine&&engine.onCrash)engine.onCrash();
   }
   function pauseToggle(){
@@ -1063,7 +1153,7 @@ button:disabled{opacity:.6;cursor:wait}
       }catch(err){console.warn('[game] WebGL unavailable – using 2D fallback:',err&&err.message)}
     }
   }
-  window.BGR={start,move,pauseToggle,get state(){return state},get renderer(){return engine&&engine.name},stats(){return {score,blue,gold,stage:currentStage,stageScore,progress:progression.snapshot()}}};
+  window.BGR={start,move,pauseToggle,skyBike(){if(state==='run'&&engine&&engine.giveSkyBike)engine.giveSkyBike()},debug(){return engine&&engine.debug?engine.debug():null},get state(){return state},get renderer(){return engine&&engine.name},stats(){return {score,blue,gold,stage:currentStage,stageScore,progress:progression.snapshot()}}};
   boot();
 })();
 </script>
