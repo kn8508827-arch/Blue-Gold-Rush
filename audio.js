@@ -101,9 +101,11 @@
       coinGold(t) { osc('triangle', 1175, 1175, t, 0.1, 0.3, sfxBus, true); osc('triangle', 1568, 1568, t + 0.07, 0.12, 0.3, sfxBus, true); osc('triangle', 2093, 2093, t + 0.14, 0.25, 0.28, sfxBus, true); },
       crash(t) { noise(t, 0.5, 0.7, sfxBus, 'lowpass', 3000, 120, true); osc('sawtooth', 160, 40, t, 0.4, 0.45, sfxBus, true); },
       gameover(t) { [440, 370, 311, 220].forEach((f, i) => osc('triangle', f, f * 0.97, t + 0.15 + i * 0.2, 0.3, 0.3, sfxBus, true)); },
+      skyBike(t) { noise(t, 0.9, 0.35, sfxBus, 'bandpass', 500, 3200, true); [523, 659, 784, 1047].forEach((f, i) => osc('triangle', f, f * 1.02, t + i * 0.08, 0.18, 0.22, sfxBus, true)); },
+      land(t) { noise(t, 0.35, 0.3, sfxBus, 'lowpass', 1800, 200, true); osc('sine', 220, 110, t, 0.25, 0.3, sfxBus, true); },
     };
     // minimum gap (s) per effect to avoid stacking duplicates
-    const GAP = { click: 0.04, start: 0.3, jump: 0.08, slide: 0.12, lane: 0.05, coinBlue: 0.03, coinGold: 0.03, crash: 0.5, gameover: 0.5 };
+    const GAP = { click: 0.04, start: 0.3, jump: 0.08, slide: 0.12, lane: 0.05, coinBlue: 0.03, coinGold: 0.03, crash: 0.5, gameover: 0.5, skyBike: 0.5, land: 0.3 };
 
     function play(name) {
       if (!ctx || !enabled || volume <= 0 || !SFX[name]) return false;
