@@ -39,3 +39,14 @@ Single chest emblem with white backing and no rear logo; existing back geometry 
 
 ## Sky Bike power-up 🚲
 A glowing Sky Bike (blue wheels, gold frame and wings, with a gold ring) sometimes appears on the track, led in by a line of gold coins. Run into it to ride it: the runner climbs into the air and cruises in a gentle wave between **15 m and 20 m**, steering left/right between lanes to collect lines of sky coins, untouched by ground obstacles. Jump/slide are off while riding. After the ride the bike glides down and the runner gets 1.2 s of landing protection. The ride lasts 8 s at Rookie and +0.5 s for every rank above it (max 13 s), so higher ranks fly longer. A HUD pill shows altitude and time left. Works in both the 3D and the 2D fallback. Logic and ranks live in `powerups.js` (tested in `tests/powerups.test.js`). Screenshot: `docs/19-sky-bike.png`.
+
+## Cooler Fly 3D (second game)
+
+`cooler-fly/` is a separate 3D tap-to-fly game starring the Cooler Bot mascot, served at
+`https://kn8508827-arch.github.io/Blue-Gold-Rush/cooler-fly/`.
+
+- three.js 0.160 from jsDelivr (unpkg fallback); Telegram Mini App aware (expand, haptics, share)
+- 5 stages that change with the score: Neo Phnom Penh 2050, Cyber Angkor, Mekong of Light, Orbit Station, Galaxy Kingdom
+- 5 ranks (Rookie → Cooler King), local top-5 scores, coins (+1) and crystals (+5)
+- procedural synthwave music per stage (Web Audio) plus sound effects; music and sound toggles, pause
+- game rules in `cooler-fly/logic.js`, tested by `tests/cooler-fly.test.js`
