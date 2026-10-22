@@ -50,3 +50,14 @@ A glowing Sky Bike (blue wheels, gold frame and wings, with a gold ring) sometim
 - 5 ranks (Rookie → Cooler King), local top-5 scores, coins (+1) and crystals (+5)
 - procedural synthwave music per stage (Web Audio) plus sound effects; music and sound toggles, pause
 - game rules in `cooler-fly/logic.js`, tested by `tests/cooler-fly.test.js`
+
+## Cooler Arcade (six quick games)
+
+`arcade/` is a hub of six quick games in one page, served at
+`https://kn8508827-arch.github.io/Blue-Gold-Rush/arcade/` (open a game directly with `#2048`, `#snake`,
+`#memory`, `#whack`, `#ttt` or `#brick`):
+
+- 🔢 2048 Neon · 🐍 Neon Snake · 🃏 Memory match (Khmer symbols) · 🔨 Whack-a-Cooler (30 s, avoid bombs) ·
+  ❌ Tic-tac-toe vs AI (3 levels, perfect AI on hard) · 🧱 Brick breaker (levels, lives)
+- swipe/tap controls plus arrow keys, sound effects, best score per game, Telegram haptics
+- rules in `arcade/logic.js`, tested by `tests/arcade.test.js`
