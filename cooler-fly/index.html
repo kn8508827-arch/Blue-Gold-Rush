@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#060b24">
+<title>Cooler Fly 3D | Team ស្មោះស្នេហ៍</title>
+<link rel="icon" href="cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--a:#2bd0ff;--b:#ff3df0;--gold:#ffc847;--glass:#08122ab8;--line:#8fe6ff40}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#060b24;color:#fff;font-family:"Kantumruy Pro",system-ui,"Segoe UI",Arial,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+#view{position:fixed;inset:0;touch-action:none}
+#view canvas{display:block;width:100%!important;height:100%!important}
+.hud{position:fixed;z-index:5;top:calc(env(safe-area-inset-top,0px) + 10px);left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:0 12px;pointer-events:none}
+.chip{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:6px 11px;font-weight:700;box-shadow:0 0 18px #2bd0ff22,inset 0 0 12px #ffffff08;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:14px}
+.chip small{display:block;font-size:10px;color:#9fd6f5;font-weight:500}
+.stage{text-align:center;max-width:46vw}.stage b{font-family:Orbitron,system-ui;font-size:11px;letter-spacing:.12em;color:var(--a)}
+.btns{display:flex;gap:6px;pointer-events:auto}
+.btns button{width:40px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--glass);color:#fff;font-size:16px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#score{position:fixed;z-index:5;top:calc(env(safe-area-inset-top,0px) + 66px);left:0;right:0;text-align:center;font-family:Orbitron,system-ui;font-size:56px;font-weight:900;letter-spacing:.04em;text-shadow:0 0 18px var(--a),0 0 42px var(--b);pointer-events:none}
+#banner{position:fixed;z-index:6;top:34%;left:50%;transform:translate(-50%,-50%) scale(.8);text-align:center;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+#banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#banner small{font-family:Orbitron,system-ui;letter-spacing:.3em;color:var(--a);font-size:13px}
+#banner div{font-size:clamp(26px,8vw,40px);font-weight:700;text-shadow:0 0 22px var(--b)}
+#banner i{font-style:normal;font-family:Orbitron,system-ui;font-size:13px;color:#cfe9ff;letter-spacing:.15em}
+.overlay{position:fixed;z-index:10;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at 50% 30%,#2bd0ff22,#020617cc 70%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.overlay[hidden]{display:none}
+.card{width:min(94vw,430px);max-height:92vh;overflow:auto;text-align:center;padding:22px 20px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(160deg,#0f2552ee,#070d26f2);box-shadow:0 0 60px #2bd0ff33,0 30px 80px #000c}
+.avatar{width:92px;height:92px;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 26px var(--a),0 0 50px #ff3df055}
+h1{margin:10px 0 2px;font-family:Orbitron,system-ui;font-size:34px;font-weight:900;letter-spacing:.06em;background:linear-gradient(90deg,var(--a),#fff,var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font-family:Orbitron,system-ui;font-size:11px;letter-spacing:.35em;color:var(--gold)}
+p{margin:8px 0;color:#d2e8fb;line-height:1.6;font-size:15px}
+.big{font-family:Orbitron,system-ui;font-size:52px;font-weight:900;color:#fff;text-shadow:0 0 20px var(--a)}
+.rank{display:inline-block;margin:4px 0;padding:6px 14px;border-radius:99px;background:#ffc84722;border:1px solid #ffc84799;color:var(--gold);font-weight:700}
+.row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+button.play{border:0;border-radius:16px;padding:14px 28px;font-size:18px;font-weight:700;font-family:inherit;color:#041026;background:linear-gradient(100deg,var(--a),#9ef0ff 45%,var(--gold));box-shadow:0 0 26px #2bd0ff88;cursor:pointer}
+button.ghost{border:1px solid var(--line);border-radius:16px;padding:13px 18px;font-size:15px;font-weight:700;font-family:inherit;color:#fff;background:#0b1a3a;cursor:pointer}
+.list{margin:12px 0 0;padding:10px 12px;border-radius:16px;background:#ffffff08;border:1px solid #ffffff14;text-align:left;font-size:13px;color:#cfe3f7}
+.list h3{margin:0 0 6px;font-size:13px;color:var(--a);font-family:Orbitron,system-ui;letter-spacing:.12em}
+.list div{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed #ffffff12}
+.list div:last-child{border:0}
+.hint{font-size:12px;color:#8fb3d6;margin-top:12px}
+#loading{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#060b24;font-family:Orbitron,system-ui;letter-spacing:.2em;color:var(--a)}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="loading"><img class="avatar" src="cooler.png" alt=""><div>LOADING…</div></div>
+
+<div class="hud">
+  <div class="chip">🪙 <span id="coins">0</span><small>កាក់សរុប</small></div>
+  <div class="chip stage"><b id="stageNo">STAGE 1</b><div id="stageName">ភ្នំពេញ 2050</div></div>
+  <div class="btns">
+    <button id="musicBtn" aria-label="Music on/off">🎵</button>
+    <button id="muteBtn" aria-label="Sound on/off">🔊</button>
+    <button id="pauseBtn" aria-label="Pause">⏸</button>
+  </div>
+</div>
+<div id="score" hidden>0</div>
+<div id="banner"><small id="bannerTop">STAGE 2</small><div id="bannerName"></div><i id="bannerEn"></i></div>
+
+<div class="overlay" id="start" hidden>
+  <div class="card">
+    <img class="avatar" src="cooler.png" alt="Cooler Bot">
+    <h1>COOLER FLY</h1>
+    <div class="tag">3D · YEAR 2050</div>
+    <p>ហោះ Cooler Bot កាត់ទីក្រុងអនាគត ប្រាសាទ Hologram និងអវកាស 🚀<br>ប្រមូលកាក់ 🪙 និងគ្រីស្តាល់មេក្រូ 💎 (+5)</p>
+    <div class="row"><button class="play" id="playBtn">▶ ចាប់ផ្ដើម</button></div>
+    <div class="list" id="stageList"><h3>STAGES · វគ្គ</h3></div>
+    <div class="list" id="rankList"><h3>RANKS · ឋានៈ</h3></div>
+    <div class="list" id="topList"><h3>TOP 5 · ពិន្ទុខ្ពស់</h3></div>
+    <p class="hint">ចុចអេក្រង់ ឬ Space ដើម្បីហោះឡើង 🎧 ពាក់កាសស្ដាប់ភ្លេងល្អជាង</p>
+  </div>
+</div>
+
+<div class="overlay" id="paused" hidden>
+  <div class="card"><h1>PAUSE</h1><div class="row"><button class="play" id="resumeBtn">▶ លេងបន្ត</button></div></div>
+</div>
+
+<div class="overlay" id="over" hidden>
+  <div class="card">
+    <img class="avatar" src="cooler.png" alt="">
+    <div class="tag" id="overStage">STAGE 1</div>
+    <div class="big" id="finalScore">0</div>
+    <div class="rank" id="finalRank"></div>
+    <p id="finalInfo"></p>
+    <div class="row">
+      <button class="play" id="againBtn">↻ លេងម្ដងទៀត</button>
+      <button class="ghost" id="shareBtn">📤 Share</button>
+    </div>
+    <div class="list" id="topList2"><h3>TOP 5 · ពិន្ទុខ្ពស់</h3></div>
+    <p class="hint">Cooler Fly · ហ្គេមរបស់ Vid Cooler 🎤 Team ស្មោះស្នេហ៍</p>
+  </div>
+</div>
+
+<script src="logic.js"></script>
+<script>
+"use strict";
+(() => {
+const L = window.CoolerFlyLogic;
+const $ = id => document.getElementById(id);
+const tg = window.Telegram && window.Telegram.WebApp;
+try { if (tg) { tg.ready(); tg.expand(); tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } } catch (_) {}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("coolerfly3d:" + k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } },
+  set(k, v) { try { localStorage.setItem("coolerfly3d:" + k, JSON.stringify(v)); } catch (_) {} },
+};
+
+function loadScript(urls) {
+  return urls.reduce((p, url) => p.catch(() => new Promise((ok, bad) => {
+    const s = document.createElement("script"); s.src = url; s.onload = () => window.THREE ? ok() : bad(); s.onerror = bad;
+    document.head.appendChild(s);
+  })), Promise.reject());
+}
+
+loadScript([
+  "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+  "https://unpkg.com/three@0.160.0/build/three.min.js",
+]).then(boot).catch(() => {
+  $("loading").innerHTML = "<p style='font-family:inherit;letter-spacing:0;padding:20px;text-align:center'>⚠️ មិនអាចផ្ទុក 3D បានទេ<br>សូមពិនិត្យអ៊ីនធឺណិត ហើយបើកម្ដងទៀត</p>";
+});
+
+// ================= AUDIO: synthwave music + effects =================
+const Audio = (() => {
+  let ctx = null, master, musicBus, sfxBus, noise, timer = null, step = 0, nextT = 0;
+  let muted = store.get("muted", false), musicOn = store.get("music", true), stage = L.STAGES[0], intensity = 0;
+  const SCALES = [ // root (Hz) + minor-ish progressions per stage
+    { root: 55.0, prog: [0, 8, 3, 10] }, { root: 61.74, prog: [0, 5, 8, 7] }, { root: 49.0, prog: [0, 3, 8, 10] },
+    { root: 58.27, prog: [0, 10, 8, 5] }, { root: 65.41, prog: [0, 8, 10, 7] },
+  ];
+  const f = (root, semi) => root * Math.pow(2, semi / 12);
+  function init() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = muted ? 0 : 0.9;
+      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+      master.connect(comp).connect(ctx.destination);
+      musicBus = ctx.createGain(); musicBus.gain.value = musicOn ? 0.55 : 0; musicBus.connect(master);
+      sfxBus = ctx.createGain(); sfxBus.gain.value = 0.8; sfxBus.connect(master);
+      // shared reverb-ish delay for space
+      const delay = ctx.createDelay(); delay.delayTime.value = 0.28; const fb = ctx.createGain(); fb.gain.value = 0.28;
+      const wet = ctx.createGain(); wet.gain.value = 0.25; musicBus.connect(delay); delay.connect(fb).connect(delay); delay.connect(wet).connect(master);
+      const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      noise = buf;
+    } catch (_) { ctx = null; }
+  }
+  function tone(bus, t, freq, dur, type, vol, opts = {}) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (opts.to) o.frequency.exponentialRampToValueAtTime(opts.to, t + dur);
+    if (opts.detune) o.detune.value = opts.detune;
+    let node = o;
+    if (opts.cutoff) { const fl = ctx.createBiquadFilter(); fl.type = "lowpass"; fl.frequency.setValueAtTime(opts.cutoff, t); fl.frequency.exponentialRampToValueAtTime(Math.max(200, opts.cutoff * 0.25), t + dur); fl.Q.value = 6; o.connect(fl); node = fl; }
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (opts.attack || 0.005)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    node.connect(g).connect(bus); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function hit(bus, t, dur, vol, hp) {
+    const s = ctx.createBufferSource(); s.buffer = noise; const fl = ctx.createBiquadFilter(); fl.type = hp ? "highpass" : "bandpass"; fl.frequency.value = hp || 1800;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(fl).connect(g).connect(bus); s.start(t); s.stop(t + dur + 0.02);
+  }
+  function schedule() {
+    if (!ctx) return;
+    const spb = 60 / (stage.bpm || 120) / 4; // 16th note
+    const sc = SCALES[(L.STAGES.indexOf(stage) + 5) % 5] || SCALES[0];
+    while (nextT < ctx.currentTime + 0.15) {
+      const s = step % 16, bar = Math.floor(step / 16) % 4, chord = sc.prog[bar];
+      if (s % 4 === 0) tone(musicBus, nextT, 120, 0.28, "sine", 0.9, { to: 40 });                 // kick
+      if (s === 4 || s === 12) hit(musicBus, nextT, 0.18, 0.45);                                   // snare
+      if (s % 2 === 0) hit(musicBus, nextT, 0.04, 0.12 + (s % 4 === 2 ? 0.08 : 0), 7000);          // hats
+      if (s % 2 === 0) tone(musicBus, nextT, f(sc.root, chord + (s % 8 === 6 ? 12 : 0)), spb * 1.8, "sawtooth", 0.22, { cutoff: 900 + intensity * 900 }); // bass
+      const arp = [0, 3, 7, 12, 15, 12, 7, 3][s % 8];
+      if (intensity > 0 || s % 2 === 0) tone(musicBus, nextT, f(sc.root * 4, chord + arp), spb * 0.9, "square", 0.05, { cutoff: 3200 }); // arp
+      if (s === 0) [0, 3, 7].forEach(n => tone(musicBus, nextT, f(sc.root * 4, chord + n), spb * 15, "sawtooth", 0.035, { attack: 0.25, detune: n * 4, cutoff: 2400 })); // pad
+      nextT += spb; step++;
+    }
+  }
+  return {
+    start() { init(); if (!ctx) return; if (!timer) { nextT = ctx.currentTime + 0.05; timer = setInterval(schedule, 40); } },
+    setStage(st, level) { stage = st; intensity = level; },
+    sfx(name) {
+      if (!ctx || muted) return; const t = ctx.currentTime;
+      if (name === "flap") { tone(sfxBus, t, 380, 0.14, "triangle", 0.25, { to: 760 }); hit(sfxBus, t, 0.08, 0.08, 3000); }
+      else if (name === "coin") { tone(sfxBus, t, 1318, 0.09, "square", 0.12); tone(sfxBus, t + 0.07, 1760, 0.16, "square", 0.12); }
+      else if (name === "gem") [784, 988, 1175, 1568].forEach((n, i) => tone(sfxBus, t + i * 0.06, n, 0.22, "triangle", 0.18));
+      else if (name === "pass") tone(sfxBus, t, 880, 0.06, "sine", 0.1);
+      else if (name === "stage") [523, 659, 784, 1047, 1319].forEach((n, i) => tone(sfxBus, t + i * 0.09, n, 0.4, "sawtooth", 0.1, { cutoff: 4000 }));
+      else if (name === "crash") { tone(sfxBus, t, 220, 0.6, "sawtooth", 0.35, { to: 40, cutoff: 2000 }); hit(sfxBus, t, 0.5, 0.5); }
+    },
+    toggleMute() { muted = !muted; store.set("muted", muted); if (master) master.gain.value = muted ? 0 : 0.9; return muted; },
+    toggleMusic() { musicOn = !musicOn; store.set("music", musicOn); if (musicBus) musicBus.gain.value = musicOn ? 0.55 : 0; return musicOn; },
+    get muted() { return muted; }, get musicOn() { return musicOn; },
+  };
+})();
+
+const haptic = k => { try { tg && tg.HapticFeedback && (k === "crash" ? tg.HapticFeedback.notificationOccurred("error") : tg.HapticFeedback.impactOccurred(k === "flap" ? "light" : "medium")); } catch (_) {} };
+
+// ================= GAME =================
+function boot() {
+  const T = window.THREE;
+  const view = $("view");
+  const renderer = new T.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.outputColorSpace = T.SRGBColorSpace;
+  renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
+  view.appendChild(renderer.domElement);
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(55, 1, 0.1, 400);
+  scene.fog = new T.Fog(0x1a0b3d, 30, 120);
+  const hemi = new T.HemisphereLight(0x9fdcff, 0x1a0b3d, 0.9); scene.add(hemi);
+  const sun = new T.DirectionalLight(0xffffff, 1.6); sun.position.set(6, 14, 12); scene.add(sun);
+  const rim = new T.PointLight(0xff3df0, 40, 30); scene.add(rim);
+
+  const S = 40, GROUND = L.WORLD_H - 70;               // logic px → 3D units
+  const toY = y => (GROUND - y) / S, toX = x => x / S;
+  const loader = new T.TextureLoader();
+  const tex = src => { const t = loader.load(src); t.colorSpace = T.SRGBColorSpace; return t; };
+  const coolerTex = tex("cooler.png"), coinTex = tex("coin.png");
+
+  function glowTexture(inner = "#ffffff") {
+    const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d");
+    const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, inner); r.addColorStop(0.25, inner + "aa"); r.addColorStop(1, "#00000000");
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t;
+  }
+  const glowTex = glowTexture();
+  const glow = (color, size, opacity = 1) => { const m = new T.Sprite(new T.SpriteMaterial({ map: glowTex, color, transparent: true, opacity, blending: T.AdditiveBlending, depthWrite: false })); m.scale.set(size, size, 1); return m; };
+
+  // ---------- player ----------
+  const player3 = new T.Group(); scene.add(player3);
+  const body = new T.Mesh(new T.SphereGeometry(0.62, 32, 24), new T.MeshStandardMaterial({ color: 0x1b2a4a, metalness: 0.9, roughness: 0.25, emissive: 0x0a1630 }));
+  body.scale.set(1.15, 1, 0.8); player3.add(body);
+  const face = new T.Mesh(new T.CircleGeometry(0.66, 48), new T.MeshBasicMaterial({ map: coolerTex, transparent: true }));
+  face.position.z = 0.52; player3.add(face);
+  const faceRing = new T.Mesh(new T.TorusGeometry(0.7, 0.05, 12, 64), new T.MeshStandardMaterial({ color: 0xffc847, emissive: 0xffa21a, emissiveIntensity: 1.4, metalness: 0.6, roughness: 0.3 }));
+  faceRing.position.z = 0.52; player3.add(faceRing);
+  const halo = new T.Mesh(new T.TorusGeometry(1.05, 0.045, 12, 80), new T.MeshBasicMaterial({ color: 0x2bd0ff }));
+  halo.rotation.x = Math.PI / 2.4; player3.add(halo);
+  const wingMat = new T.MeshStandardMaterial({ color: 0x2bd0ff, emissive: 0x2bd0ff, emissiveIntensity: 1.2, metalness: 0.5, roughness: 0.3 });
+  for (const s of [-1, 1]) { const w = new T.Mesh(new T.BoxGeometry(0.9, 0.06, 0.32), wingMat); w.position.set(-0.45, -0.1, s * 0.62); w.rotation.y = s * 0.35; player3.add(w); }
+  const thruster = glow(0x7fe6ff, 1.6); thruster.position.set(-0.95, -0.05, 0); player3.add(thruster);
+  const playerGlow = glow(0x2bd0ff, 3.6, 0.35); player3.add(playerGlow);
+
+  // trail
+  const TRAIL = 40, trailPos = new Float32Array(TRAIL * 3), trailGeo = new T.BufferGeometry();
+  trailGeo.setAttribute("position", new T.BufferAttribute(trailPos, 3));
+  const trail = new T.Points(trailGeo, new T.PointsMaterial({ size: 0.28, map: glowTex, color: 0x7fe6ff, transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
+  scene.add(trail);
+
+  // ---------- obstacles & items (pooled) ----------
+  const boxGeo = new T.BoxGeometry(1, 1, 1), edgeGeo = new T.EdgesGeometry(boxGeo);
+  // obstacles must stand out from the background: bright, glowing, white edges
+  const towerMat = new T.MeshStandardMaterial({ color: 0x0e2350, metalness: 0.7, roughness: 0.18, emissive: 0x2bd0ff, emissiveIntensity: 0.22, transparent: true, opacity: 0.9 });
+  const neonMat = new T.MeshBasicMaterial({ color: 0x2bd0ff });
+  const edgeMat = new T.LineBasicMaterial({ color: 0xffffff });
+  const capMat = new T.MeshBasicMaterial({ color: 0xff3df0 });
+  const stripeMat = new T.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.12 });
+  const PW = L.PILLAR_W / S;
+  function makeTower() {
+    const g = new T.Group();
+    const mesh = new T.Mesh(boxGeo, towerMat), edges = new T.LineSegments(edgeGeo, edgeMat);
+    const cap = new T.Mesh(new T.BoxGeometry(1.25, 0.18, 1.25), capMat);
+    const corners = new T.Group();
+    for (const [cx, cz] of [[-0.5, 0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]]) { const n = new T.Mesh(new T.BoxGeometry(0.07, 1, 0.07), neonMat); n.position.set(cx, 0, cz); corners.add(n); }
+    const stripes = new T.Group();
+    for (let i = 0; i < 6; i++) { const st = new T.Mesh(new T.PlaneGeometry(0.08, 1), stripeMat); st.position.z = 0.501; st.position.x = -0.35 + i * 0.14; stripes.add(st); }
+    g.add(mesh, edges, cap, stripes, corners); g.userData = { mesh, edges, cap, stripes, corners };
+    return g;
+  }
+  function sizeTower(g, w, h, capAtTop) {
+    const { mesh, edges, cap, stripes, corners } = g.userData;
+    mesh.scale.set(w, h, w); edges.scale.set(w, h, w); stripes.scale.set(w, h, 1); corners.scale.set(w, h, w);
+    cap.scale.set(w, 1, w); cap.position.y = capAtTop ? h / 2 : -h / 2;
+  }
+  const pillarPool = [], live = [];
+  function getPair() {
+    let p = pillarPool.pop();
+    if (!p) { p = { top: makeTower(), bottom: makeTower(), gate: glow(0xff3df0, 3, 0.22) }; }
+    scene.add(p.top, p.bottom, p.gate); return p;
+  }
+  const coinGeo = new T.CylinderGeometry(0.42, 0.42, 0.09, 40);
+  const coinMats = [new T.MeshStandardMaterial({ color: 0xffc847, metalness: 1, roughness: 0.25, emissive: 0x7a4b00, emissiveIntensity: 0.6 }),
+    new T.MeshStandardMaterial({ map: coinTex, metalness: 0.6, roughness: 0.35, emissive: 0x332000 }),
+    new T.MeshStandardMaterial({ map: coinTex, metalness: 0.6, roughness: 0.35, emissive: 0x332000 })];
+  const gemGeo = new T.OctahedronGeometry(0.5, 0);
+  const gemMat = new T.MeshStandardMaterial({ color: 0xff5ec4, emissive: 0xff2fb0, emissiveIntensity: 1.6, metalness: 0.2, roughness: 0.1, transparent: true, opacity: 0.92 });
+  function makeItem(kind) {
+    const g = new T.Group();
+    if (kind === "gem") { const m = new T.Mesh(gemGeo, gemMat); m.scale.set(0.8, 1.25, 0.8); g.add(m, glow(0xff5ec4, 2.4, 0.6)); }
+    else { const m = new T.Mesh(coinGeo, coinMats); m.rotation.x = Math.PI / 2; g.add(m, glow(0xffc847, 1.6, 0.45)); }
+    return g;
+  }
+
+  // particles
+  const sparks = [];
+  function burst(x, y, color, n = 16, speed = 6) {
+    for (let i = 0; i < n; i++) {
+      const s = glow(color, 0.5 + Math.random() * 0.5, 1); const a = Math.random() * Math.PI * 2, b = (Math.random() - 0.5) * Math.PI;
+      s.position.set(x, y, 0); s.userData = { vx: Math.cos(a) * Math.cos(b) * speed, vy: Math.sin(a) * speed, vz: Math.sin(b) * speed, life: 0.7 + Math.random() * 0.4 };
+      scene.add(s); sparks.push(s);
+    }
+  }
+
+  // ---------- backgrounds per stage ----------
+  let bg = null, bgItems = [], starField = null;
+  function disposeGroup(g) { g.traverse(o => { if (o.geometry && o.geometry !== boxGeo) o.geometry.dispose(); if (o.material && !o.material.map?.isCanvasTexture) { } }); scene.remove(g); }
+  function windowTexture(c1, c2) {
+    const c = document.createElement("canvas"); c.width = 64; c.height = 128; const g = c.getContext("2d");
+    g.fillStyle = "#050914"; g.fillRect(0, 0, 64, 128);
+    for (let y = 4; y < 128; y += 8) for (let x = 4; x < 64; x += 8) if (Math.random() < 0.45) { g.fillStyle = Math.random() < 0.7 ? c1 : c2; g.globalAlpha = 0.5 + Math.random() * 0.5; g.fillRect(x, y, 4, 4); }
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.magFilter = T.NearestFilter; return t;
+  }
+  const hex = n => "#" + n.toString(16).padStart(6, "0");
+  function makeStars(n, spread, size, color = 0xffffff) {
+    const pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { pos[i * 3] = (Math.random() - 0.3) * spread; pos[i * 3 + 1] = Math.random() * 60 - 5; pos[i * 3 + 2] = -40 - Math.random() * 120; }
+    const g = new T.BufferGeometry(); g.setAttribute("position", new T.BufferAttribute(pos, 3));
+    return new T.Points(g, new T.PointsMaterial({ size, color, map: glowTex, transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+  }
+  function add(o, para, span) { o.userData.para = para; o.userData.span = span; bg.add(o); bgItems.push(o); return o; }
+
+  function buildStage(st) {
+    if (bg) disposeGroup(bg);
+    bg = new T.Group(); bgItems = []; scene.add(bg);
+    scene.background = new T.Color(st.sky); scene.fog.color = new T.Color(st.fog);
+    hemi.color = new T.Color(st.a); hemi.groundColor = new T.Color(st.fog);
+    rim.color = new T.Color(st.b); towerMat.emissive = new T.Color(st.a); neonMat.color = new T.Color(st.a); capMat.color = new T.Color(st.b);
+    halo.material.color = new T.Color(st.a); wingMat.color = new T.Color(st.a); wingMat.emissive = new T.Color(st.a);
+    trail.material.color = new T.Color(st.a);
+    document.documentElement.style.setProperty("--a", hex(st.a)); document.documentElement.style.setProperty("--b", hex(st.b));
+    const SPAN = 140;
+    // big horizon glow (sun / moon / planet light)
+    const sunG = glow(st.b, 70, 0.35); sunG.position.set(20, 14, -110); bg.add(sunG);
+    if (st.key === "city" || st.key === "angkor" || st.key === "ocean") {
+      const grid = new T.GridHelper(400, 160, st.a, st.b); grid.material.transparent = true; grid.material.opacity = 0.35; grid.position.y = -0.02;
+      add(grid, 1, 2.5);
+      const floor = new T.Mesh(new T.PlaneGeometry(400, 300), new T.MeshStandardMaterial({ color: st.key === "ocean" ? 0x1a0830 : 0x050a1c, metalness: st.key === "ocean" ? 1 : 0.6, roughness: st.key === "ocean" ? 0.12 : 0.5 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.y = -0.05; bg.add(floor);
+    }
+    if (st.key === "city") {
+      const wt = windowTexture(hex(st.a), hex(st.b));
+      const bmat = new T.MeshStandardMaterial({ color: 0x0b1230, emissive: 0xffffff, emissiveMap: wt, emissiveIntensity: 0.75, metalness: 0.7, roughness: 0.4 });
+      for (let i = 0; i < 60; i++) {
+        const h = 8 + Math.random() * 34, w = 3 + Math.random() * 5;
+        const m = new T.Mesh(boxGeo, bmat);
+        m.scale.set(w, h, w); m.position.set(Math.random() * SPAN - 20, h / 2, -34 - Math.random() * 70);
+        add(m, 0.35 + (80 - (-m.position.z)) / 260, SPAN);
+        if (Math.random() < 0.3) { const b = glow(Math.random() < 0.5 ? st.a : st.b, 2.2, 0.9); b.position.set(m.position.x, h + 0.6, m.position.z); add(b, m.userData.para, SPAN); }
+      }
+      for (let i = 0; i < 6; i++) { // flying cars
+        const car = new T.Group(); car.add(glow(st.b, 1.2, 0.9)); const c2 = glow(st.a, 0.8, 0.9); c2.position.x = -0.8; car.add(c2);
+        car.position.set(Math.random() * SPAN, 8 + Math.random() * 12, -12 - Math.random() * 20); add(car, 1.6, SPAN);
+      }
+    } else if (st.key === "angkor") {
+      const holo = new T.MeshBasicMaterial({ color: st.a, wireframe: true, transparent: true, opacity: 0.55 });
+      const solid = new T.MeshStandardMaterial({ color: 0x14302c, emissive: st.b, emissiveIntensity: 0.25, transparent: true, opacity: 0.7, metalness: 0.4, roughness: 0.5 });
+      const temple = (x, z, s) => {
+        const g = new T.Group();
+        const base = new T.Mesh(boxGeo, solid); base.scale.set(14 * s, 2 * s, 10 * s); base.position.y = s; g.add(base);
+        const towers = [[0, 9], [-4.5, 6.5], [4.5, 6.5], [-7, 4.5], [7, 4.5]];
+        for (const [tx, th] of towers) {
+          for (let k = 0; k < 5; k++) {
+            const r1 = (1.6 - k * 0.28) * s, r2 = (1.3 - k * 0.26) * s, hh = th * s / 5;
+            const c = new T.Mesh(new T.CylinderGeometry(Math.max(0.1, r2), r1, hh, 8), k % 2 ? holo : solid);
+            c.position.set(tx * s, 2 * s + hh * (k + 0.5), 0); g.add(c);
+          }
+          const tip = glow(st.a, 2.5 * s, 0.9); tip.position.set(tx * s, 2 * s + th * s + 0.4, 0); g.add(tip);
+        }
+        g.position.set(x, 0, z); return g;
+      };
+      for (let i = 0; i < 6; i++) add(temple(i * 26 - 10, -40 - (i % 3) * 18, 1 + (i % 3) * 0.3), 0.45 - (i % 3) * 0.1, 156);
+      for (let i = 0; i < 18; i++) { // holo rings & palm-like crystals
+        const ring = new T.Mesh(new T.TorusGeometry(1.2 + Math.random(), 0.04, 8, 48), new T.MeshBasicMaterial({ color: Math.random() < 0.5 ? st.a : st.b, transparent: true, opacity: 0.7 }));
+        ring.position.set(Math.random() * SPAN, 3 + Math.random() * 12, -10 - Math.random() * 25); ring.userData.spin = 0.5 + Math.random();
+        add(ring, 0.8, SPAN);
+      }
+    } else if (st.key === "ocean") {
+      for (let i = 0; i < 40; i++) { // floating lanterns
+        const l = glow(Math.random() < 0.7 ? st.a : 0xffd27a, 1 + Math.random() * 1.4, 0.95);
+        l.position.set(Math.random() * SPAN, 0.6 + Math.random() * 14, -6 - Math.random() * 50); l.userData.bob = Math.random() * 6; add(l, 0.6, SPAN);
+      }
+      const sunDisc = new T.Mesh(new T.CircleGeometry(18, 64), new T.MeshBasicMaterial({ color: st.a, transparent: true, opacity: 0.9, fog: false }));
+      sunDisc.position.set(10, 10, -120); bg.add(sunDisc);
+      for (let i = 0; i < 7; i++) { const bar = new T.Mesh(new T.PlaneGeometry(40, 0.8), new T.MeshBasicMaterial({ color: st.sky, fog: false })); bar.position.set(10, 2 + i * 2.2, -119); bg.add(bar); }
+      for (let i = 0; i < 10; i++) { // light bridges
+        const p = new T.Mesh(new T.BoxGeometry(0.3, 10 + Math.random() * 10, 0.3), new T.MeshBasicMaterial({ color: st.b }));
+        p.position.set(Math.random() * SPAN, 6, -30 - Math.random() * 30); add(p, 0.5, SPAN);
+      }
+    } else if (st.key === "orbit") {
+      const planetTex = (() => { const c = document.createElement("canvas"); c.width = 256; c.height = 128; const g = c.getContext("2d");
+        const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, "#1a5fb4"); gr.addColorStop(0.5, "#2bd0ff"); gr.addColorStop(1, "#0b2a6b"); g.fillStyle = gr; g.fillRect(0, 0, 256, 128);
+        g.fillStyle = "#2f9e5b"; for (let i = 0; i < 30; i++) { g.beginPath(); g.ellipse(Math.random() * 256, 20 + Math.random() * 90, 6 + Math.random() * 22, 4 + Math.random() * 10, Math.random(), 0, Math.PI * 2); g.fill(); }
+        g.fillStyle = "#ffffff55"; for (let i = 0; i < 40; i++) g.fillRect(Math.random() * 256, Math.random() * 128, 20 + Math.random() * 40, 2);
+        const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; })();
+      const planet = new T.Mesh(new T.SphereGeometry(30, 48, 32), new T.MeshStandardMaterial({ map: planetTex, emissive: 0x0a2a55, emissiveIntensity: 0.4, roughness: 0.8 }));
+      planet.position.set(30, -18, -100); planet.userData.spin = 0.03; bg.add(planet); bgItems.push(planet);
+      const atmo = glow(0x6fd0ff, 85, 0.35); atmo.position.copy(planet.position); bg.add(atmo);
+      const ring = new T.Mesh(new T.TorusGeometry(9, 0.6, 12, 64), new T.MeshStandardMaterial({ color: 0xcfd8ff, metalness: 0.9, roughness: 0.2, emissive: 0x223355 }));
+      ring.position.set(-6, 16, -45); ring.rotation.x = 1.2; ring.userData.spin = 0.2; add(ring, 0.3, SPAN);
+      const rockMat = new T.MeshStandardMaterial({ color: 0x6b6f86, roughness: 0.9, flatShading: true });
+      for (let i = 0; i < 26; i++) { const r = new T.Mesh(new T.IcosahedronGeometry(0.4 + Math.random() * 1.4, 0), rockMat); r.position.set(Math.random() * SPAN, Math.random() * 15, -6 - Math.random() * 30); r.userData.spin = Math.random(); add(r, 0.7, SPAN); }
+    } else { // galaxy
+      for (let i = 0; i < 14; i++) { const n = glow(Math.random() < 0.5 ? st.a : st.b, 30 + Math.random() * 40, 0.18); n.position.set(Math.random() * 160 - 20, Math.random() * 40 - 5, -60 - Math.random() * 50); add(n, 0.15, 180); }
+      const crys = new T.MeshStandardMaterial({ color: st.b, emissive: st.b, emissiveIntensity: 1, transparent: true, opacity: 0.8, metalness: 0.2, roughness: 0.1 });
+      for (let i = 0; i < 22; i++) { const c = new T.Mesh(new T.OctahedronGeometry(0.5 + Math.random() * 1.5, 0), crys); c.scale.y = 2; c.position.set(Math.random() * SPAN, Math.random() * 15, -8 - Math.random() * 30); c.userData.spin = 0.4 + Math.random(); add(c, 0.65, SPAN); }
+      const spiral = new Float32Array(1500 * 3);
+      for (let i = 0; i < 1500; i++) { const a = i * 0.05, r = 2 + i * 0.03; spiral[i * 3] = Math.cos(a) * r + 30; spiral[i * 3 + 1] = Math.sin(a) * r * 0.4 + 18; spiral[i * 3 + 2] = -90 + Math.sin(a) * r * 0.5; }
+      const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.BufferAttribute(spiral, 3));
+      const sp = new T.Points(sg, new T.PointsMaterial({ size: 0.6, map: glowTex, color: st.a, transparent: true, blending: T.AdditiveBlending, depthWrite: false })); sp.userData.spin = 0.02; bg.add(sp); bgItems.push(sp);
+    }
+    if (starField) scene.remove(starField);
+    starField = makeStars(st.key === "orbit" || st.key === "galaxy" ? 900 : 400, 260, st.key === "orbit" ? 0.5 : 0.35); scene.add(starField);
+  }
+
+  // ---------- state ----------
+  let W = 360, camX = 6, state = "start", paused = false, god = false;
+  let player, pillars, items, score, coinsRun, nextX, curStage, flash = 0, shake = 0, t0 = 0;
+  let best = store.get("best", 0), totalCoins = store.get("coins", 0), top = store.get("top", []);
+  $("coins").textContent = totalCoins;
+
+  function resize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h;
+    camera.fov = w / h < 0.7 ? 62 : 52; camera.updateProjectionMatrix();
+    const dist = 17, visH = 2 * dist * Math.tan(T.MathUtils.degToRad(camera.fov / 2)), visW = visH * camera.aspect;
+    camX = toX(140) + visW * 0.28; W = (camX + visW / 2) * S + 160;
+    camera.position.set(camX, 7.2, dist); camera.lookAt(camX, 6.6, 0);
+  }
+  window.addEventListener("resize", resize);
+
+  function clearWorld() {
+    for (const p of pillars || []) { scene.remove(p.obj.top, p.obj.bottom, p.obj.gate); pillarPool.push(p.obj); }
+    for (const it of items || []) scene.remove(it.obj);
+    for (const s of sparks) scene.remove(s); sparks.length = 0;
+  }
+  function reset() {
+    clearWorld();
+    player = { x: 140, y: L.WORLD_H * 0.42, vy: 0 };
+    pillars = []; items = []; score = 0; coinsRun = 0; nextX = W + 100;
+    curStage = L.stageFor(0); buildStage(curStage); Audio.setStage(curStage, 0); showStage(false);
+    trailPos.fill(0);
+  }
+  function spawn() {
+    const d = L.difficulty(score), gapY = L.newGapY(Math.random, d.gap, GROUND);
+    const obj = getPair();
+    const topH = 30, gapTop = toY(gapY), gapBot = toY(gapY + d.gap);
+    sizeTower(obj.top, PW, topH, false); obj.top.position.set(0, gapTop + topH / 2, 0);
+    sizeTower(obj.bottom, PW, gapBot, true); obj.bottom.position.set(0, gapBot / 2, 0);
+    obj.gate.position.set(0, (gapTop + gapBot) / 2, 0); obj.gate.scale.set(2.2, d.gap / S * 1.1, 1);
+    pillars.push({ x: nextX, gapY, gap: d.gap, passed: false, obj });
+    const gem = Math.random() < 0.12;
+    const addItem = (x, y, kind) => { const o = makeItem(kind); scene.add(o); items.push({ x, y, kind, got: false, t: Math.random() * 6, obj: o }); };
+    addItem(nextX + L.PILLAR_W / 2, gapY + d.gap / 2 + (Math.random() - 0.5) * d.gap * 0.3, gem ? "gem" : "coin");
+    if (Math.random() < 0.35) for (let i = 1; i <= 3; i++) addItem(nextX + L.PILLAR_W + i * 50, gapY + d.gap / 2 + Math.sin(i * 1.3) * 28, "coin");
+    nextX += d.spacing;
+  }
+  function showStage(withBanner) {
+    $("stageNo").textContent = "STAGE " + curStage.number;
+    $("stageName").textContent = curStage.km;
+    if (!withBanner) return;
+    $("bannerTop").textContent = "STAGE " + curStage.number; $("bannerName").textContent = curStage.km; $("bannerEn").textContent = curStage.en.toUpperCase();
+    $("banner").classList.add("show"); setTimeout(() => $("banner").classList.remove("show"), 2200);
+  }
+
+  function renderLists() {
+    const st = $("stageList"); st.innerHTML = "<h3>STAGES · វគ្គ</h3>" + L.STAGES.map((s, i) => `<div><span>${i + 1}. ${s.km}</span><span>${s.min}+</span></div>`).join("");
+    const rk = $("rankList"); rk.innerHTML = "<h3>RANKS · ឋានៈ</h3>" + L.RANKS.map(r => `<div><span>${r.icon} ${r.km}</span><span>${r.min}+</span></div>`).join("");
+    const tl = top.length ? top.map((e, i) => `<div><span>${["🥇", "🥈", "🥉", "4.", "5."][i]} ${e.s} · ${L.rankFor(e.s).icon}</span><span>វគ្គ ${e.st} · ${e.d}</span></div>`).join("") : "<div><span>មិនទាន់មាន — លេងមុនគេ! 🚀</span></div>";
+    $("topList").innerHTML = "<h3>TOP 5 · ពិន្ទុខ្ពស់</h3>" + tl; $("topList2").innerHTML = "<h3>TOP 5 · ពិន្ទុខ្ពស់</h3>" + tl;
+  }
+
+  function start() {
+    Audio.start(); reset(); state = "play"; paused = false;
+    ["start", "over", "paused"].forEach(id => $(id).hidden = true); $("score").hidden = false; $("score").textContent = "0";
+    L.flap(player); Audio.sfx("flap");
+  }
+  function gameOver() {
+    state = "over"; shake = 0.6; flash = 0.35; Audio.sfx("crash"); haptic("crash");
+    burst(toX(player.x), toY(player.y), curStage.b, 30, 9); burst(toX(player.x), toY(player.y), 0xffc847, 16, 6);
+    totalCoins += coinsRun; store.set("coins", totalCoins); $("coins").textContent = totalCoins;
+    const isBest = score > best; if (isBest) { best = score; store.set("best", best); }
+    const d = new Date(); top.push({ s: score, st: curStage.number, d: `${d.getDate()}/${d.getMonth() + 1}` });
+    top.sort((a, b) => b.s - a.s); top = top.slice(0, 5); store.set("top", top); renderLists();
+    const r = L.rankFor(score);
+    setTimeout(() => {
+      $("overStage").textContent = `STAGE ${curStage.number} · ${curStage.en.toUpperCase()}`;
+      $("finalScore").textContent = score; $("finalRank").textContent = `${r.icon} ${r.km} · ${r.en}`;
+      const nextRank = L.RANKS.find(x => x.min > score);
+      $("finalInfo").innerHTML = (isBest && score > 0 ? "🎉 <b>កំណត់ត្រាថ្មី!</b><br>" : "") + `🪙 +${coinsRun} កាក់ · 🏆 ល្អបំផុត ${best}` +
+        (nextRank ? `<br>🎯 នៅខ្វះ ${nextRank.min - score} ពិន្ទុ ដើម្បីក្លាយជា ${nextRank.icon} ${nextRank.km}` : "<br>👑 អ្នកជាស្ដេច Cooler ហើយ!");
+      $("score").hidden = true; $("over").hidden = false;
+    }, 900);
+  }
+  function flapInput() {
+    if (paused) return;
+    if (state === "play") { L.flap(player); Audio.sfx("flap"); haptic("flap"); burst(toX(player.x) - 0.9, toY(player.y), curStage.a, 5, 3); }
+    else if (state === "start") start();
+  }
+  renderer.domElement.addEventListener("pointerdown", e => { e.preventDefault(); flapInput(); });
+  window.addEventListener("keydown", e => {
+    if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); if (state === "over" && !$("over").hidden) start(); else flapInput(); }
+    if (e.code === "KeyP" || e.code === "Escape") togglePause();
+  });
+  function togglePause() {
+    if (state !== "play") return; paused = !paused; $("paused").hidden = !paused; $("pauseBtn").textContent = paused ? "▶" : "⏸";
+  }
+  $("pauseBtn").addEventListener("click", togglePause); $("resumeBtn").addEventListener("click", togglePause);
+  document.addEventListener("visibilitychange", () => { if (document.hidden && state === "play" && !paused) togglePause(); });
+  $("playBtn").addEventListener("click", start); $("againBtn").addEventListener("click", start);
+  const setBtns = () => { $("muteBtn").textContent = Audio.muted ? "🔇" : "🔊"; $("musicBtn").style.opacity = Audio.musicOn ? 1 : 0.4; };
+  $("muteBtn").addEventListener("click", () => { Audio.toggleMute(); setBtns(); });
+  $("musicBtn").addEventListener("click", () => { Audio.start(); Audio.toggleMusic(); setBtns(); });
+  setBtns();
+  $("shareBtn").addEventListener("click", () => {
+    const text = `🚀 ខ្ញុំបាន ${score} ពិន្ទុ (${L.rankFor(score).icon} ${L.rankFor(score).km}) ក្នុង Cooler Fly 3D! អ្នកលើសខ្ញុំទេ? 😎`;
+    const url = location.href.split("#")[0], link = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    try { if (tg && tg.openTelegramLink) { tg.openTelegramLink(link); return; } } catch (_) {}
+    if (navigator.share) navigator.share({ title: "Cooler Fly 3D", text, url }).catch(() => {}); else window.open(link, "_blank");
+  });
+
+  // ---------- loop ----------
+  const tmp = new T.Vector3();
+  let last = performance.now();
+  function update(dt, now) {
+    const d = L.difficulty(score), speed = state === "play" ? d.speed : 70;
+    const v3 = speed / S;
+    // background parallax & animation
+    for (const o of bgItems) {
+      if (o.userData.para) { o.position.x -= v3 * o.userData.para * dt; const span = o.userData.span; if (o.position.x < camX - span * 0.35) o.position.x += span; }
+      if (o.userData.spin) { o.rotation.y += o.userData.spin * dt; o.rotation.z += o.userData.spin * 0.3 * dt; }
+      if (o.userData.bob !== undefined) { o.userData.bob += dt; o.position.y += Math.sin(o.userData.bob * 1.5) * 0.004; }
+    }
+    if (starField) starField.rotation.z += dt * 0.004;
+    if (state === "start") { player.y = L.WORLD_H * 0.42 + Math.sin(now / 350) * 14; player.vy = 0; }
+    else if (state === "play" && !paused) {
+      L.stepPlayer(player, dt);
+      if (god) { if (player.y > GROUND - 160) L.flap(player); }
+      for (const p of pillars) p.x -= speed * dt;
+      for (const it of items) it.x -= speed * dt;
+      nextX -= speed * dt;
+      while (nextX < W) spawn();
+      for (let i = pillars.length - 1; i >= 0; i--) {
+        const p = pillars[i];
+        if (p.x < -200) { scene.remove(p.obj.top, p.obj.bottom, p.obj.gate); pillarPool.push(p.obj); pillars.splice(i, 1); continue; }
+        if (!p.passed && p.x + L.PILLAR_W < player.x) {
+          p.passed = true; score++; $("score").textContent = score; Audio.sfx("pass");
+          const ns = L.stageFor(score);
+          if (ns.index !== curStage.index) { curStage = ns; flash = 0.5; buildStage(curStage); showStage(true); Audio.sfx("stage"); haptic("stage"); }
+          Audio.setStage(curStage, Math.min(1, (score - curStage.min) / 8));
+          const r = L.rankFor(score); if (r.min === score && score > 0) { $("bannerTop").textContent = "NEW RANK"; $("bannerName").textContent = `${r.icon} ${r.km}`; $("bannerEn").textContent = r.en.toUpperCase(); $("banner").classList.add("show"); setTimeout(() => $("banner").classList.remove("show"), 1800); Audio.sfx("gem"); }
+        }
+        if (!god && L.collides(player, p, GROUND)) { gameOver(); break; }
+      }
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i]; it.t += dt;
+        if (!it.got && Math.hypot(it.x - player.x, it.y - player.y) < L.PLAYER_R + 18) {
+          it.got = true; it.t = 0; const v = it.kind === "gem" ? 5 : 1; coinsRun += v;
+          burst(toX(it.x), toY(it.y), it.kind === "gem" ? 0xff5ec4 : 0xffc847, it.kind === "gem" ? 22 : 10, 5);
+          Audio.sfx(it.kind === "gem" ? "gem" : "coin"); haptic("coin");
+        }
+        if (it.x < -100 || (it.got && it.t > 0.4)) { scene.remove(it.obj); items.splice(i, 1); }
+      }
+    } else if (state === "over") {
+      if (player.y + L.PLAYER_R < GROUND) { player.vy = Math.min(L.MAX_FALL, player.vy + L.GRAVITY * dt); player.y += player.vy * dt; }
+    }
+    // sync 3D
+    const px = toX(player.x), py = toY(player.y);
+    player3.position.set(px, py, 0);
+    const tilt = state === "over" ? player3.rotation.z - dt * 3 : -Math.max(-0.5, Math.min(0.9, player.vy / 650)) * 0.8;
+    player3.rotation.z += (tilt - player3.rotation.z) * Math.min(1, dt * 10);
+    halo.rotation.z += dt * 2.5; faceRing.rotation.z -= dt;
+    thruster.scale.setScalar(1.2 + Math.random() * 0.8 + (player.vy < 0 ? 0.8 : 0));
+    rim.position.set(px + 2, py + 2, 4);
+    trailPos.copyWithin(3, 0, (TRAIL - 1) * 3);
+    trailPos[0] = px - 0.9; trailPos[1] = py; trailPos[2] = (Math.random() - 0.5) * 0.2;
+    for (let i = 1; i < TRAIL; i++) trailPos[i * 3] -= v3 * dt;
+    trailGeo.attributes.position.needsUpdate = true;
+    for (const p of pillars) { const x = toX(p.x) + PW / 2; p.obj.top.position.x = x; p.obj.bottom.position.x = x; p.obj.gate.position.x = x; p.obj.gate.material.opacity = 0.16 + Math.sin(now / 250 + p.x) * 0.06; }
+    for (const it of items) {
+      it.obj.position.set(toX(it.x), toY(it.y) + (it.got ? it.t * 3 : Math.sin(it.t * 3) * 0.12), 0);
+      it.obj.rotation.y += dt * (it.kind === "gem" ? 2 : 3.5);
+      const s = it.got ? Math.max(0.01, 1 - it.t * 2.2) : 1; it.obj.scale.setScalar(s);
+    }
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i], u = s.userData; u.life -= dt; s.position.x += u.vx * dt; s.position.y += u.vy * dt; s.position.z += u.vz * dt; u.vy -= 9 * dt;
+      s.material.opacity = Math.max(0, u.life); if (u.life <= 0) { scene.remove(s); s.material.dispose(); sparks.splice(i, 1); }
+    }
+    // camera: slight follow + shake + flash
+    shake = Math.max(0, shake - dt); flash = Math.max(0, flash - dt);
+    camera.position.set(camX + (Math.random() - 0.5) * shake * 0.8, 7.2 + (py - 6.6) * 0.12 + (Math.random() - 0.5) * shake * 0.8, 17);
+    camera.lookAt(camX, 6.6 + (py - 6.6) * 0.1, 0);
+    renderer.toneMappingExposure = 1.15 + flash * 2;
+  }
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    update(paused ? 0 : dt, now); renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  resize(); reset(); renderLists();
+  $("loading").remove(); $("start").hidden = false;
+  requestAnimationFrame(frame);
+  // test hooks (used by the automated screenshot test only)
+  window.__coolerFly = { get state() { return state; }, get score() { return score; }, start, stage: () => curStage, setScore(s) { score = s; },
+    god(on) { god = on; }, goStage(n) { score = L.STAGES[n - 1].min; curStage = L.stageFor(score); buildStage(curStage); showStage(true); Audio.setStage(curStage, 0.5); },
+    hover() { player.y = L.WORLD_H * 0.42; player.vy = -120; } };
+}
+})();
+</script>
+</body>
+</html>
