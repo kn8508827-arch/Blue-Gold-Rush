@@ -51,12 +51,14 @@ A glowing Sky Bike (blue wheels, gold frame and wings, with a gold ring) sometim
 - procedural synthwave music per stage (Web Audio) plus sound effects; music and sound toggles, pause
 - game rules in `cooler-fly/logic.js`, tested by `tests/cooler-fly.test.js`
 
-## Cooler Arcade (twelve quick games)
+## Cooler Arcade (sixteen games)
 
-`arcade/` is a hub of twelve quick games in one page, served at
-`https://kn8508827-arch.github.io/Blue-Gold-Rush/arcade/` (open a game directly with `#2048`, `#snake`,
+`arcade/` is a hub of sixteen games in one page, served at
+`https://kn8508827-arch.github.io/Blue-Gold-Rush/arcade/` (open a game directly with `?g=<key>` or `#<key>`: `khla`, `sudoku`, `solitaire`, `mahjong`, `#2048`, `#snake`,
 `#memory`, `#whack`, `#ttt`, `#brick`, `#sort`, `#c4`, `#mines`, `#simon`, `#slide` or `#tap`):
 
+- for adults, big and calm (no timers): 🎲 ខ្លាឃ្លោក (Khmer New Year dice game, play points only) · 🔢 Sudoku (unique solution, hints) ·
+  🃏 Solitaire (tap a card and it moves itself, undo) · 🀄 Mahjong solitaire (always solvable, hints)
 - 🔢 2048 Neon · 🐍 Neon Snake · 🃏 Memory match (Khmer symbols) · 🔨 Whack-a-Cooler (30 s, avoid bombs) ·
   ❌ Tic-tac-toe vs AI (3 levels, perfect AI on hard) · 🧱 Brick breaker (levels, lives) ·
   🧪 Ball sort (levels, undo) · 🔴 Connect 4 vs AI (alpha-beta) · 💣 Minesweeper (safe first click, flags) ·

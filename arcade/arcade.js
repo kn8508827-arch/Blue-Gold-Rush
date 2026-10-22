@@ -60,6 +60,10 @@ const keyDir = e => ({ ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", Ar
 
 // ---------- games ----------
 const GAMES = [
+  { key: "khla", icon: "🎲", name: "ខ្លាឃ្លោក", sub: "ហ្គេមបុណ្យចូលឆ្នាំ", c1: "#e8352e", c2: "#7a0f0a", hint: "ចុចរូបដើម្បីភ្នាល់ពិន្ទុ · ចុច ក្រឡុក · ពិន្ទុកម្សាន្តប៉ុណ្ណោះ មិនមែនលុយពិត", start: gKhla, isNew: true, adult: true },
+  { key: "sudoku", icon: "🔢", name: "Sudoku", sub: "ហាត់ខួរក្បាល គ្មានម៉ោង", c1: "#3a7bd5", c2: "#16306b", hint: "ជ្រើសក្រឡា រួចចុចលេខ · ជួរ ជួរឈរ និងប្រអប់ ៣×៣ មិនឲ្យលេខដដែល", start: gSudoku, isNew: true, adult: true },
+  { key: "solitaire", icon: "🃏", name: "Solitaire បៀ", sub: "ចុចបៀ វារត់ទៅកន្លែងខ្លួនឯង", c1: "#1e9e5a", c2: "#0b4a2a", hint: "ចុចបៀមួយសន្លឹក វានឹងផ្លាស់ទីដោយខ្លួនឯង · ចុចហ៊ុបខាងឆ្វេងដើម្បីយកបៀថ្មី", start: gSolitaire, isNew: true, adult: true },
+  { key: "mahjong", icon: "🀄", name: "Mahjong", sub: "ផ្គូផ្គងក្រឡាដូចគ្នា", c1: "#c9a227", c2: "#5a4300", hint: "ចុចក្រឡាទំនេរ ២ ដែលដូចគ្នា · ក្រឡាទំនេរ = គ្មានអ្វីសង្កត់ និងចំហម្ខាង", start: gMahjong, isNew: true, adult: true },
   { key: "2048", icon: "🔢", name: "2048 Neon", sub: "អូសបូកលេខ", c1: "#ff8a1f", c2: "#b33d00", hint: "អូស ឬចុចព្រួញ ដើម្បីបូកលេខដូចគ្នា · គោលដៅ 2048!", start: g2048 },
   { key: "snake", icon: "🐍", name: "ពស់ Neon", sub: "ស៊ីផ្លែឈើ ឲ្យវែង", c1: "#2ee6a0", c2: "#0b6b4f", hint: "អូសដើម្បីបត់ · កុំខាំខ្លួនឯង!", start: gSnake },
   { key: "memory", icon: "🃏", name: "ផ្គូផ្គងកាត", sub: "ចងចាំរូបដូចគ្នា", c1: "#a46bff", c2: "#4b1fa8", hint: "បើកកាត ២ ដូចគ្នា · កាន់តែលឿន ពិន្ទុកាន់តែច្រើន", start: gMemory },
@@ -75,12 +79,14 @@ const GAMES = [
 ];
 
 function renderHub() {
-  $("hub").innerHTML = GAMES.map((g, i) => `<button class="card" type="button" data-k="${g.key}" style="--c1:${g.c1};--c2:${g.c2};--d:${(i * 0.37).toFixed(2)}s">
-    ${g.isNew ? '<span class="new">ថ្មី</span>' : ""}<span class="best">🏆 ${store.get("best:" + g.key, 0)}</span><span class="ic">${g.icon}</span><b>${g.name}</b><small>${g.sub}</small></button>`).join("");
+  const card = (g, i) => `<button class="card" type="button" data-k="${g.key}" style="--c1:${g.c1};--c2:${g.c2};--d:${(i * 0.37).toFixed(2)}s">
+    ${g.isNew ? '<span class="new">ថ្មី</span>' : ""}<span class="best">🏆 ${store.get("best:" + g.key, 0)}</span><span class="ic">${g.icon}</span><b>${g.name}</b><small>${g.sub}</small></button>`;
+  $("hub").innerHTML = `<h2 class="sec">👨‍👩‍👧 សម្រាប់មនុស្សធំ · ស្រួលលេង</h2>` + GAMES.filter(g => g.adult).map(card).join("") +
+    `<h2 class="sec">⚡ ល្បឿន និងប្រាជ្ញា</h2>` + GAMES.filter(g => !g.adult).map((g, i) => card(g, i + 4)).join("");
   $("count").textContent = GAMES.length;
 }
 $("hub").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) { sfx.tap(); location.hash = c.dataset.k; } });
-$("back").addEventListener("click", () => { sfx.tap(); history.length > 1 ? history.back() : (location.hash = ""); });
+$("back").addEventListener("click", () => { sfx.tap(); if (location.hash.length > 1 && history.length > 1) history.back(); else { location.hash = ""; open(""); } });
 
 let cleanup = null;
 function open(key) {
@@ -419,7 +425,145 @@ function gTap(stage) {
   return () => { alive = false; clearInterval(clock); cancelAnimationFrame(raf); };
 }
 
+// ===== ខ្លាឃ្លោក =====
+function gKhla(stage) {
+  let bal = store.get("kkBalance", 1000), chip = 10, bets = {}, rolling = false;
+  if (bal <= 0) bal = 1000;
+  const wrap = document.createElement("div"); wrap.className = "kk"; stage.appendChild(wrap); setScore(bal);
+  const total = () => Object.values(bets).reduce((a, b) => a + b, 0);
+  const draw = (dice) => {
+    wrap.innerHTML = `<div class="kk-bowl">${(dice || [null, null, null]).map(d => `<span class="die">${d == null ? "❔" : A.KK[d].em}</span>`).join("")}</div>
+      <div class="kk-board">${A.KK.map((k, i) => `<button type="button" data-i="${i}" class="${dice && dice.includes(i) ? "hit" : ""}"><span>${k.em}</span><b>${k.km}</b>${bets[i] ? `<i>${bets[i]}</i>` : ""}</button>`).join("")}</div>
+      <div class="kk-chips">${[10, 50, 100].map(v => `<button type="button" data-chip="${v}" aria-pressed="${v === chip}">${v}</button>`).join("")}<button type="button" id="kkClear">✕ សម្អាត</button></div>
+      <button class="btn big" type="button" id="kkRoll" ${total() ? "" : "disabled"}>🥣 ក្រឡុក (${total()})</button>
+      <p class="kk-note">ពិន្ទុកម្សាន្ត ${bal.toLocaleString()} · មិនមែនលុយពិត</p>`;
+  };
+  wrap.addEventListener("click", e => {
+    if (rolling) return;
+    const c = e.target.closest("[data-chip]"); if (c) { chip = Number(c.dataset.chip); sfx.tap(); draw(); return; }
+    if (e.target.closest("#kkClear")) { bets = {}; sfx.tap(); draw(); return; }
+    const b = e.target.closest("[data-i]");
+    if (b) { if (total() + chip > bal) { sfx.bad(); return; } bets[b.dataset.i] = (bets[b.dataset.i] || 0) + chip; beep(520, 0.06); haptic("tap"); draw(); return; }
+    if (e.target.closest("#kkRoll") && total()) {
+      rolling = true; const dice = A.kkRoll(); let k = 0;
+      const shake = setInterval(() => { draw(A.kkRoll()); beep(200 + Math.random() * 200, 0.04, "square", 0.05); if (++k > 10) { clearInterval(shake); finish(dice); } }, 90);
+    }
+  });
+  const finish = dice => {
+    const net = A.kkSettle(bets, dice); bal += net; store.set("kkBalance", bal); setScore(bal);
+    draw(dice); (net > 0 ? sfx.win : net < 0 ? sfx.bad : sfx.tap)(); haptic(net > 0 ? "win" : "tap");
+    const msg = document.createElement("div"); msg.className = "kk-msg " + (net >= 0 ? "up" : "down"); msg.textContent = net >= 0 ? `+${net} 🎉` : `${net}`; wrap.appendChild(msg);
+    bets = {}; rolling = false;
+    setTimeout(() => { msg.remove(); draw(dice); if (bal <= 0) { bal = 1000; store.set("kkBalance", bal); setScore(bal); gameOver("អស់ពិន្ទុ 😅", "ទទួលបាន 1,000 ពិន្ទុថ្មី"); } }, 1400);
+  };
+  draw();
+}
+
+// ===== sudoku =====
+function gSudoku(stage) {
+  const levels = [["ងាយ", 36], ["មធ្យម", 45], ["ពិបាក", 52]];
+  let holes = store.get("sdHoles", 36), game = A.sudoku(holes), cur = game.puzzle.slice(), sel = -1, mistakes = 0;
+  const wrap = document.createElement("div"); wrap.style.cssText = "display:grid;gap:10px;justify-items:center;width:100%"; stage.appendChild(wrap);
+  const draw = () => {
+    const sv = sel >= 0 ? cur[sel] : 0;
+    wrap.innerHTML = `<div class="levels">${levels.map(([n, h]) => `<button type="button" data-h="${h}" aria-pressed="${h === holes}">${n}</button>`).join("")}<span class="chip">❌ ${mistakes}</span></div>
+      <div class="sudoku">${cur.map((v, i) => { const r = Math.floor(i / 9), c = i % 9, given = game.puzzle[i] !== 0, wrong = v && !given && v !== game.solution[i];
+        const peer = sel >= 0 && (Math.floor(sel / 9) === r || sel % 9 === c || (Math.floor(sel / 27) === Math.floor(i / 27) && Math.floor((sel % 9) / 3) === Math.floor(c / 3)));
+        return `<button type="button" data-i="${i}" class="${given ? "given" : ""}${wrong ? " wrong" : ""}${i === sel ? " sel" : peer ? " peer" : ""}${v && v === sv ? " same" : ""}${c % 3 === 2 && c < 8 ? " br" : ""}${r % 3 === 2 && r < 8 ? " bb" : ""}">${v || ""}</button>`; }).join("")}</div>
+      <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" data-n="${n}">${n}</button>`).join("")}<button type="button" data-n="0">⌫</button><button type="button" id="sdHint">💡</button></div>`;
+  };
+  wrap.addEventListener("click", e => {
+    const lv = e.target.closest("[data-h]"); if (lv) { holes = Number(lv.dataset.h); store.set("sdHoles", holes); open("sudoku"); return; }
+    const cell = e.target.closest("[data-i]"); if (cell) { sel = Number(cell.dataset.i); sfx.tap(); draw(); return; }
+    if (sel < 0 || game.puzzle[sel]) return;
+    if (e.target.closest("#sdHint")) { cur[sel] = game.solution[sel]; sfx.good(); }
+    const pad = e.target.closest("[data-n]");
+    if (pad) { const n = Number(pad.dataset.n); cur[sel] = n; if (n && n !== game.solution[sel]) { mistakes++; sfx.bad(); haptic("bad"); } else if (n) { sfx.good(); haptic("tap"); } }
+    draw();
+    if (cur.every((v, i) => v === game.solution[i])) { setScore(Math.max(50, holes * 20 - mistakes * 25)); gameOver("🏆 Sudoku រួចរាល់!", `ខុស ${mistakes} ដង`, true); }
+  });
+  draw();
+}
+
+// ===== solitaire =====
+function gSolitaire(stage) {
+  let st = A.deal(), history = [], moves = 0;
+  const wrap = document.createElement("div"); wrap.className = "sol"; stage.appendChild(wrap);
+  const name = c => ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[c.r] || c.r;
+  const face = (c, extra = "") => c.up ? `<div class="pc ${A.isRed(c) ? "red" : ""} ${extra}"><b>${name(c)}</b><span>${c.s}</span></div>` : `<div class="pc back ${extra}"></div>`;
+  const snap = () => JSON.parse(JSON.stringify(st));
+  const draw = () => {
+    const w = st.waste[st.waste.length - 1];
+    wrap.innerHTML = `<div class="sol-top">
+        <button type="button" class="slot" id="stock">${st.stock.length ? '<div class="pc back"></div>' : "↻"}</button>
+        <button type="button" class="slot" id="waste">${w ? face(w) : ""}</button><span></span>
+        ${st.found.map((p, i) => `<div class="slot found">${p.length ? face(p[p.length - 1]) : "♠♥♦♣"[i]}</div>`).join("")}</div>
+      <div class="sol-tab">${st.tab.map((col, ci) => `<div class="col">${col.map((c, k) => `<button type="button" class="cardbtn" data-c="${ci}" data-k="${k}" style="top:${k * (c.up ? 26 : 12)}px">${face(c)}</button>`).join("") || '<div class="slot"></div>'}</div>`).join("")}</div>
+      <div class="levels"><button type="button" id="solUndo">↶ ថយក្រោយ</button><button type="button" id="solNew">↻ ល្បែងថ្មី</button><span class="chip">${moves} ជំហាន</span></div>`;
+  };
+  // move a run starting at card to the best place (foundation first)
+  const tryMove = (cards, from) => {
+    if (cards.length === 1) { const fi = st.found.findIndex(p => A.canFound(cards[0], p)); if (fi >= 0) { history.push(snap()); from.splice(from.length - 1, 1); st.found[fi].push(cards[0]); return true; } }
+    const order = st.tab.map((_, i) => i).sort((a, b) => st.tab[b].length - st.tab[a].length);
+    for (const ti of order) { const col = st.tab[ti]; if (col === from) continue;
+      if (A.canTab(cards[0], col)) { history.push(snap()); from.splice(from.length - cards.length, cards.length); col.push(...cards); return true; } }
+    return false;
+  };
+  const after = () => {
+    st.tab.forEach(col => { if (col.length && !col[col.length - 1].up) col[col.length - 1].up = true; });
+    moves++; draw(); setScore(st.found.reduce((a, p) => a + p.length, 0) * 10);
+    if (A.solWon(st)) gameOver("🏆 ឈ្នះ Solitaire!", `${moves} ជំហាន`, true);
+  };
+  wrap.addEventListener("click", e => {
+    if (e.target.closest("#solNew")) { open("solitaire"); return; }
+    if (e.target.closest("#solUndo")) { if (history.length) { st = history.pop(); sfx.tap(); draw(); } return; }
+    if (e.target.closest("#stock")) {
+      history.push(snap());
+      if (st.stock.length) { const c = st.stock.pop(); c.up = true; st.waste.push(c); }
+      else { st.stock = st.waste.reverse().map(c => ({ ...c, up: false })); st.waste = []; }
+      beep(500, 0.05); draw(); return;
+    }
+    if (e.target.closest("#waste")) { const w = st.waste[st.waste.length - 1]; if (w && tryMove([w], st.waste)) { sfx.good(); after(); } else sfx.bad(); return; }
+    const b = e.target.closest(".cardbtn"); if (!b) return;
+    const col = st.tab[b.dataset.c], k = Number(b.dataset.k); if (!col[k].up) return;
+    if (tryMove(col.slice(k), col)) { sfx.good(); haptic("tap"); after(); } else { sfx.bad(); }
+  });
+  draw();
+}
+
+// ===== mahjong =====
+function gMahjong(stage) {
+  const syms = ["🐉", "🐯", "🪷", "🛕", "🎋", "🌸", "🍊", "🥭", "🐘", "🦚", "⭐", "🌙", "🔔", "🏮", "🧧", "🎴", "💎", "🍀"];
+  let tiles = A.mahjong(A.mjLayout(), syms), sel = null, pairs = 0;
+  const wrap = document.createElement("div"); wrap.className = "mj-wrap"; stage.appendChild(wrap);
+  const W = Math.min(stage.clientWidth - 16, 480), unit = W / 17.5, tw = unit * 2, th = unit * 2.5;
+  const draw = () => {
+    const live = tiles.filter(t => !t.gone).sort((a, b) => a.z - b.z || a.y - b.y || a.x - b.x);
+    wrap.style.width = W + "px"; wrap.style.height = (th * 6.4 + 10) + "px";
+    wrap.innerHTML = live.map(t => { const free = A.mjFree(tiles, t);
+      return `<button type="button" data-id="${t.id}" class="mj${free ? " free" : ""}${sel === t.id ? " sel" : ""}" style="left:${t.x * unit + t.z * 4}px;top:${t.y / 2 * th - t.z * 5}px;width:${tw}px;height:${th}px;z-index:${t.z * 100 + t.y}">${t.sym}</button>`; }).join("")
+      + `<div class="levels" style="position:absolute;bottom:-52px;left:0;right:0"><button type="button" id="mjHint">💡 ជំនួយ</button><button type="button" id="mjNew">↻ ថ្មី</button></div>`;
+  };
+  const freePairs = () => { const f = tiles.filter(t => !t.gone && A.mjFree(tiles, t)); for (let i = 0; i < f.length; i++) for (let j = i + 1; j < f.length; j++) if (f[i].sym === f[j].sym) return [f[i], f[j]]; return null; };
+  wrap.addEventListener("click", e => {
+    if (e.target.closest("#mjNew")) { open("mahjong"); return; }
+    if (e.target.closest("#mjHint")) { const p = freePairs(); if (p) { p.forEach(t => wrap.querySelector(`[data-id="${t.id}"]`)?.classList.add("hint")); sfx.tap(); } return; }
+    const b = e.target.closest(".mj"); if (!b) return; const t = tiles[b.dataset.id];
+    if (!A.mjFree(tiles, t)) { sfx.bad(); return; }
+    if (sel === null || sel === t.id) { sel = sel === t.id ? null : t.id; sfx.tap(); draw(); return; }
+    const s = tiles[sel];
+    if (s.sym === t.sym) { s.gone = t.gone = true; sel = null; pairs++; setScore(pairs * 20); sfx.good(); haptic("tap"); draw();
+      if (tiles.every(x => x.gone)) gameOver("🏆 Mahjong រួចរាល់!", "អស្ចារ្យ!", true);
+      else if (!freePairs()) gameOver("អស់ផ្លូវផ្គូផ្គង", "ចុច លេងម្ដងទៀត"); }
+    else { sel = t.id; sfx.tap(); draw(); }
+  });
+  draw();
+}
+
 renderHub();
-if (location.hash) open(location.hash.slice(1));
+// Direct links from the bot use ?g=<key> (Telegram puts its own data in the #hash).
+const direct = new URLSearchParams(location.search).get("g");
+if (direct && GAMES.some(x => x.key === direct)) open(direct);
+else if (location.hash) open(location.hash.slice(1));
 window.__arcade = { open, GAMES };
 })();

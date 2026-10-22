@@ -259,7 +259,112 @@
   }
   const hitTarget = (t, x, y) => (x - t.x) ** 2 + (y - t.y) ** 2 <= t.r * t.r;
 
-  return { mineBoard, around, reveal, mineWon, C4W, C4H, c4Drop, c4Winner, c4Ai, sortLevel, canPour, pour, sorted,
+  // ---------------- sudoku ----------------
+  function sudokuOk(g, i, v) {
+    const r = Math.floor(i / 9), c = i % 9, br = r - r % 3, bc = c - c % 3;
+    for (let k = 0; k < 9; k++) {
+      if (g[r * 9 + k] === v || g[k * 9 + c] === v) return false;
+      if (g[(br + Math.floor(k / 3)) * 9 + bc + (k % 3)] === v) return false;
+    }
+    return true;
+  }
+  /** Count solutions (stops at `limit`). g: array of 81, 0 = empty. Mutates and restores g. */
+  function sudokuCount(g, limit = 2) {
+    const i = g.indexOf(0); if (i < 0) return 1;
+    let n = 0;
+    for (let v = 1; v <= 9 && n < limit; v++) if (sudokuOk(g, i, v)) { g[i] = v; n += sudokuCount(g, limit - n); g[i] = 0; }
+    return n;
+  }
+  function sudokuFill(g, rand) {
+    const i = g.indexOf(0); if (i < 0) return true;
+    const vals = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => rand() - 0.5);
+    for (const v of vals) if (sudokuOk(g, i, v)) { g[i] = v; if (sudokuFill(g, rand)) return true; g[i] = 0; }
+    return false;
+  }
+  /** { puzzle, solution } with a unique solution; holes ≈ 36 easy, 45 medium, 52 hard. */
+  function sudoku(holes = 40, rand = Math.random) {
+    const sol = Array(81).fill(0); sudokuFill(sol, rand);
+    const puz = sol.slice(), order = [...Array(81).keys()].sort(() => rand() - 0.5);
+    let removed = 0;
+    for (const i of order) {
+      if (removed >= holes) break;
+      const keep = puz[i]; puz[i] = 0;
+      if (sudokuCount(puz.slice(), 2) !== 1) puz[i] = keep; else removed++;
+    }
+    return { puzzle: puz, solution: sol };
+  }
+
+  // ---------------- solitaire (Klondike, draw 1) ----------------
+  const SUITS = ["♠", "♥", "♦", "♣"], RED = new Set(["♥", "♦"]);
+  function newDeck(rand = Math.random) {
+    const d = []; for (const s of SUITS) for (let r = 1; r <= 13; r++) d.push({ s, r, up: false });
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d;
+  }
+  function deal(rand = Math.random) {
+    const d = newDeck(rand), tab = [];
+    for (let c = 0; c < 7; c++) { const col = d.splice(0, c + 1); col[col.length - 1].up = true; tab.push(col); }
+    return { stock: d, waste: [], found: [[], [], [], []], tab };
+  }
+  const isRed = c => RED.has(c.s);
+  /** Can `card` (bottom of a moving run) go on tableau column `col`? */
+  const canTab = (card, col) => col.length ? (col[col.length - 1].up && isRed(col[col.length - 1]) !== isRed(card) && col[col.length - 1].r === card.r + 1) : card.r === 13;
+  const canFound = (card, pile) => pile.length ? pile[pile.length - 1].s === card.s && pile[pile.length - 1].r === card.r - 1 : card.r === 1;
+  const solWon = st => st.found.every(p => p.length === 13);
+
+  // ---------------- mahjong solitaire ----------------
+  /** Tiles at layout positions; built in reverse (pairs removed from free spots) so it is always solvable. */
+  function mahjong(layout, symbols, rand = Math.random) {
+    const tiles = layout.map(([x, y, z], i) => ({ id: i, x, y, z, sym: null, gone: false }));
+    const live = new Set(tiles.map(t => t.id));
+    const pairs = [];
+    while (live.size > 1) {
+      const free = [...live].map(id => tiles[id]).filter(t => mjFree(tiles, t, live));
+      if (free.length < 2) return mahjong(layout, symbols, rand); // retry (rare)
+      const a = free.splice(Math.floor(rand() * free.length), 1)[0];
+      const b = free[Math.floor(rand() * free.length)];
+      live.delete(a.id); live.delete(b.id); pairs.push([a, b]);
+    }
+    pairs.forEach(([a, b], k) => { a.sym = b.sym = symbols[k % symbols.length]; });
+    return tiles;
+  }
+  /** Free = nothing on top, and the left or right side is open. Tiles are 2×2 units; layout units are halves. */
+  function mjFree(tiles, t, live) {
+    const alive = o => o !== t && (live ? live.has(o.id) : !o.gone);
+    const over = (o) => Math.abs(o.x - t.x) < 2 && Math.abs(o.y - t.y) < 2;
+    if (tiles.some(o => alive(o) && o.z === t.z + 1 && over(o))) return false;
+    const side = dx => tiles.some(o => alive(o) && o.z === t.z && o.x === t.x + dx && Math.abs(o.y - t.y) < 2);
+    return !side(-2) || !side(2);
+  }
+  /** A simple pyramid layout (72 tiles) that fits a phone screen. */
+  function mjLayout() {
+    const L = [];
+    for (let y = 0; y < 6; y++) for (let x = 0; x < 8; x++) L.push([x * 2, y * 2, 0]);           // 48
+    for (let y = 1; y < 5; y++) for (let x = 2; x < 6; x++) L.push([x * 2, y * 2, 1]);           // 16
+    for (let y = 2; y < 4; y++) for (let x = 3; x < 5; x++) L.push([x * 2, y * 2, 2]);           // 4
+    L.push([5, 4, 3], [7, 4, 3], [5, 6, 3], [7, 6, 3]);                                          // 4 → 72
+    return L;
+  }
+
+  // ---------------- ខ្លាឃ្លោក (Khla Khlouk) ----------------
+  const KK = [
+    { key: "tiger", km: "ខ្លា", em: "🐯" }, { key: "gourd", km: "ឃ្លោក", em: "🎃" }, { key: "rooster", km: "មាន់", em: "🐓" },
+    { key: "shrimp", km: "បង្កង", em: "🦐" }, { key: "crab", km: "ក្ដាម", em: "🦀" }, { key: "fish", km: "ត្រី", em: "🐟" },
+  ];
+  const kkRoll = (rand = Math.random) => [0, 1, 2].map(() => Math.floor(rand() * 6));
+  /** bets: {index: amount}. Each matching die pays the bet once and the stake comes back. Returns net change. */
+  function kkSettle(bets, dice) {
+    let net = 0;
+    for (const [k, amt] of Object.entries(bets)) {
+      const hits = dice.filter(d => d === Number(k)).length;
+      net += hits ? amt * hits : -amt;
+    }
+    return net;
+  }
+
+  return { sudoku, sudokuOk, sudokuCount, deal, newDeck, canTab, canFound, isRed, solWon, SUITS,
+           mahjong, mjFree, mjLayout, KK, kkRoll, kkSettle,
+           mineBoard, around, reveal, mineWon, C4W, C4H, c4Drop, c4Winner, c4Ai, sortLevel, canPour, pour, sorted,
            simonNext, simonCheck, solvedTiles, slideShuffle, slideMove, slideNeighbours, isSolved, target, hitTarget,
            slideRow, move2048, addTile, canMove2048, DIRS, turn, stepSnake, placeFood, LINES, winner, aiMove, deck, memoryScore, bricks, paddleBounce };
 });

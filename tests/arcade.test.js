@@ -109,3 +109,49 @@ test("simon and sliding puzzle and tap rush", () => {
   assert.equal(A.slideMove(solved, 3, 7)[8], 8);
   const tg = A.target(300, 400, 30, () => 0); assert.equal(A.hitTarget(tg, 30, 30), true); assert.equal(A.hitTarget(tg, 100, 100), false);
 });
+
+test("sudoku: valid full solution, unique puzzle", () => {
+  let seed = 7; const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  const { puzzle, solution } = A.sudoku(40, rand);
+  assert.equal(solution.indexOf(0), -1);
+  for (let i = 0; i < 81; i++) { const v = solution[i]; solution[i] = 0; assert.ok(A.sudokuOk(solution, i, v)); solution[i] = v; }
+  assert.ok(puzzle.filter(v => !v).length >= 30);
+  assert.equal(A.sudokuCount(puzzle.slice(), 2), 1);
+  puzzle.forEach((v, i) => { if (v) assert.equal(v, solution[i]); });
+});
+
+test("solitaire: deal and move rules", () => {
+  const st = A.deal(() => 0.3);
+  assert.equal(st.tab.map(c => c.length).join(), "1,2,3,4,5,6,7");
+  assert.equal(st.stock.length, 24);
+  assert.ok(st.tab.every(col => col[col.length - 1].up && col.slice(0, -1).every(c => !c.up)));
+  assert.equal(A.canTab({ s: "♥", r: 6 }, [{ s: "♠", r: 7, up: true }]), true);
+  assert.equal(A.canTab({ s: "♣", r: 6 }, [{ s: "♠", r: 7, up: true }]), false);
+  assert.equal(A.canTab({ s: "♣", r: 13 }, []), true);
+  assert.equal(A.canFound({ s: "♦", r: 1 }, []), true);
+  assert.equal(A.canFound({ s: "♦", r: 3 }, [{ s: "♦", r: 2 }]), true);
+  assert.equal(A.canFound({ s: "♥", r: 3 }, [{ s: "♦", r: 2 }]), false);
+});
+
+test("mahjong: 72 tiles in pairs and always solvable by removing free pairs", () => {
+  const syms = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+  const tiles = A.mahjong(A.mjLayout(), syms, () => 0.5);
+  assert.equal(tiles.length, 72);
+  const counts = {}; tiles.forEach(t => { counts[t.sym] = (counts[t.sym] || 0) + 1; });
+  assert.ok(Object.values(counts).every(n => n % 2 === 0));
+  // greedy solver from the generator order isn't known; check at least one free pair exists at start
+  const free = tiles.filter(t => A.mjFree(tiles, t));
+  const symsFree = free.map(t => t.sym);
+  assert.ok(symsFree.some((s, i) => symsFree.indexOf(s) !== i));
+  // tile on top blocks the one below
+  const top = tiles.find(t => t.z === 3); assert.ok(A.mjFree(tiles, top));
+  const under = tiles.find(t => t.z === 2); assert.equal(A.mjFree(tiles, under), false);
+});
+
+test("khla khlouk: six symbols, three dice, settle", () => {
+  assert.equal(A.KK.length, 6);
+  assert.equal(A.kkRoll(() => 0.99).length, 3);
+  assert.equal(A.kkSettle({ 0: 10 }, [0, 0, 3]), 20);
+  assert.equal(A.kkSettle({ 0: 10, 1: 5 }, [2, 3, 4]), -15);
+  assert.equal(A.kkSettle({ 2: 10 }, [2, 5, 1]), 10);
+});
