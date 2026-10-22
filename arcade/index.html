@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#060a1f">
+<title>Cooler Arcade · ៦ ហ្គេម</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#060a1f;--glass:rgba(16,22,52,.7);--line:rgba(140,210,255,.22);--a:#2bd0ff;--b:#ff4fd8;--gold:#ffd23f;--text:#eef6ff;--muted:#9fb3d8}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(1200px 700px at 50% -10%,#1b2a6b 0%,#060a1f 60%) fixed,var(--bg);color:var(--text);font-family:"Kantumruy Pro",system-ui,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(43,208,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(43,208,255,.06) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(180deg,transparent,#000 40%,#000);pointer-events:none}
+button{font-family:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{position:relative;max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 28px}
+header.hub{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+header.hub img{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);box-shadow:0 0 22px var(--a)}
+header.hub h1{margin:0;font-family:Orbitron,sans-serif;font-size:24px;letter-spacing:.08em;background:linear-gradient(90deg,var(--a),#fff,var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+header.hub small{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{position:relative;overflow:hidden;text-align:left;padding:14px;min-height:150px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(150deg,var(--c1),var(--c2));box-shadow:0 10px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .15s}
+.card:active{transform:scale(.97)}
+.card .ic{font-size:46px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
+.card b{display:block;font-size:17px;margin-top:6px}
+.card small{display:block;font-size:12px;opacity:.85}
+.card .best{position:absolute;right:10px;top:10px;font-family:Orbitron,sans-serif;font-size:11px;padding:4px 8px;border-radius:99px;background:rgba(0,0,0,.35)}
+.card::after{content:"";position:absolute;right:-30px;bottom:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.12)}
+.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:16px}
+/* game screen */
+#game{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--bg)}
+#game[hidden]{display:none}
+.bar{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px}
+.bar .icon{width:42px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--glass);font-size:18px}
+.bar .title{flex:1;font-weight:700;font-size:16px}
+.chip{padding:6px 10px;border-radius:12px;background:var(--glass);border:1px solid var(--line);font-family:Orbitron,sans-serif;font-size:13px;text-align:center;min-width:64px}
+.chip small{display:block;font-family:"Kantumruy Pro",sans-serif;font-size:9px;color:var(--muted)}
+#stage{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 16px;touch-action:none}
+#hint{text-align:center;color:var(--muted);font-size:13px;padding:0 12px calc(env(safe-area-inset-bottom,0px) + 14px)}
+.over{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,6,20,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.over .box{text-align:center;padding:22px 26px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(160deg,#152a66,#0a1030);box-shadow:0 0 40px rgba(43,208,255,.3);animation:pop .4s cubic-bezier(.2,1.4,.3,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.over h2{margin:0 0 4px;font-size:26px}.over .num{font-family:Orbitron,sans-serif;font-size:44px;font-weight:900;text-shadow:0 0 18px var(--a)}
+.btn{margin-top:12px;border:0;border-radius:14px;padding:12px 22px;font-weight:700;font-size:16px;color:#1a1000;background:linear-gradient(100deg,var(--gold),#ff9b2e);box-shadow:0 0 20px rgba(255,190,50,.5)}
+/* 2048 */
+.g2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid var(--line);width:min(92vw,420px);aspect-ratio:1}
+.g2048 div{border-radius:12px;display:grid;place-items:center;font-family:Orbitron,sans-serif;font-weight:900;font-size:clamp(16px,6vw,30px);background:rgba(255,255,255,.04);transition:transform .1s}
+.g2048 div.n{animation:pop .2s}
+/* memory */
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(92vw,420px)}
+.mem button{aspect-ratio:3/4;border-radius:14px;border:1px solid var(--line);font-size:clamp(26px,9vw,44px);background:linear-gradient(150deg,#2a3c8f,#141c4a);transition:transform .3s;transform-style:preserve-3d}
+.mem button span{visibility:hidden}
+.mem button.open{background:linear-gradient(150deg,#fff,#dbe9ff);transform:rotateY(180deg)}
+.mem button.open span{visibility:visible;display:inline-block;transform:rotateY(180deg)}
+.mem button.done{background:linear-gradient(150deg,#2ee6a0,#0e8f6a);transform:rotateY(180deg)}
+.mem button.done span{visibility:visible;display:inline-block;transform:rotateY(180deg)}
+.mem button::before{content:"C";font-family:Orbitron,sans-serif;color:var(--gold);font-size:22px;opacity:.6}
+.mem button.open::before,.mem button.done::before{display:none}
+/* tic tac toe */
+.ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(86vw,360px);aspect-ratio:1}
+.ttt button{border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-family:Orbitron,sans-serif;font-size:clamp(40px,14vw,64px);font-weight:900}
+.ttt button.X{color:var(--a);text-shadow:0 0 18px var(--a)}.ttt button.O{color:var(--b);text-shadow:0 0 18px var(--b)}
+.ttt button.win{background:rgba(255,210,63,.2);border-color:var(--gold)}
+.levels{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
+.levels button{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--glass);font-weight:700}
+.levels button[aria-pressed="true"]{background:var(--a);color:#04122a}
+/* whack */
+.whack{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(92vw,420px)}
+.hole{position:relative;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 70%,#02040f 40%,#1b2560 41%,#0e1440 70%);overflow:hidden;border:1px solid var(--line);box-shadow:inset 0 10px 20px rgba(0,0,0,.7)}
+.hole .mole{position:absolute;left:12%;width:76%;top:100%;transition:top .12s ease-out;border:0;background:none;padding:0}
+.hole .mole img{width:100%;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 16px var(--a)}
+.hole .mole.bomb img{border-color:#ff3d5a;box-shadow:0 0 16px #ff3d5a}
+.hole .mole .bombface{font-size:clamp(40px,14vw,64px);display:block;text-align:center}
+.hole .mole.up{top:12%}
+.hole .mole.hit{filter:brightness(2) saturate(0);transform:scale(.8)}
+canvas.play{max-width:100%;max-height:100%;border-radius:18px;border:1px solid var(--line);background:#050816;box-shadow:0 0 30px rgba(43,208,255,.2);touch-action:none}
+.dpad{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hub"><img src="../cooler-fly/cooler.png" alt=""><div><h1>COOLER ARCADE</h1><small>៦ ហ្គេម · លេងភ្លាម · Team ស្មោះស្នេហ៍</small></div></header>
+  <div class="grid" id="hub"></div>
+  <p class="foot">🏆 ពិន្ទុល្អបំផុតរក្សាទុកក្នុងទូរស័ព្ទ · ហ្គេមថ្មីៗនឹងមកទៀត 🚀</p>
+</div>
+
+<section id="game" hidden>
+  <div class="bar">
+    <button class="icon" id="back" type="button" aria-label="ត្រឡប់">←</button>
+    <div class="title" id="gTitle"></div>
+    <div class="chip"><span id="gScore">0</span><small>ពិន្ទុ</small></div>
+    <div class="chip"><span id="gBest">0</span><small>ល្អបំផុត</small></div>
+    <button class="icon" id="snd" type="button" aria-label="សំឡេង">🔊</button>
+  </div>
+  <div id="stage"></div>
+  <div id="hint"></div>
+</section>
+
+<script src="logic.js"></script>
+<script src="arcade.js"></script>
+</body>
+</html>
