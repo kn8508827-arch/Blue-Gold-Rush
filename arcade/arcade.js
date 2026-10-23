@@ -60,20 +60,33 @@ const keyDir = e => ({ ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", Ar
 
 // ---------- games ----------
 const GAMES = [
+  { key: "khla", icon: "🎲", name: "ខ្លាឃ្លោក", sub: "ហ្គេមបុណ្យចូលឆ្នាំ", c1: "#e8352e", c2: "#7a0f0a", hint: "ចុចរូបដើម្បីភ្នាល់ពិន្ទុ · ចុច ក្រឡុក · ពិន្ទុកម្សាន្តប៉ុណ្ណោះ មិនមែនលុយពិត", start: gKhla, isNew: true, adult: true },
+  { key: "sudoku", icon: "🔢", name: "Sudoku", sub: "ហាត់ខួរក្បាល គ្មានម៉ោង", c1: "#3a7bd5", c2: "#16306b", hint: "ជ្រើសក្រឡា រួចចុចលេខ · ជួរ ជួរឈរ និងប្រអប់ ៣×៣ មិនឲ្យលេខដដែល", start: gSudoku, isNew: true, adult: true },
+  { key: "solitaire", icon: "🃏", name: "Solitaire បៀ", sub: "ចុចបៀ វារត់ទៅកន្លែងខ្លួនឯង", c1: "#1e9e5a", c2: "#0b4a2a", hint: "ចុចបៀមួយសន្លឹក វានឹងផ្លាស់ទីដោយខ្លួនឯង · ចុចហ៊ុបខាងឆ្វេងដើម្បីយកបៀថ្មី", start: gSolitaire, isNew: true, adult: true },
+  { key: "mahjong", icon: "🀄", name: "Mahjong", sub: "ផ្គូផ្គងក្រឡាដូចគ្នា", c1: "#c9a227", c2: "#5a4300", hint: "ចុចក្រឡាទំនេរ ២ ដែលដូចគ្នា · ក្រឡាទំនេរ = គ្មានអ្វីសង្កត់ និងចំហម្ខាង", start: gMahjong, isNew: true, adult: true },
   { key: "2048", icon: "🔢", name: "2048 Neon", sub: "អូសបូកលេខ", c1: "#ff8a1f", c2: "#b33d00", hint: "អូស ឬចុចព្រួញ ដើម្បីបូកលេខដូចគ្នា · គោលដៅ 2048!", start: g2048 },
   { key: "snake", icon: "🐍", name: "ពស់ Neon", sub: "ស៊ីផ្លែឈើ ឲ្យវែង", c1: "#2ee6a0", c2: "#0b6b4f", hint: "អូសដើម្បីបត់ · កុំខាំខ្លួនឯង!", start: gSnake },
   { key: "memory", icon: "🃏", name: "ផ្គូផ្គងកាត", sub: "ចងចាំរូបដូចគ្នា", c1: "#a46bff", c2: "#4b1fa8", hint: "បើកកាត ២ ដូចគ្នា · កាន់តែលឿន ពិន្ទុកាន់តែច្រើន", start: gMemory },
   { key: "whack", icon: "🔨", name: "វាយ Cooler", sub: "ល្បឿនដៃ ៣០ វិនាទី", c1: "#ffd23f", c2: "#b37b00", hint: "វាយ Cooler Bot ឲ្យបានច្រើន · កុំវាយគ្រាប់បែក 💣", start: gWhack },
   { key: "ttt", icon: "❌", name: "XO ប្រកួត AI", sub: "ឈ្នះ AI បានទេ?", c1: "#2bd0ff", c2: "#0b4f8f", hint: "អ្នកជា X · ជ្រើសកម្រិត ហើយប្រកួត AI", start: gTtt },
   { key: "brick", icon: "🧱", name: "បំបែកឥដ្ឋ", sub: "បាល់ Neon", c1: "#ff4fd8", c2: "#8a1f78", hint: "អូសក្ដារ ឲ្យបាល់បុកឥដ្ឋ · ឡើងកម្រិតជាបន្តបន្ទាប់", start: gBrick },
+  { key: "sort", icon: "🧪", name: "តម្រៀបបាល់", sub: "ពណ៌ដូចគ្នាក្នុងបំពង់", c1: "#00e0b0", c2: "#00607a", hint: "ចុចបំពង់មួយ រួចចុចបំពង់ទៀត ដើម្បីចាក់ · បាល់ពណ៌ដូចគ្នាទើបដាក់លើគ្នាបាន", start: gSort, isNew: true },
+  { key: "c4", icon: "🔴", name: "Connect 4", sub: "តម្រៀប ៤ ឈ្នះ AI", c1: "#ff3d5a", c2: "#7a0f2a", hint: "ចុចជួរឈរ ដើម្បីទម្លាក់គ្រាប់ · តម្រៀប ៤ មុន AI", start: gC4, isNew: true },
+  { key: "mines", icon: "💣", name: "រកមីន", sub: "ប្រយ័ត្នផ្ទុះ!", c1: "#5b6cff", c2: "#1d1f7a", hint: "បើកក្រឡាដែលគ្មានមីន · លេខប្រាប់ចំនួនមីនជុំវិញ · ចុច 🚩 ដើម្បីដាក់ទង់", start: gMines, isNew: true },
+  { key: "simon", icon: "🎵", name: "Simon ចាំភ្លេង", sub: "ចាំពន្លឺ និងសំឡេង", c1: "#ffb21e", c2: "#8a4b00", hint: "មើល និងស្ដាប់ ហើយចុចតាមលំដាប់ · វគ្គនីមួយៗវែងជាងមុន", start: gSimon, isNew: true },
+  { key: "slide", icon: "🧩", name: "Puzzle រំកិល", sub: "តម្រៀបលេខ 1-15", c1: "#7cf7ff", c2: "#1d5c8f", hint: "ចុចលេខជាប់ក្រឡាទទេ ដើម្បីរំកិល · តម្រៀប 1 ដល់ 15", start: gSlide, isNew: true },
+  { key: "tap", icon: "🎯", name: "ចុចលឿន", sub: "ល្បឿនដៃ ៣០ វិនាទី", c1: "#ff7ad9", c2: "#5a1a8f", hint: "ចុចគោលដៅ Neon ឲ្យលឿន · ចុចជាប់ៗបាន Combo!", start: gTap, isNew: true },
 ];
 
 function renderHub() {
-  $("hub").innerHTML = GAMES.map(g => `<button class="card" type="button" data-k="${g.key}" style="--c1:${g.c1};--c2:${g.c2}">
-    <span class="best">🏆 ${store.get("best:" + g.key, 0)}</span><span class="ic">${g.icon}</span><b>${g.name}</b><small>${g.sub}</small></button>`).join("");
+  const card = (g, i) => `<button class="card" type="button" data-k="${g.key}" style="--c1:${g.c1};--c2:${g.c2};--d:${(i * 0.37).toFixed(2)}s">
+    ${g.isNew ? '<span class="new">ថ្មី</span>' : ""}<span class="best">🏆 ${store.get("best:" + g.key, 0)}</span><span class="ic">${g.icon}</span><b>${g.name}</b><small>${g.sub}</small></button>`;
+  $("hub").innerHTML = `<h2 class="sec">👨‍👩‍👧 សម្រាប់មនុស្សធំ · ស្រួលលេង</h2>` + GAMES.filter(g => g.adult).map(card).join("") +
+    `<h2 class="sec">⚡ ល្បឿន និងប្រាជ្ញា</h2>` + GAMES.filter(g => !g.adult).map((g, i) => card(g, i + 4)).join("");
+  $("count").textContent = GAMES.length;
 }
 $("hub").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) { sfx.tap(); location.hash = c.dataset.k; } });
-$("back").addEventListener("click", () => { sfx.tap(); history.length > 1 ? history.back() : (location.hash = ""); });
+$("back").addEventListener("click", () => { sfx.tap(); if (location.hash.length > 1 && history.length > 1) history.back(); else { location.hash = ""; open(""); } });
 
 let cleanup = null;
 function open(key) {
@@ -253,7 +266,304 @@ function gBrick(stage) {
   return () => { alive = false; cancelAnimationFrame(raf); window.removeEventListener("keydown", k); };
 }
 
+// ===== ball sort =====
+function gSort(stage) {
+  const palette = ["#ff3d5a", "#2bd0ff", "#ffd23f", "#2ee6a0", "#a46bff", "#ff8a1f", "#ff4fd8"];
+  let level = store.get("sortLevel", 1), tubes, pick = -1, moves = 0, history = [];
+  const wrap = document.createElement("div"); wrap.style.cssText = "width:100%;display:grid;gap:14px;justify-items:center"; stage.appendChild(wrap);
+  const start = () => { tubes = A.sortLevel(Math.min(7, 3 + level)); pick = -1; moves = 0; history = []; draw(); };
+  const draw = () => {
+    wrap.innerHTML = `<div class="levels"><span class="chip">LV ${level}</span><button type="button" id="undo">↶ ថយក្រោយ</button><button type="button" id="redo">↻ ថ្មី</button></div>
+      <div class="tubes">${tubes.map((t, i) => `<button type="button" class="tube${pick === i ? " pick" : ""}" data-i="${i}" aria-label="បំពង់ ${i + 1}">${t.map(c => `<i style="--b:${palette[c]}"></i>`).join("")}</button>`).join("")}</div>`;
+    wrap.querySelector("#undo").onclick = () => { if (history.length) { tubes = history.pop(); pick = -1; sfx.tap(); draw(); } };
+    wrap.querySelector("#redo").onclick = () => { sfx.tap(); start(); };
+  };
+  wrap.addEventListener("click", e => {
+    const t = e.target.closest(".tube"); if (!t) return; const i = Number(t.dataset.i);
+    if (pick < 0) { if (tubes[i].length) { pick = i; sfx.tap(); } draw(); return; }
+    if (pick === i) { pick = -1; draw(); return; }
+    if (A.canPour(tubes, pick, i)) {
+      history.push(tubes.map(x => x.slice())); A.pour(tubes, pick, i); moves++; beep(520 + i * 40, 0.08); haptic("tap");
+      pick = -1; draw();
+      if (A.sorted(tubes)) { setScore(score + 100 * level); level++; store.set("sortLevel", level); sfx.win(); haptic("win"); setTimeout(start, 900); }
+    } else { sfx.bad(); pick = -1; draw(); }
+  });
+  start();
+}
+
+// ===== connect four =====
+function gC4(stage) {
+  const levels = [["ងាយ", 0], ["មធ្យម", 2], ["ពិបាក", 5]];
+  let depth = store.get("c4Depth", 2), board, busy = false, wins = store.get("c4Wins", 0);
+  const wrap = document.createElement("div"); stage.appendChild(wrap); setScore(wins);
+  const empty = () => Array.from({ length: A.C4H }, () => Array(A.C4W).fill(null));
+  const draw = (win = []) => {
+    const hl = new Set(win.map(([r, c]) => r + "," + c));
+    wrap.innerHTML = `<div class="levels">${levels.map(([n, d]) => `<button type="button" data-d="${d}" aria-pressed="${d === depth}">${n}</button>`).join("")}</div>
+      <div class="c4">${board.map((row, r) => row.map((v, c) => `<button type="button" data-c="${c}" class="${v || ""}${hl.has(r + "," + c) ? " win" : ""}" aria-label="ជួរ ${c + 1}"></button>`).join("")).join("")}</div>`;
+  };
+  const end = w => {
+    draw(w.cells);
+    if (w.who === "R") { wins += 3; store.set("c4Wins", wins); setScore(wins); gameOver("🏆 អ្នកឈ្នះ AI!", "+3", true); }
+    else if (w.who === "Y") gameOver("🤖 AI ឈ្នះ", "សាកម្ដងទៀត 💪");
+    else { wins += 1; store.set("c4Wins", wins); setScore(wins); gameOver("🤝 ស្មើ", "+1"); }
+  };
+  wrap.addEventListener("click", e => {
+    const lv = e.target.closest("[data-d]"); if (lv) { depth = Number(lv.dataset.d); store.set("c4Depth", depth); open("c4"); return; }
+    const cell = e.target.closest("[data-c]"); if (!cell || busy) return;
+    const c = Number(cell.dataset.c); if (A.c4Drop(board, c, "R") < 0) return;
+    beep(300, 0.08, "square", 0.08); haptic("tap"); draw(); let w = A.c4Winner(board); if (w) return end(w);
+    busy = true;
+    setTimeout(() => { A.c4Drop(board, A.c4Ai(board, "Y", depth), "Y"); beep(220, 0.08, "square", 0.08); busy = false; draw(); const w2 = A.c4Winner(board); if (w2) end(w2); }, 380);
+  });
+  board = empty(); draw();
+}
+
+// ===== minesweeper =====
+function gMines(stage) {
+  const W = 9, H = 11, M = 14; let cells = null, flagMode = false, over = false, t0 = 0, timer = 0;
+  const wrap = document.createElement("div"); wrap.style.cssText = "display:grid;gap:10px;justify-items:center"; stage.appendChild(wrap);
+  const draw = () => {
+    const flags = cells ? cells.flat().filter(c => c.flag).length : 0;
+    wrap.innerHTML = `<div class="levels"><span class="chip">💣 ${M - flags}</span><button type="button" id="flag" aria-pressed="${flagMode}">🚩 ដាក់ទង់</button></div>
+      <div class="mines" style="grid-template-columns:repeat(${W},1fr)">${Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => {
+        const c = cells && cells[y][x];
+        const cls = !c ? "" : c.open ? (c.mine ? "open boom" : "open n" + c.n) : c.flag ? "flag" : "";
+        const txt = !c ? "" : c.open ? (c.mine ? "💥" : c.n || "") : c.flag ? "🚩" : "";
+        return `<button type="button" data-x="${x}" data-y="${y}" class="${cls}">${txt}</button>`; }).join("")).join("")}</div>`;
+    wrap.querySelector("#flag").onclick = () => { flagMode = !flagMode; sfx.tap(); draw(); };
+  };
+  wrap.addEventListener("click", e => {
+    const b = e.target.closest("[data-x]"); if (!b || over) return; const x = Number(b.dataset.x), y = Number(b.dataset.y);
+    if (!cells) { cells = A.mineBoard(W, H, M, x, y); t0 = performance.now(); timer = setInterval(() => setScore(Math.max(0, 1000 - Math.floor((performance.now() - t0) / 1000) * 5)), 1000); }
+    const c = cells[y][x];
+    if (flagMode) { if (!c.open) { c.flag = !c.flag; sfx.tap(); } draw(); return; }
+    const r = A.reveal(cells, x, y);
+    if (r.boom) { over = true; clearInterval(timer); cells.flat().forEach(k => { if (k.mine) k.open = true; }); draw(); setScore(0); gameOver("💥 ផ្ទុះហើយ!", "ប្រយ័ត្នលើកក្រោយ"); return; }
+    if (r.opened) { beep(400 + Math.min(r.opened, 20) * 30, 0.05); haptic("tap"); }
+    draw();
+    if (A.mineWon(cells)) { over = true; clearInterval(timer); setScore(Math.max(50, 1000 - Math.floor((performance.now() - t0) / 1000) * 5)); gameOver("🏆 រកឃើញមីនទាំងអស់!", `${Math.round((performance.now() - t0) / 1000)} វិនាទី`, true); }
+  });
+  draw(); setScore(0);
+  return () => clearInterval(timer);
+}
+
+// ===== simon =====
+function gSimon(stage) {
+  const pads = [["#2ee6a0", 330], ["#ff3d5a", 392], ["#ffd23f", 494], ["#2bd0ff", 587]];
+  let seq = [], input = [], busy = true, alive = true, timers = [];
+  const wrap = document.createElement("div"); wrap.className = "simon"; stage.appendChild(wrap);
+  wrap.innerHTML = pads.map(([c], i) => `<button type="button" data-i="${i}" style="--p:${c}" aria-label="ប៊ូតុង ${i + 1}"></button>`).join("") + '<div class="mid" id="simonMid">GO</div>';
+  const btns = [...wrap.querySelectorAll("button")];
+  const flash = (i, ms = 380) => { btns[i].classList.add("lit"); beep(pads[i][1], ms / 1000, "triangle", 0.16); timers.push(setTimeout(() => btns[i].classList.remove("lit"), ms)); };
+  const play = () => {
+    busy = true; input = []; seq = A.simonNext(seq); $("simonMid").textContent = seq.length;
+    const gap = Math.max(260, 560 - seq.length * 20);
+    seq.forEach((v, k) => timers.push(setTimeout(() => alive && flash(v, gap * 0.7), 600 + k * gap)));
+    timers.push(setTimeout(() => { busy = false; }, 600 + seq.length * gap));
+  };
+  wrap.addEventListener("pointerdown", e => {
+    const b = e.target.closest("button"); if (!b || busy || !alive) return; const i = Number(b.dataset.i);
+    flash(i, 220); haptic("tap"); input.push(i);
+    const r = A.simonCheck(seq, input);
+    if (r === "wrong") { alive = false; gameOver("❌ ខុសលំដាប់", `ចាំបាន ${seq.length - 1} វគ្គ`); }
+    else if (r === "done") { setScore(seq.length * 10); timers.push(setTimeout(play, 700)); }
+  });
+  timers.push(setTimeout(play, 500));
+  return () => { alive = false; timers.forEach(clearTimeout); };
+}
+
+// ===== sliding puzzle =====
+function gSlide(stage) {
+  let n = store.get("slideN", 4), tiles, moves = 0, t0 = 0;
+  const wrap = document.createElement("div"); wrap.style.cssText = "display:grid;gap:12px;justify-items:center"; stage.appendChild(wrap);
+  const start = () => { tiles = A.slideShuffle(n, n * n * 15); moves = 0; t0 = performance.now(); draw(); };
+  const draw = () => {
+    wrap.innerHTML = `<div class="levels">${[3, 4].map(k => `<button type="button" data-n="${k}" aria-pressed="${k === n}">${k}×${k}</button>`).join("")}<span class="chip">${moves} ជំហាន</span></div>
+      <div class="slide" style="grid-template-columns:repeat(${n},1fr)">${tiles.map((v, i) => `<button type="button" data-i="${i}" class="${v ? "" : "gap"}${v && v === i + 1 ? " ok" : ""}">${v || ""}</button>`).join("")}</div>`;
+  };
+  wrap.addEventListener("click", e => {
+    const sz = e.target.closest("[data-n]"); if (sz) { n = Number(sz.dataset.n); store.set("slideN", n); sfx.tap(); start(); return; }
+    const b = e.target.closest("[data-i]"); if (!b) return;
+    const next = A.slideMove(tiles, n, Number(b.dataset.i)); if (next === tiles) return;
+    tiles = next; moves++; beep(600, 0.04, "square", 0.05); haptic("tap"); draw();
+    if (A.isSolved(tiles)) { setScore(Math.max(50, (n === 4 ? 1500 : 600) - moves * 4 - Math.floor((performance.now() - t0) / 1000) * 2)); gameOver("🧩 តម្រៀបរួច!", `${moves} ជំហាន`, true); }
+  });
+  start();
+}
+
+// ===== tap rush =====
+function gTap(stage) {
+  const cv = document.createElement("canvas"); cv.className = "play"; stage.appendChild(cv);
+  const W = Math.floor(Math.min(stage.clientWidth - 24, 460)), H = Math.floor(Math.min(stage.clientHeight - 24, W * 1.4)), dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + "px"; cv.style.height = H + "px"; const g = cv.getContext("2d"); g.scale(dpr, dpr);
+  const colors = ["#2bd0ff", "#ff4fd8", "#ffd23f", "#2ee6a0"];
+  let pts = 0, combo = 0, left = 30, alive = true, raf = 0, rings = [], t = A.target(W, H, 38), tc = colors[0], born = performance.now();
+  const life = () => Math.max(700, 1600 - (30 - left) * 30);
+  cv.addEventListener("pointerdown", e => {
+    if (!alive) return; const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * (W / r.width), y = (e.clientY - r.top) * (H / r.height);
+    if (A.hitTarget(t, x, y)) { combo++; const gain = 10 + Math.min(combo, 10) * 2; pts += gain; setScore(pts); rings.push({ x: t.x, y: t.y, r: t.r, a: 1, c: tc, txt: "+" + gain });
+      beep(700 + Math.min(combo, 12) * 40, 0.06, "triangle", 0.1); haptic("tap"); next(); }
+    else { combo = 0; beep(180, 0.08, "sawtooth", 0.05); }
+  });
+  const next = () => { t = A.target(W, H - 40, Math.max(22, 38 - (30 - left) * 0.5)); t.y += 30; tc = colors[Math.floor(Math.random() * colors.length)]; born = performance.now(); };
+  const clock = setInterval(() => { left--; if (left <= 0) { alive = false; clearInterval(clock); gameOver("⏰ អស់ម៉ោង!", `Combo ល្អបំផុតរហូតដល់ ${combo}`, pts >= 400); } }, 1000);
+  const loop = now => {
+    if (!alive) return;
+    if (now - born > life()) { combo = 0; next(); }
+    g.fillStyle = "#050816"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#9fb3d8"; g.font = "700 14px Orbitron, sans-serif"; g.fillText(`⏱ ${left}s`, 12, 24); g.fillText(`COMBO x${combo}`, W - 120, 24);
+    const k = 1 - (now - born) / life();
+    g.strokeStyle = tc; g.lineWidth = 4; g.shadowColor = tc; g.shadowBlur = 20; g.beginPath(); g.arc(t.x, t.y, t.r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); g.stroke();
+    g.fillStyle = tc + "55"; g.beginPath(); g.arc(t.x, t.y, t.r * 0.8, 0, 7); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(t.x, t.y, t.r * 0.25, 0, 7); g.fill(); g.shadowBlur = 0;
+    for (const r of rings) { r.r += 2.5; r.a -= 0.04; g.globalAlpha = Math.max(0, r.a); g.strokeStyle = r.c; g.lineWidth = 3; g.beginPath(); g.arc(r.x, r.y, r.r, 0, 7); g.stroke();
+      g.fillStyle = "#fff"; g.font = "900 18px Orbitron, sans-serif"; g.fillText(r.txt, r.x - 16, r.y - r.r - 4); }
+    g.globalAlpha = 1; rings = rings.filter(r => r.a > 0);
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  return () => { alive = false; clearInterval(clock); cancelAnimationFrame(raf); };
+}
+
+// ===== ខ្លាឃ្លោក =====
+function gKhla(stage) {
+  let bal = store.get("kkBalance", 1000), chip = 10, bets = {}, rolling = false;
+  if (bal <= 0) bal = 1000;
+  const wrap = document.createElement("div"); wrap.className = "kk"; stage.appendChild(wrap); setScore(bal);
+  const total = () => Object.values(bets).reduce((a, b) => a + b, 0);
+  const draw = (dice) => {
+    wrap.innerHTML = `<div class="kk-bowl">${(dice || [null, null, null]).map(d => `<span class="die">${d == null ? "❔" : A.KK[d].em}</span>`).join("")}</div>
+      <div class="kk-board">${A.KK.map((k, i) => `<button type="button" data-i="${i}" class="${dice && dice.includes(i) ? "hit" : ""}"><span>${k.em}</span><b>${k.km}</b>${bets[i] ? `<i>${bets[i]}</i>` : ""}</button>`).join("")}</div>
+      <div class="kk-chips">${[10, 50, 100].map(v => `<button type="button" data-chip="${v}" aria-pressed="${v === chip}">${v}</button>`).join("")}<button type="button" id="kkClear">✕ សម្អាត</button></div>
+      <button class="btn big" type="button" id="kkRoll" ${total() ? "" : "disabled"}>🥣 ក្រឡុក (${total()})</button>
+      <p class="kk-note">ពិន្ទុកម្សាន្ត ${bal.toLocaleString()} · មិនមែនលុយពិត</p>`;
+  };
+  wrap.addEventListener("click", e => {
+    if (rolling) return;
+    const c = e.target.closest("[data-chip]"); if (c) { chip = Number(c.dataset.chip); sfx.tap(); draw(); return; }
+    if (e.target.closest("#kkClear")) { bets = {}; sfx.tap(); draw(); return; }
+    const b = e.target.closest("[data-i]");
+    if (b) { if (total() + chip > bal) { sfx.bad(); return; } bets[b.dataset.i] = (bets[b.dataset.i] || 0) + chip; beep(520, 0.06); haptic("tap"); draw(); return; }
+    if (e.target.closest("#kkRoll") && total()) {
+      rolling = true; const dice = A.kkRoll(); let k = 0;
+      const shake = setInterval(() => { draw(A.kkRoll()); beep(200 + Math.random() * 200, 0.04, "square", 0.05); if (++k > 10) { clearInterval(shake); finish(dice); } }, 90);
+    }
+  });
+  const finish = dice => {
+    const net = A.kkSettle(bets, dice); bal += net; store.set("kkBalance", bal); setScore(bal);
+    draw(dice); (net > 0 ? sfx.win : net < 0 ? sfx.bad : sfx.tap)(); haptic(net > 0 ? "win" : "tap");
+    const msg = document.createElement("div"); msg.className = "kk-msg " + (net >= 0 ? "up" : "down"); msg.textContent = net >= 0 ? `+${net} 🎉` : `${net}`; wrap.appendChild(msg);
+    bets = {}; rolling = false;
+    setTimeout(() => { msg.remove(); draw(dice); if (bal <= 0) { bal = 1000; store.set("kkBalance", bal); setScore(bal); gameOver("អស់ពិន្ទុ 😅", "ទទួលបាន 1,000 ពិន្ទុថ្មី"); } }, 1400);
+  };
+  draw();
+}
+
+// ===== sudoku =====
+function gSudoku(stage) {
+  const levels = [["ងាយ", 36], ["មធ្យម", 45], ["ពិបាក", 52]];
+  let holes = store.get("sdHoles", 36), game = A.sudoku(holes), cur = game.puzzle.slice(), sel = -1, mistakes = 0;
+  const wrap = document.createElement("div"); wrap.style.cssText = "display:grid;gap:10px;justify-items:center;width:100%"; stage.appendChild(wrap);
+  const draw = () => {
+    const sv = sel >= 0 ? cur[sel] : 0;
+    wrap.innerHTML = `<div class="levels">${levels.map(([n, h]) => `<button type="button" data-h="${h}" aria-pressed="${h === holes}">${n}</button>`).join("")}<span class="chip">❌ ${mistakes}</span></div>
+      <div class="sudoku">${cur.map((v, i) => { const r = Math.floor(i / 9), c = i % 9, given = game.puzzle[i] !== 0, wrong = v && !given && v !== game.solution[i];
+        const peer = sel >= 0 && (Math.floor(sel / 9) === r || sel % 9 === c || (Math.floor(sel / 27) === Math.floor(i / 27) && Math.floor((sel % 9) / 3) === Math.floor(c / 3)));
+        return `<button type="button" data-i="${i}" class="${given ? "given" : ""}${wrong ? " wrong" : ""}${i === sel ? " sel" : peer ? " peer" : ""}${v && v === sv ? " same" : ""}${c % 3 === 2 && c < 8 ? " br" : ""}${r % 3 === 2 && r < 8 ? " bb" : ""}">${v || ""}</button>`; }).join("")}</div>
+      <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" data-n="${n}">${n}</button>`).join("")}<button type="button" data-n="0">⌫</button><button type="button" id="sdHint">💡</button></div>`;
+  };
+  wrap.addEventListener("click", e => {
+    const lv = e.target.closest("[data-h]"); if (lv) { holes = Number(lv.dataset.h); store.set("sdHoles", holes); open("sudoku"); return; }
+    const cell = e.target.closest("[data-i]"); if (cell) { sel = Number(cell.dataset.i); sfx.tap(); draw(); return; }
+    if (sel < 0 || game.puzzle[sel]) return;
+    if (e.target.closest("#sdHint")) { cur[sel] = game.solution[sel]; sfx.good(); }
+    const pad = e.target.closest("[data-n]");
+    if (pad) { const n = Number(pad.dataset.n); cur[sel] = n; if (n && n !== game.solution[sel]) { mistakes++; sfx.bad(); haptic("bad"); } else if (n) { sfx.good(); haptic("tap"); } }
+    draw();
+    if (cur.every((v, i) => v === game.solution[i])) { setScore(Math.max(50, holes * 20 - mistakes * 25)); gameOver("🏆 Sudoku រួចរាល់!", `ខុស ${mistakes} ដង`, true); }
+  });
+  draw();
+}
+
+// ===== solitaire =====
+function gSolitaire(stage) {
+  let st = A.deal(), history = [], moves = 0;
+  const wrap = document.createElement("div"); wrap.className = "sol"; stage.appendChild(wrap);
+  const name = c => ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[c.r] || c.r;
+  const face = (c, extra = "") => c.up ? `<div class="pc ${A.isRed(c) ? "red" : ""} ${extra}"><b>${name(c)}</b><span>${c.s}</span></div>` : `<div class="pc back ${extra}"></div>`;
+  const snap = () => JSON.parse(JSON.stringify(st));
+  const draw = () => {
+    const w = st.waste[st.waste.length - 1];
+    wrap.innerHTML = `<div class="sol-top">
+        <button type="button" class="slot" id="stock">${st.stock.length ? '<div class="pc back"></div>' : "↻"}</button>
+        <button type="button" class="slot" id="waste">${w ? face(w) : ""}</button><span></span>
+        ${st.found.map((p, i) => `<div class="slot found">${p.length ? face(p[p.length - 1]) : "♠♥♦♣"[i]}</div>`).join("")}</div>
+      <div class="sol-tab">${st.tab.map((col, ci) => `<div class="col">${col.map((c, k) => `<button type="button" class="cardbtn" data-c="${ci}" data-k="${k}" style="top:${k * (c.up ? 26 : 12)}px">${face(c)}</button>`).join("") || '<div class="slot"></div>'}</div>`).join("")}</div>
+      <div class="levels"><button type="button" id="solUndo">↶ ថយក្រោយ</button><button type="button" id="solNew">↻ ល្បែងថ្មី</button><span class="chip">${moves} ជំហាន</span></div>`;
+  };
+  // move a run starting at card to the best place (foundation first)
+  const tryMove = (cards, from) => {
+    if (cards.length === 1) { const fi = st.found.findIndex(p => A.canFound(cards[0], p)); if (fi >= 0) { history.push(snap()); from.splice(from.length - 1, 1); st.found[fi].push(cards[0]); return true; } }
+    const order = st.tab.map((_, i) => i).sort((a, b) => st.tab[b].length - st.tab[a].length);
+    for (const ti of order) { const col = st.tab[ti]; if (col === from) continue;
+      if (A.canTab(cards[0], col)) { history.push(snap()); from.splice(from.length - cards.length, cards.length); col.push(...cards); return true; } }
+    return false;
+  };
+  const after = () => {
+    st.tab.forEach(col => { if (col.length && !col[col.length - 1].up) col[col.length - 1].up = true; });
+    moves++; draw(); setScore(st.found.reduce((a, p) => a + p.length, 0) * 10);
+    if (A.solWon(st)) gameOver("🏆 ឈ្នះ Solitaire!", `${moves} ជំហាន`, true);
+  };
+  wrap.addEventListener("click", e => {
+    if (e.target.closest("#solNew")) { open("solitaire"); return; }
+    if (e.target.closest("#solUndo")) { if (history.length) { st = history.pop(); sfx.tap(); draw(); } return; }
+    if (e.target.closest("#stock")) {
+      history.push(snap());
+      if (st.stock.length) { const c = st.stock.pop(); c.up = true; st.waste.push(c); }
+      else { st.stock = st.waste.reverse().map(c => ({ ...c, up: false })); st.waste = []; }
+      beep(500, 0.05); draw(); return;
+    }
+    if (e.target.closest("#waste")) { const w = st.waste[st.waste.length - 1]; if (w && tryMove([w], st.waste)) { sfx.good(); after(); } else sfx.bad(); return; }
+    const b = e.target.closest(".cardbtn"); if (!b) return;
+    const col = st.tab[b.dataset.c], k = Number(b.dataset.k); if (!col[k].up) return;
+    if (tryMove(col.slice(k), col)) { sfx.good(); haptic("tap"); after(); } else { sfx.bad(); }
+  });
+  draw();
+}
+
+// ===== mahjong =====
+function gMahjong(stage) {
+  const syms = ["🐉", "🐯", "🪷", "🛕", "🎋", "🌸", "🍊", "🥭", "🐘", "🦚", "⭐", "🌙", "🔔", "🏮", "🧧", "🎴", "💎", "🍀"];
+  let tiles = A.mahjong(A.mjLayout(), syms), sel = null, pairs = 0;
+  const wrap = document.createElement("div"); wrap.className = "mj-wrap"; stage.appendChild(wrap);
+  const W = Math.min(stage.clientWidth - 16, 480), unit = W / 17.5, tw = unit * 2, th = unit * 2.5;
+  const draw = () => {
+    const live = tiles.filter(t => !t.gone).sort((a, b) => a.z - b.z || a.y - b.y || a.x - b.x);
+    wrap.style.width = W + "px"; wrap.style.height = (th * 6.4 + 10) + "px";
+    wrap.innerHTML = live.map(t => { const free = A.mjFree(tiles, t);
+      return `<button type="button" data-id="${t.id}" class="mj${free ? " free" : ""}${sel === t.id ? " sel" : ""}" style="left:${t.x * unit + t.z * 4}px;top:${t.y / 2 * th - t.z * 5}px;width:${tw}px;height:${th}px;z-index:${t.z * 100 + t.y}">${t.sym}</button>`; }).join("")
+      + `<div class="levels" style="position:absolute;bottom:-52px;left:0;right:0"><button type="button" id="mjHint">💡 ជំនួយ</button><button type="button" id="mjNew">↻ ថ្មី</button></div>`;
+  };
+  const freePairs = () => { const f = tiles.filter(t => !t.gone && A.mjFree(tiles, t)); for (let i = 0; i < f.length; i++) for (let j = i + 1; j < f.length; j++) if (f[i].sym === f[j].sym) return [f[i], f[j]]; return null; };
+  wrap.addEventListener("click", e => {
+    if (e.target.closest("#mjNew")) { open("mahjong"); return; }
+    if (e.target.closest("#mjHint")) { const p = freePairs(); if (p) { p.forEach(t => wrap.querySelector(`[data-id="${t.id}"]`)?.classList.add("hint")); sfx.tap(); } return; }
+    const b = e.target.closest(".mj"); if (!b) return; const t = tiles[b.dataset.id];
+    if (!A.mjFree(tiles, t)) { sfx.bad(); return; }
+    if (sel === null || sel === t.id) { sel = sel === t.id ? null : t.id; sfx.tap(); draw(); return; }
+    const s = tiles[sel];
+    if (s.sym === t.sym) { s.gone = t.gone = true; sel = null; pairs++; setScore(pairs * 20); sfx.good(); haptic("tap"); draw();
+      if (tiles.every(x => x.gone)) gameOver("🏆 Mahjong រួចរាល់!", "អស្ចារ្យ!", true);
+      else if (!freePairs()) gameOver("អស់ផ្លូវផ្គូផ្គង", "ចុច លេងម្ដងទៀត"); }
+    else { sel = t.id; sfx.tap(); draw(); }
+  });
+  draw();
+}
+
 renderHub();
-if (location.hash) open(location.hash.slice(1));
+// Direct links from the bot use ?g=<key> (Telegram puts its own data in the #hash).
+const direct = new URLSearchParams(location.search).get("g");
+if (direct && GAMES.some(x => x.key === direct)) open(direct);
+else if (location.hash) open(location.hash.slice(1));
 window.__arcade = { open, GAMES };
 })();

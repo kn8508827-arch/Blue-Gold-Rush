@@ -113,5 +113,258 @@
     return { vx: Math.sin(a) * speed, vy: -Math.cos(a) * speed };
   }
 
-  return { slideRow, move2048, addTile, canMove2048, DIRS, turn, stepSnake, placeFood, LINES, winner, aiMove, deck, memoryScore, bricks, paddleBounce };
+  // ---------------- minesweeper ----------------
+  /** Board of {mine, n, open, flag}; the first clicked cell and its neighbours are always safe. */
+  function mineBoard(w, h, mines, safeX, safeY, rand = Math.random) {
+    const cells = Array.from({ length: h }, () => Array.from({ length: w }, () => ({ mine: false, n: 0, open: false, flag: false })));
+    const spots = [];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (Math.abs(x - safeX) > 1 || Math.abs(y - safeY) > 1) spots.push([x, y]);
+    for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
+    spots.slice(0, Math.min(mines, spots.length)).forEach(([x, y]) => { cells[y][x].mine = true; });
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) cells[y][x].n = around(w, h, x, y).filter(([a, b]) => cells[b][a].mine).length;
+    return cells;
+  }
+  function around(w, h, x, y) {
+    const out = [];
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const a = x + dx, b = y + dy; if ((dx || dy) && a >= 0 && b >= 0 && a < w && b < h) out.push([a, b]); }
+    return out;
+  }
+  /** Open a cell (flood-fills zeros). Returns { boom, opened }. */
+  function reveal(cells, x, y) {
+    const h = cells.length, w = cells[0].length, c = cells[y][x];
+    if (c.open || c.flag) return { boom: false, opened: 0 };
+    if (c.mine) { c.open = true; return { boom: true, opened: 1 }; }
+    let opened = 0; const stack = [[x, y]];
+    while (stack.length) {
+      const [a, b] = stack.pop(), cell = cells[b][a];
+      if (cell.open || cell.flag || cell.mine) continue;
+      cell.open = true; opened++;
+      if (cell.n === 0) stack.push(...around(w, h, a, b));
+    }
+    return { boom: false, opened };
+  }
+  const mineWon = cells => cells.every(r => r.every(c => c.mine || c.open));
+
+  // ---------------- connect four ----------------
+  const C4W = 7, C4H = 6;
+  function c4Drop(board, col, who) { // board[row][col], row 0 = top
+    for (let r = C4H - 1; r >= 0; r--) if (!board[r][col]) { board[r][col] = who; return r; }
+    return -1;
+  }
+  function c4Winner(board) {
+    const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    for (let r = 0; r < C4H; r++) for (let c = 0; c < C4W; c++) {
+      const v = board[r][c]; if (!v) continue;
+      for (const [dr, dc] of dirs) {
+        const cells = [[r, c]];
+        for (let k = 1; k < 4; k++) { const rr = r + dr * k, cc = c + dc * k; if (rr < 0 || rr >= C4H || cc < 0 || cc >= C4W || board[rr][cc] !== v) break; cells.push([rr, cc]); }
+        if (cells.length === 4) return { who: v, cells };
+      }
+    }
+    return board[0].every(Boolean) ? { who: "draw", cells: [] } : null;
+  }
+  function c4Score(board, me) {
+    const opp = me === "R" ? "Y" : "R"; let s = 0;
+    for (let r = 0; r < C4H; r++) if (board[r][3] === me) s += 3;
+    const win = (cells) => { const m = cells.filter(v => v === me).length, o = cells.filter(v => v === opp).length;
+      if (m && o) return 0; if (m === 4) return 1000; if (m === 3) return 5; if (m === 2) return 2; if (o === 3) return -4; return 0; };
+    for (let r = 0; r < C4H; r++) for (let c = 0; c < C4W; c++) for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+      const cells = []; for (let k = 0; k < 4; k++) { const rr = r + dr * k, cc = c + dc * k; if (rr < 0 || rr >= C4H || cc < 0 || cc >= C4W) break; cells.push(board[rr][cc]); }
+      if (cells.length === 4) s += win(cells);
+    }
+    return s;
+  }
+  function c4Minimax(board, depth, alpha, beta, maxing, me) {
+    const w = c4Winner(board), opp = me === "R" ? "Y" : "R";
+    if (w) return w.who === "draw" ? 0 : (w.who === me ? 100000 + depth : -100000 - depth);
+    if (depth === 0) return c4Score(board, me);
+    const order = [3, 2, 4, 1, 5, 0, 6].filter(c => !board[0][c]);
+    let best = maxing ? -Infinity : Infinity;
+    for (const c of order) {
+      const r = c4Drop(board, c, maxing ? me : opp);
+      const v = c4Minimax(board, depth - 1, alpha, beta, !maxing, me); board[r][c] = null;
+      if (maxing) { best = Math.max(best, v); alpha = Math.max(alpha, v); } else { best = Math.min(best, v); beta = Math.min(beta, v); }
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+  function c4Ai(board, me, depth = 4, rand = Math.random) {
+    const cols = [3, 2, 4, 1, 5, 0, 6].filter(c => !board[0][c]);
+    if (!cols.length) return -1;
+    if (depth <= 0) return cols[Math.floor(rand() * cols.length)];
+    let best = -Infinity, pick = cols[0];
+    for (const c of cols) {
+      const b = board.map(r => r.slice()); c4Drop(b, c, me);
+      const v = c4Minimax(b, depth - 1, -Infinity, Infinity, false, me);
+      if (v > best) { best = v; pick = c; }
+    }
+    return pick;
+  }
+
+  // ---------------- ball sort ----------------
+  /** colors × 4 balls shuffled into `colors` tubes plus 2 empty tubes. */
+  function sortLevel(colors, rand = Math.random) {
+    const balls = []; for (let c = 0; c < colors; c++) for (let k = 0; k < 4; k++) balls.push(c);
+    for (let i = balls.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [balls[i], balls[j]] = [balls[j], balls[i]]; }
+    const tubes = []; for (let t = 0; t < colors; t++) tubes.push(balls.slice(t * 4, t * 4 + 4));
+    if (tubes.every(t => t.every(v => v === t[0]))) return sortLevel(colors, rand);
+    return tubes.concat([[], []]);
+  }
+  function canPour(tubes, from, to) {
+    const a = tubes[from], b = tubes[to];
+    return from !== to && a.length > 0 && b.length < 4 && (b.length === 0 || b[b.length - 1] === a[a.length - 1]);
+  }
+  /** Moves every same-coloured top ball that fits. Returns the number moved. */
+  function pour(tubes, from, to) {
+    let n = 0;
+    while (canPour(tubes, from, to)) { tubes[to].push(tubes[from].pop()); n++; }
+    return n;
+  }
+  const sorted = tubes => tubes.every(t => t.length === 0 || (t.length === 4 && t.every(v => v === t[0])));
+
+  // ---------------- simon ----------------
+  const simonNext = (seq, rand = Math.random) => seq.concat(Math.floor(rand() * 4));
+  /** Check the player's input so far: "ok" (keep going), "done" (round complete) or "wrong". */
+  function simonCheck(seq, input) {
+    for (let i = 0; i < input.length; i++) if (input[i] !== seq[i]) return "wrong";
+    return input.length === seq.length ? "done" : "ok";
+  }
+
+  // ---------------- sliding 15 ----------------
+  const solvedTiles = n => Array.from({ length: n * n }, (_, i) => (i + 1) % (n * n));
+  /** Shuffle by random legal moves from the solved state, so it is always solvable. */
+  function slideShuffle(n, steps = 200, rand = Math.random) {
+    let t = solvedTiles(n), prev = -1;
+    for (let i = 0; i < steps; i++) {
+      const z = t.indexOf(0), opts = slideNeighbours(n, z).filter(p => p !== prev);
+      const p = opts[Math.floor(rand() * opts.length)]; t = slideMove(t, n, p); prev = z;
+    }
+    return isSolved(t) ? slideShuffle(n, steps, rand) : t;
+  }
+  function slideNeighbours(n, z) {
+    const r = Math.floor(z / n), c = z % n, out = [];
+    if (r > 0) out.push(z - n); if (r < n - 1) out.push(z + n); if (c > 0) out.push(z - 1); if (c < n - 1) out.push(z + 1);
+    return out;
+  }
+  /** Move tile at index i into the gap if adjacent; returns a new array (unchanged if not adjacent). */
+  function slideMove(t, n, i) {
+    const z = t.indexOf(0); if (!slideNeighbours(n, z).includes(i)) return t;
+    const out = t.slice(); [out[z], out[i]] = [out[i], out[z]]; return out;
+  }
+  const isSolved = t => t.every((v, i) => v === (i + 1) % t.length);
+
+  // ---------------- tap rush ----------------
+  function target(w, h, r, rand = Math.random) {
+    return { x: r + rand() * (w - 2 * r), y: r + rand() * (h - 2 * r), r };
+  }
+  const hitTarget = (t, x, y) => (x - t.x) ** 2 + (y - t.y) ** 2 <= t.r * t.r;
+
+  // ---------------- sudoku ----------------
+  function sudokuOk(g, i, v) {
+    const r = Math.floor(i / 9), c = i % 9, br = r - r % 3, bc = c - c % 3;
+    for (let k = 0; k < 9; k++) {
+      if (g[r * 9 + k] === v || g[k * 9 + c] === v) return false;
+      if (g[(br + Math.floor(k / 3)) * 9 + bc + (k % 3)] === v) return false;
+    }
+    return true;
+  }
+  /** Count solutions (stops at `limit`). g: array of 81, 0 = empty. Mutates and restores g. */
+  function sudokuCount(g, limit = 2) {
+    const i = g.indexOf(0); if (i < 0) return 1;
+    let n = 0;
+    for (let v = 1; v <= 9 && n < limit; v++) if (sudokuOk(g, i, v)) { g[i] = v; n += sudokuCount(g, limit - n); g[i] = 0; }
+    return n;
+  }
+  function sudokuFill(g, rand) {
+    const i = g.indexOf(0); if (i < 0) return true;
+    const vals = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => rand() - 0.5);
+    for (const v of vals) if (sudokuOk(g, i, v)) { g[i] = v; if (sudokuFill(g, rand)) return true; g[i] = 0; }
+    return false;
+  }
+  /** { puzzle, solution } with a unique solution; holes ≈ 36 easy, 45 medium, 52 hard. */
+  function sudoku(holes = 40, rand = Math.random) {
+    const sol = Array(81).fill(0); sudokuFill(sol, rand);
+    const puz = sol.slice(), order = [...Array(81).keys()].sort(() => rand() - 0.5);
+    let removed = 0;
+    for (const i of order) {
+      if (removed >= holes) break;
+      const keep = puz[i]; puz[i] = 0;
+      if (sudokuCount(puz.slice(), 2) !== 1) puz[i] = keep; else removed++;
+    }
+    return { puzzle: puz, solution: sol };
+  }
+
+  // ---------------- solitaire (Klondike, draw 1) ----------------
+  const SUITS = ["♠", "♥", "♦", "♣"], RED = new Set(["♥", "♦"]);
+  function newDeck(rand = Math.random) {
+    const d = []; for (const s of SUITS) for (let r = 1; r <= 13; r++) d.push({ s, r, up: false });
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d;
+  }
+  function deal(rand = Math.random) {
+    const d = newDeck(rand), tab = [];
+    for (let c = 0; c < 7; c++) { const col = d.splice(0, c + 1); col[col.length - 1].up = true; tab.push(col); }
+    return { stock: d, waste: [], found: [[], [], [], []], tab };
+  }
+  const isRed = c => RED.has(c.s);
+  /** Can `card` (bottom of a moving run) go on tableau column `col`? */
+  const canTab = (card, col) => col.length ? (col[col.length - 1].up && isRed(col[col.length - 1]) !== isRed(card) && col[col.length - 1].r === card.r + 1) : card.r === 13;
+  const canFound = (card, pile) => pile.length ? pile[pile.length - 1].s === card.s && pile[pile.length - 1].r === card.r - 1 : card.r === 1;
+  const solWon = st => st.found.every(p => p.length === 13);
+
+  // ---------------- mahjong solitaire ----------------
+  /** Tiles at layout positions; built in reverse (pairs removed from free spots) so it is always solvable. */
+  function mahjong(layout, symbols, rand = Math.random) {
+    const tiles = layout.map(([x, y, z], i) => ({ id: i, x, y, z, sym: null, gone: false }));
+    const live = new Set(tiles.map(t => t.id));
+    const pairs = [];
+    while (live.size > 1) {
+      const free = [...live].map(id => tiles[id]).filter(t => mjFree(tiles, t, live));
+      if (free.length < 2) return mahjong(layout, symbols, rand); // retry (rare)
+      const a = free.splice(Math.floor(rand() * free.length), 1)[0];
+      const b = free[Math.floor(rand() * free.length)];
+      live.delete(a.id); live.delete(b.id); pairs.push([a, b]);
+    }
+    pairs.forEach(([a, b], k) => { a.sym = b.sym = symbols[k % symbols.length]; });
+    return tiles;
+  }
+  /** Free = nothing on top, and the left or right side is open. Tiles are 2×2 units; layout units are halves. */
+  function mjFree(tiles, t, live) {
+    const alive = o => o !== t && (live ? live.has(o.id) : !o.gone);
+    const over = (o) => Math.abs(o.x - t.x) < 2 && Math.abs(o.y - t.y) < 2;
+    if (tiles.some(o => alive(o) && o.z === t.z + 1 && over(o))) return false;
+    const side = dx => tiles.some(o => alive(o) && o.z === t.z && o.x === t.x + dx && Math.abs(o.y - t.y) < 2);
+    return !side(-2) || !side(2);
+  }
+  /** A simple pyramid layout (72 tiles) that fits a phone screen. */
+  function mjLayout() {
+    const L = [];
+    for (let y = 0; y < 6; y++) for (let x = 0; x < 8; x++) L.push([x * 2, y * 2, 0]);           // 48
+    for (let y = 1; y < 5; y++) for (let x = 2; x < 6; x++) L.push([x * 2, y * 2, 1]);           // 16
+    for (let y = 2; y < 4; y++) for (let x = 3; x < 5; x++) L.push([x * 2, y * 2, 2]);           // 4
+    L.push([5, 4, 3], [7, 4, 3], [5, 6, 3], [7, 6, 3]);                                          // 4 → 72
+    return L;
+  }
+
+  // ---------------- ខ្លាឃ្លោក (Khla Khlouk) ----------------
+  const KK = [
+    { key: "tiger", km: "ខ្លា", em: "🐯" }, { key: "gourd", km: "ឃ្លោក", em: "🎃" }, { key: "rooster", km: "មាន់", em: "🐓" },
+    { key: "shrimp", km: "បង្កង", em: "🦐" }, { key: "crab", km: "ក្ដាម", em: "🦀" }, { key: "fish", km: "ត្រី", em: "🐟" },
+  ];
+  const kkRoll = (rand = Math.random) => [0, 1, 2].map(() => Math.floor(rand() * 6));
+  /** bets: {index: amount}. Each matching die pays the bet once and the stake comes back. Returns net change. */
+  function kkSettle(bets, dice) {
+    let net = 0;
+    for (const [k, amt] of Object.entries(bets)) {
+      const hits = dice.filter(d => d === Number(k)).length;
+      net += hits ? amt * hits : -amt;
+    }
+    return net;
+  }
+
+  return { sudoku, sudokuOk, sudokuCount, deal, newDeck, canTab, canFound, isRed, solWon, SUITS,
+           mahjong, mjFree, mjLayout, KK, kkRoll, kkSettle,
+           mineBoard, around, reveal, mineWon, C4W, C4H, c4Drop, c4Winner, c4Ai, sortLevel, canPour, pour, sorted,
+           simonNext, simonCheck, solvedTiles, slideShuffle, slideMove, slideNeighbours, isSolved, target, hitTarget,
+           slideRow, move2048, addTile, canMove2048, DIRS, turn, stepSnake, placeFood, LINES, winner, aiMove, deck, memoryScore, bricks, paddleBounce };
 });
