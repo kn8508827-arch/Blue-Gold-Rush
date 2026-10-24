@@ -225,6 +225,16 @@ body.btn-soft .app .t{color:#d9d4f5}
 .vd .acts button{padding:10px 6px;border-radius:14px;font-weight:700;font-size:13.5px;background:#ffffff1a;box-shadow:inset 0 0 0 1px #ffffff33;color:#fff;transition:transform .15s}
 .vd .acts button.main{background:linear-gradient(135deg,#ffb27a,#ff5a0a);color:#2a0d02;box-shadow:0 6px 16px -6px #ff6a1aaa}
 .vd .acts button:active{transform:scale(.96)}
+/* 📈 Leng Betell — page management & digital marketing partner (navy & electric blue) */
+.bt{padding:12px;border-radius:var(--r-md);background:linear-gradient(160deg,rgba(4,10,40,.95),rgba(20,90,230,.5));
+  box-shadow:inset 0 0 0 1px #3fa0ff55,0 10px 26px -12px #1e7bffaa}
+.bt .logo{display:block;width:150px;height:150px;margin:0 auto;border-radius:50%;box-shadow:0 0 24px #2a8bff66}
+.bt .tt{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.35;margin-top:8px}
+.bt .tt b{font-size:15px;color:#fff} .bt .tt small{font-size:12.5px;color:#cfe3ff}
+.bt .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bt .acts button{padding:10px 6px;border-radius:14px;font-weight:700;font-size:13.5px;background:#ffffff1a;box-shadow:inset 0 0 0 1px #ffffff2e;color:#fff;transition:transform .15s}
+.bt .acts button.main{background:linear-gradient(135deg,#6fe0ff,#1e6bff);color:#04102e;box-shadow:0 6px 16px -6px #2a8bffaa}
+.bt .acts button:active{transform:scale(.96)}
 /* ⚙️ theme settings */
 .gear{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:19px;background:var(--glass);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;margin-left:10px}
@@ -329,6 +339,16 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button type="button" class="main" data-call="+855968343333">📞 Call</button>
       <button type="button" data-tg="https://t.me/ny_chamnan">💬 Telegram</button>
       <button type="button" data-web="https://www.facebook.com/share/1QXzGau2kN/">📘 Facebook</button>
+    </div>
+  </section>
+</div></div>
+<div class="sheet" id="btSheet" role="dialog" aria-modal="true" aria-label="Leng Betell Digital Marketing"><div class="box">
+  <section class="bt" aria-label="Leng Betell Digital Marketing">
+    <img class="logo" src="betell-logo.png" alt="Leng Betell" width="480" height="480">
+    <div class="tt"><b>គ្រប់គ្រង Page · Digital Marketing</b><small>ដៃគូរបស់ក្រុម · ម្ចាស់ Leng Betell</small></div>
+    <div class="acts">
+      <button type="button" class="main" data-tg="https://t.me/LENGBETELL">💬 Telegram</button>
+      <button type="button" data-web="https://www.facebook.com/share/19fJPYiuwD/">📘 Facebook</button>
     </div>
   </section>
 </div></div>
@@ -496,6 +516,7 @@ const SECTIONS = [
     ["sheet:e1Sheet", "img:e1auto-icon.png", "E1 Auto", "c1", "e1 auto services ឡាន យានដ្ឋាន ជួសជុល car garage លីអេង lyeng", "ដៃគូ"],
     ["sheet:xcSheet", "img:xincheng-icon.png", "Xincheng", "c3", "xincheng ស៊ីនចេង ផ្ទះ រចនា តុបតែង design house decor furniture គ្រឿងសង្ហារឹម marco", "ដៃគូ"],
     ["sheet:vdSheet", "img:vdaudio-icon.png", "VD Audio", "c3", "vd audio ធុងបាស់ បាស់ សំឡេង ភ្លេង sound speaker music party ការ នី ចំណាន", "ដៃគូ"],
+    ["sheet:btSheet", "img:betell-icon.png", "Digital", "c5", "digital marketing page ផេក ទីផ្សារ ផ្សព្វផ្សាយ ads boost facebook leng betell", "ដៃគូ"],
   ]},
   { t: "👥 Group & សមាជិក", s: "សម្រាប់ Group និងគណនី", items: [
     ["nearby", "📍", "មិត្តនៅឯណា", "c1", "nearby location ទីតាំង មិត្ត map", "ថ្មី"],
@@ -639,14 +660,14 @@ $("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https:
 $("teamApp").addEventListener("click", () => { haptic("medium"); const u = "https://team-smos-snea.lovable.app/";
   if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); });
 // 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
-document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call]").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
   haptic("light");
   if (b.dataset.call) { location.href = "tel:" + b.dataset.call; return; }
   if (b.dataset.tg) return tgOpen(b.dataset.tg);
   if (tg && tg.openLink) tg.openLink(b.dataset.web); else window.open(b.dataset.web, "_blank");
 }));
 // partner sheets (TPNews, E1 Auto ...): tap the dark backdrop to close
-["tpSheet", "e1Sheet", "xcSheet", "vdSheet"].forEach(id => $(id).addEventListener("click", e => { if (e.target.id === id) e.currentTarget.classList.remove("on"); }));
+["tpSheet", "e1Sheet", "xcSheet", "vdSheet", "btSheet"].forEach(id => $(id).addEventListener("click", e => { if (e.target.id === id) e.currentTarget.classList.remove("on"); }));
 // 📅 Khmer calendar data (same file as calendar.html): lunar line + next sila under the clock
 const SMN = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
 const WDN = ["អាទិត្យ","ចន្ទ","អង្គារ","ពុធ","ព្រហស្បតិ៍","សុក្រ","សៅរ៍"];
