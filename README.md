@@ -75,3 +75,10 @@ A glowing Sky Bike (blue wheels, gold frame and wings, with a gold ring) sometim
 - tap a car (or drag it onto the track) to race it; each lap pays coins; up to 8 cars on the track
 - 🚀 x2 boost for 30 s, 🔀 auto-merge, half-rate offline earnings (capped at 2 h), progress saved on the device
 - economy and merge rules in `merge-racer/logic.js`, tested by `tests/merge-racer.test.js`
+
+## Cooler Hub (Telegram Mini App home screen)
+
+`hub/` is the home screen the bot opens (`/hub`, the chat menu button, or 🚀 in /menu):
+a holographic member card that follows your finger/phone tilt, today's Khmer date, weather, dollar and gold,
+searchable app icons for every bot feature and game, a monthly money donut and an owner panel.
+Personal data arrives from the bot as `?d=<base64url JSON>`; tiles open `t.me/<bot>?start=go_<feature>`.
