@@ -130,6 +130,7 @@ h2 small{font-size:13px;font-weight:400;color:var(--mist)}
 .app .ic{position:relative;overflow:hidden;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:28px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -10px rgba(0,0,0,.6);transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .2s,filter .2s}
 .app:active .ic{transform:scale(.9)}
+.app .ic.pic{padding:0}.app .ic.pic img{width:100%;height:100%;object-fit:cover;display:block}
 .app .t{text-shadow:0 1px 3px rgba(0,0,0,.65)}
 /* 🫧 Glow (default): glossy glass top, soft coloured halo */
 body.btn-glow .app .ic{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -6px 12px rgba(0,0,0,.18),0 10px 22px -8px var(--gl,#7c5cff99),0 0 0 1px rgba(255,255,255,.12)}
@@ -181,7 +182,7 @@ body.btn-soft .app .t{color:#d9d4f5}
 .team .go{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#ffffff26;font-weight:700}
 @media (prefers-reduced-motion:reduce){.team img{animation:none}}
 /* 📰 TPNews — partner news outlet */
-.tpn{margin:12px 0 0;padding:12px;border-radius:var(--r-md);
+.tpn{margin:0;padding:12px;border-radius:var(--r-md);
   background:linear-gradient(120deg,rgba(38,150,240,.55),rgba(40,60,200,.45));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   box-shadow:inset 0 0 0 1px #9fd4ff40,0 10px 26px -12px #2696f0aa}
 .tpn .hd{display:flex;align-items:center;gap:12px}
@@ -263,6 +264,21 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
 </style>
 </head>
 <body class="btn-glow">
+<div class="sheet" id="tpSheet" role="dialog" aria-modal="true" aria-label="TPNews"><div class="box">
+  <section class="tpn" aria-label="TPNews">
+    <div class="hd">
+      <img src="tpnews-logo.png" alt="TPNews" width="58" height="58">
+      <div class="tt"><b>TPNews</b><small>ដៃគូព័ត៌មាន · ម្ចាស់អង្គភាព លោក ទេព ប៉ុន</small></div>
+      <span class="tag">NEWS</span>
+    </div>
+    <div class="acts">
+      <button type="button" class="main" data-tg="https://t.me/TPNEWSREPORT">📢 Telegram News</button>
+      <button type="button" data-web="https://www.facebook.com/TPnews99">📘 Facebook Page</button>
+      <button type="button" data-tg="https://t.me/Teppon">💬 ទាក់ទងផ្ទាល់</button>
+      <button type="button" data-web="https://www.facebook.com/l457psnf5f">👤 FB ផ្ទាល់ខ្លួន</button>
+    </div>
+  </section>
+</div></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Theme"><div class="box">
   <h3>🎨 ប្ដូរ Theme របស់អ្នក</h3><p class="sub">ជ្រើសផ្ទៃខាងក្រោយ និងរចនាប៊ូតុង — រក្សាទុកដោយស្វ័យប្រវត្តិ</p>
   <h4>🖼️ ផ្ទៃខាងក្រោយ (Wallpaper)</h4><div class="opts" id="optBg"></div>
@@ -327,19 +343,6 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
     <span class="tt"><b>Team ស្មោះស្នេហ៍</b><small>App ផ្លូវការរបស់ក្រុម — ចុចបើក</small></span>
     <span class="go">↗</span>
   </button>
-  <section class="tpn" aria-label="TPNews">
-    <div class="hd">
-      <img src="tpnews-logo.png" alt="TPNews" width="58" height="58">
-      <div class="tt"><b>TPNews</b><small>ដៃគូព័ត៌មាន · ម្ចាស់អង្គភាព លោក ទេព ប៉ុន</small></div>
-      <span class="tag">NEWS</span>
-    </div>
-    <div class="acts">
-      <button type="button" class="main" data-tg="https://t.me/TPNEWSREPORT">📢 Telegram News</button>
-      <button type="button" data-web="https://www.facebook.com/TPnews99">📘 Facebook Page</button>
-      <button type="button" data-tg="https://t.me/Teppon">💬 ទាក់ទងផ្ទាល់</button>
-      <button type="button" data-web="https://www.facebook.com/l457psnf5f">👤 FB ផ្ទាល់ខ្លួន</button>
-    </div>
-  </section>
   <section class="e1a" aria-label="E1 Auto Services">
     <img class="logo" src="e1auto-logo.png" alt="E1 Auto Services" width="640" height="235">
     <div class="tt"><b>យានដ្ឋានថែរក្សាយានយន្ត</b><small>ដៃគូរបស់ក្រុម · ម្ចាស់យានដ្ឋាន លីអេង (LyEng)</small></div>
@@ -439,6 +442,7 @@ const SECTIONS = [
     ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["gold", "🪙", "មាស", "c8", "gold មាស"],
     ["news", "📰", "ព័ត៌មាន", "c7", "news ព័ត៌មាន"],
+    ["sheet:tpSheet", "img:tpnews-logo.png", "TPNews", "c1", "tpnews tp news ព័ត៌មាន ទេព ប៉ុន", "ដៃគូ"],
     ["weather", "🌤️", "អាកាសធាតុ", "c1", "weather អាកាសធាតុ"],
     ["trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
     ["health", "🧓", "សុខភាព", "c6", "health សុខភាព"],
@@ -459,6 +463,7 @@ const SECTIONS = [
 function go(key) {
   haptic("medium");
   if (key.startsWith("url:")) { location.href = key.slice(4); return; }
+  if (key.startsWith("sheet:")) { $(key.slice(6)).classList.add("on"); return; }   // partner card (TPNews ...)
   if (key.startsWith("page:")) { location.href = key.slice(5); return; }   // hub pages open inside the mini app
   const link = "https://t.me/" + BOT + "?start=go_" + key;
   if (tg && tg.openTelegramLink) {
@@ -487,7 +492,8 @@ function render(filter) {
       b.className = "app";
       b.type = "button";
       b.setAttribute("aria-label", label);
-      b.innerHTML = `<span class="ic ${color}" aria-hidden="true">${icon}</span><span class="t">${label}</span>` +
+      const ic = icon.startsWith("img:") ? `<img src="${icon.slice(4)}" alt="">` : icon;
+      b.innerHTML = `<span class="ic ${color}${icon.startsWith("img:") ? " pic" : ""}" aria-hidden="true">${ic}</span><span class="t">${label}</span>` +
         (badge ? `<span class="badge">${badge}</span>` : "");
       b.addEventListener("click", () => go(key));
       g.appendChild(b);
@@ -589,6 +595,7 @@ document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [d
   if (b.dataset.tg) return tgOpen(b.dataset.tg);
   if (tg && tg.openLink) tg.openLink(b.dataset.web); else window.open(b.dataset.web, "_blank");
 }));
+$("tpSheet").addEventListener("click", e => { if (e.target.id === "tpSheet") e.currentTarget.classList.remove("on"); });
 // 📅 Khmer calendar data (same file as calendar.html): lunar line + next sila under the clock
 const SMN = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
 const WDN = ["អាទិត្យ","ចន្ទ","អង្គារ","ពុធ","ព្រហស្បតិ៍","សុក្រ","សៅរ៍"];
