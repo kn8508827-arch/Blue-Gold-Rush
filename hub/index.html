@@ -68,6 +68,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .chip .k{font-size:12.5px;color:var(--mist)}
 .chip .v{font-family:var(--dsp);font-weight:700;font-size:20px;margin-top:2px;white-space:nowrap}
 .chip .v.kh{font-family:var(--kh);font-size:16px;font-weight:700}
+button.chip{border:0;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.chip.near{background:linear-gradient(160deg,#0f4d3c,#221e47);box-shadow:inset 0 0 0 1px #2fe0a055}
+.chip.near .v{color:#5ff2b6}
+.chip.near.fuel{background:linear-gradient(160deg,#5a2a10,#221e47);box-shadow:inset 0 0 0 1px #ff9a4a55}
+.chip.near.fuel .v{color:#ffb070}
+.chip.near:active{transform:scale(.96)}
 .chip.gold{background:linear-gradient(160deg,#3a2f12,#221e47)}
 .chip.gold .v{color:var(--gold)}
 
@@ -145,7 +151,8 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
   </section>
 
   <div class="strip" id="strip">
-    <div class="chip"><div class="k">ថ្ងៃខ្មែរ</div><div class="v kh" id="lunar">—</div></div>
+    <button class="chip near" id="evChip" type="button"><div class="k">⚡ សាកថ្ម EV</div><div class="v kh">ជិតខ្ញុំ →</div></button>
+    <button class="chip near fuel" id="fuelChip" type="button"><div class="k">⛽ ស្ថានីយប្រេង</div><div class="v kh">ជិតខ្ញុំ →</div></button>
     <div class="chip"><div class="k" id="wxName">ភ្នំពេញ</div><div class="v" id="wx">—</div></div>
     <div class="chip"><div class="k">១ ដុល្លារ</div><div class="v" id="usd">—</div></div>
     <div class="chip gold"><div class="k">មាស / ជី</div><div class="v" id="gold">—</div></div>
@@ -309,7 +316,8 @@ function tick() {
   $("hello").textContent = h < 11 ? "អរុណសួស្ដី ☀️" : h < 14 ? "ទិវាសួស្ដី 🌤️" : h < 18 ? "សាយណ្ហសួស្ដី 🌇" : "រាត្រីសួស្ដី 🌙";
   $("clock").firstChild.nodeValue = String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
   const months = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
-  $("dateSmall").textContent = KH(now.getDate()) + " " + months[now.getMonth()];
+  $("dateSmall").textContent = KH(now.getDate()) + " " + months[now.getMonth()] +
+    (D.k ? " · " + D.k.split(" ឆ្នាំ")[0] + (D.s ? " 🙏" : "") : "");
 }
 tick(); setInterval(tick, 15000);
 $("name").textContent = NAME;
@@ -359,7 +367,22 @@ window.addEventListener("deviceorientation", e => {
 }, { passive: true });
 
 // today strip
-if (D.k) $("lunar").textContent = D.k.split(" ឆ្នាំ")[0] + (D.s ? " 🙏" : "");
+// ⚡/⛽ near me: opens Google Maps (free) at the user's GPS point; without GPS, "near me" search
+function nearMe(what) {
+  haptic("medium");
+  const open = url => { if (tg && tg.openLink) tg.openLink(url); else window.open(url, "_blank"); };
+  const plain = () => open("https://www.google.com/maps/search/" + encodeURIComponent(what + " near me"));
+  if (!navigator.geolocation) return plain();
+  let done = false;
+  const t = setTimeout(() => { if (!done) { done = true; plain(); } }, 6000);
+  navigator.geolocation.getCurrentPosition(p => {
+    if (done) return; done = true; clearTimeout(t);
+    open("https://www.google.com/maps/search/" + encodeURIComponent(what) + "/@" +
+         p.coords.latitude.toFixed(5) + "," + p.coords.longitude.toFixed(5) + ",14z");
+  }, () => { if (!done) { done = true; clearTimeout(t); plain(); } }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 120000 });
+}
+$("evChip").addEventListener("click", () => nearMe("EV charging station"));
+$("fuelChip").addEventListener("click", () => nearMe("gas station"));
 if (D.h) { $("holChip").hidden = false; $("hol").textContent = D.h[0].slice(0, 22) + " · " + KH(D.h[1]) + "ថ្ងៃ"; }
 const WMO = c => c === 0 ? "☀️" : c <= 3 ? "⛅" : c <= 48 ? "🌫️" : c <= 67 ? "🌧️" : c <= 82 ? "🌦️" : "⛈️";
 fetch("https://api.open-meteo.com/v1/forecast?latitude=11.5564&longitude=104.9282&current=temperature_2m,weather_code&timezone=Asia/Phnom_Penh")
