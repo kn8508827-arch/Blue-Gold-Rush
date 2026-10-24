@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2a1c">
+<title>ប្រតិទិនខ្មែរ</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#0b1d14; --card:#13301f; --card2:#1a3d28; --line:#2a5a3c; --ink:#f3fff6; --mist:#a9cdb5;
+  --green:#4cd17a; --gold:#ffd166; --red:#ff6b6b; --today:#7cf3ff;
+  --kh:"Kantumruy Pro",system-ui,sans-serif; --dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);font-size:16px;line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);
+  background:radial-gradient(600px 380px at 100% -10%,rgba(76,209,122,.25),transparent 60%),
+             radial-gradient(500px 380px at -20% 40%,rgba(255,209,102,.10),transparent 60%),var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--today);outline-offset:3px;border-radius:10px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{width:40px;height:40px;border-radius:14px;background:var(--card);display:grid;place-items:center;font-size:18px;color:var(--ink);text-decoration:none}
+.top h1{margin:0;font-size:20px;flex:1}
+.today{background:linear-gradient(135deg,#2f9d58,#1d6b3b);border-radius:24px;padding:18px;box-shadow:0 14px 30px -14px #2f9d58aa}
+.today .lbl{font-size:13px;color:#d6ffe4}
+.today .kh{font-size:19px;font-weight:700;line-height:1.55;margin-top:4px}
+.today .sol{font-size:14px;color:#e6fff0;margin-top:2px}
+.sila{display:flex;align-items:center;gap:12px;margin-top:12px;padding:14px;border-radius:20px;background:linear-gradient(135deg,#4a3a10,#2b2410);
+  box-shadow:inset 0 0 0 1px #ffd16655}
+.sila .ic{font-size:30px}
+.sila b{display:block;color:var(--gold);font-size:16px}
+.sila span{font-size:13.5px;color:#f5e6c2}
+.cal{margin-top:16px;background:var(--card);border-radius:24px;padding:14px 10px 12px}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
+.mhead button{width:40px;height:40px;border-radius:14px;background:var(--card2);font-size:18px}
+.mtitle{text-align:center}
+.mtitle b{display:block;font-size:17px}
+.mtitle small{color:var(--mist);font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wd{text-align:center;font-size:12px;color:var(--mist);padding:2px 0 6px}
+.wd.sun{color:var(--red)}
+.d{position:relative;min-height:58px;border-radius:12px;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px}
+.d .n{font-family:var(--dsp);font-weight:700;font-size:15px}
+.d .l{font-size:10.5px;color:var(--mist);white-space:nowrap}
+.d.sun .n{color:#ff9a9a}
+.d.empty{background:none}
+.d.sila{background:linear-gradient(160deg,#5a4512,#3a2d0c);box-shadow:inset 0 0 0 1px #ffd16688}
+.d.sila .l{color:var(--gold);font-weight:700}
+.d.sila::after{content:"🙏";position:absolute;top:1px;right:3px;font-size:10px}
+.d.hol .n{color:var(--red)}
+.d.hol::before{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.d.today{box-shadow:0 0 0 2px var(--today),0 0 14px #7cf3ff66}
+.d.newm .l{color:var(--green);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:12.5px;color:var(--mist);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:4px}
+h2{font-size:16px;margin:20px 4px 8px}
+.list{background:var(--card);border-radius:20px;overflow:hidden}
+.row{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid #ffffff10}
+.row:last-child{border:0}
+.row .dd{flex:0 0 auto;width:48px;text-align:center;border-radius:12px;padding:6px 0;background:var(--card2)}
+.row .dd b{display:block;font-family:var(--dsp);font-size:16px}
+.row .dd small{font-size:11px;color:var(--mist)}
+.row .tx{flex:1;font-size:14px;line-height:1.45}
+.row .tx small{display:block;color:var(--mist);font-size:12.5px}
+.row .in{font-size:12.5px;color:var(--gold);white-space:nowrap}
+.sheet{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5)}
+.sheet.on{display:flex}
+.sheet .box{width:100%;max-width:560px;background:#163524;border-radius:24px 24px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 22px)}
+.sheet .big{font-size:19px;font-weight:700;line-height:1.55}
+.sheet p{margin:8px 0 0;color:#d8f5e2}
+.sheet .tag{display:inline-block;margin-top:10px;padding:6px 12px;border-radius:99px;font-weight:700;font-size:14px}
+.sheet .tag.s{background:#ffd16633;color:var(--gold)}
+.sheet .tag.h{background:#ff6b6b33;color:#ffb3b3}
+.sheet .close{width:100%;margin-top:16px;padding:12px;border-radius:16px;background:var(--green);color:#0b1d14;font-weight:700}
+.err{padding:20px;text-align:center;color:var(--mist)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" id="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>📅 ប្រតិទិនចន្ទគតិខ្មែរ</h1>
+  </header>
+
+  <section class="today" aria-live="polite">
+    <div class="lbl">ថ្ងៃនេះ</div>
+    <div class="kh" id="tKh">—</div>
+    <div class="sol" id="tSol"></div>
+  </section>
+
+  <section class="sila" id="silaBox">
+    <div class="ic">🙏</div>
+    <div><b id="silaT">ថ្ងៃសីលបន្ទាប់</b><span id="silaS">—</span></div>
+  </section>
+
+  <section class="cal" aria-label="ប្រតិទិនប្រចាំខែ">
+    <div class="mhead">
+      <button id="prev" type="button" aria-label="ខែមុន">‹</button>
+      <div class="mtitle"><b id="mT">—</b><small id="mS"></small></div>
+      <button id="next" type="button" aria-label="ខែបន្ទាប់">›</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="legend">
+      <span><i style="background:#5a4512;box-shadow:inset 0 0 0 1px #ffd166"></i>ថ្ងៃសីល</span>
+      <span><i style="background:#ff6b6b"></i>ថ្ងៃឈប់សម្រាក</span>
+      <span><i style="background:none;box-shadow:0 0 0 2px #7cf3ff"></i>ថ្ងៃនេះ</span>
+    </div>
+  </section>
+
+  <h2>🙏 ថ្ងៃសីលខាងមុខ</h2>
+  <div class="list" id="silaList"></div>
+  <h2>🎉 ថ្ងៃបុណ្យ & ឈប់សម្រាកខាងមុខ</h2>
+  <div class="list" id="holList"></div>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="box">
+  <div class="big" id="shKh"></div><p id="shSol"></p><div id="shTags"></div>
+  <button class="close" id="shClose" type="button">បិទ</button>
+</div></div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+try { tg && tg.ready(); tg && tg.expand(); } catch (e) {}
+const haptic = () => { try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const KD = "០១២៣៤៥៦៧៨៩", KH = n => String(n).replace(/\d/g, c => KD[c]);
+const WD = ["អាទិត្យ", "ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍"];
+const WS = ["អា", "ច", "អ", "ពុ", "ព្រ", "សុ", "ស"];
+const SM = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const khNow = () => { const n = new Date(); return new Date(n.getTime() + (n.getTimezoneOffset() + 420) * 60000); };
+let DATA = null, START = null, view = null;
+
+function info(d) {
+  const i = Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - START) / 86400000);
+  const r = DATA.days[i];
+  if (!r) return null;
+  const [day, waning, month, animal, sak, be, sila] = r;
+  return { day, waning: !!waning, month, sila: !!sila, hol: DATA.hol[iso(d)] || "",
+    short: KH(day) + (waning ? "រោច" : "កើត"),
+    full: KH(day) + (waning ? "រោច" : "កើត") + " ខែ" + DATA.months[month] + " ឆ្នាំ" + DATA.animals[animal] + " " + DATA.saks[sak] + " ព.ស. " + KH(be + 2500) };
+}
+const solar = d => "ថ្ងៃ" + WD[d.getDay()] + " ទី" + KH(d.getDate()) + " ខែ" + SM[d.getMonth()] + " ឆ្នាំ" + KH(d.getFullYear());
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+
+function renderMonth() {
+  const y = view.getFullYear(), m = view.getMonth();
+  const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), t = khNow();
+  $("mT").textContent = "ខែ" + SM[m] + " " + KH(y);
+  const a = info(first), b = info(new Date(y, m, days));
+  $("mS").textContent = a && b ? ("ខែ" + DATA.months[a.month] + (a.month !== b.month ? " – ខែ" + DATA.months[b.month] : "")) : "";
+  let h = WS.map((w, i) => `<div class="wd${i === 0 ? " sun" : ""}">${w}</div>`).join("");
+  for (let i = 0; i < first.getDay(); i++) h += `<div class="d empty"></div>`;
+  for (let n = 1; n <= days; n++) {
+    const d = new Date(y, m, n), k = info(d);
+    const cls = ["d"];
+    if (d.getDay() === 0) cls.push("sun");
+    if (k && k.sila) cls.push("sila");
+    if (k && k.hol) cls.push("hol");
+    if (iso(d) === iso(t)) cls.push("today");
+    if (k && !k.waning && k.day === 1) cls.push("newm");
+    const lab = k ? (!k.waning && k.day === 1 ? DATA.months[k.month] : k.short) : "";
+    h += `<button type="button" class="${cls.join(" ")}" data-d="${iso(d)}" aria-label="${solar(d)}${k ? " · " + k.full : ""}"><span class="n">${KH(n)}</span><span class="l">${lab}</span></button>`;
+  }
+  $("grid").innerHTML = h;
+  $("grid").querySelectorAll("button.d").forEach(el => el.addEventListener("click", () => openDay(el.dataset.d)));
+}
+
+function openDay(s) {
+  haptic();
+  const [y, m, d] = s.split("-").map(Number), day = new Date(y, m - 1, d), k = info(day);
+  if (!k) return;
+  $("shKh").textContent = k.full;
+  $("shSol").textContent = solar(day);
+  $("shTags").innerHTML = (k.sila ? `<span class="tag s">🙏 ថ្ងៃសីល</span> ` : "") + (k.hol ? `<span class="tag h">🎉 ${k.hol}</span>` : "");
+  $("sheet").classList.add("on");
+}
+
+function renderLists() {
+  const t = khNow();
+  const tk = info(t);
+  $("tKh").textContent = tk ? "ថ្ងៃ" + WD[t.getDay()] + " " + tk.full : "—";
+  $("tSol").textContent = "ត្រូវនឹង" + solar(t).replace(/^ថ្ងៃ\S+ /, "");
+  const silas = [], hols = [];
+  for (let i = 0; i < 400 && (silas.length < 6 || hols.length < 6); i++) {
+    const d = addDays(t, i), k = info(d);
+    if (!k) break;
+    if (k.sila && silas.length < 6) silas.push([d, k, i]);
+    if (k.hol && hols.length < 6) hols.push([d, k, i]);
+  }
+  const when = i => i === 0 ? "ថ្ងៃនេះ" : i === 1 ? "ស្អែក" : KH(i) + " ថ្ងៃទៀត";
+  if (silas.length) {
+    const [d, k, i] = silas[0];
+    $("silaT").textContent = i === 0 ? "🙏 ថ្ងៃនេះជាថ្ងៃសីល" : "ថ្ងៃសីលបន្ទាប់ · " + when(i);
+    $("silaS").textContent = "ថ្ងៃ" + WD[d.getDay()] + " " + KH(d.getDate()) + " " + SM[d.getMonth()] + " · " + k.short + " ខែ" + DATA.months[k.month];
+  }
+  const row = ([d, k, i], text) => `<div class="row"><div class="dd"><b>${KH(d.getDate())}</b><small>${SM[d.getMonth()]}</small></div>
+    <div class="tx">${text}<small>ថ្ងៃ${WD[d.getDay()]} · ${k.short} ខែ${DATA.months[k.month]}</small></div><div class="in">${when(i)}</div></div>`;
+  $("silaList").innerHTML = silas.map(x => row(x, "🙏 ថ្ងៃសីល")).join("") || `<div class="err">—</div>`;
+  $("holList").innerHTML = hols.map(x => row(x, x[1].hol)).join("") || `<div class="err">—</div>`;
+}
+
+$("prev").addEventListener("click", () => { haptic(); view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderMonth(); });
+$("next").addEventListener("click", () => { haptic(); view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderMonth(); });
+$("shClose").addEventListener("click", () => $("sheet").classList.remove("on"));
+$("sheet").addEventListener("click", e => { if (e.target.id === "sheet") $("sheet").classList.remove("on"); });
+let sx = null;
+$("grid").addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+$("grid").addEventListener("touchend", e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+  if (Math.abs(dx) > 50) $(dx < 0 ? "next" : "prev").click(); }, { passive: true });
+$("back").addEventListener("click", e => { if (history.length > 1 && document.referrer) { e.preventDefault(); history.back(); } });
+
+fetch("khmer-calendar.json").then(r => r.json()).then(j => {
+  DATA = j; const [y, m, d] = j.start.split("-").map(Number); START = Date.UTC(y, m - 1, d);
+  const t = khNow(); view = new Date(t.getFullYear(), t.getMonth(), 1);
+  renderLists(); renderMonth();
+}).catch(() => { $("grid").innerHTML = `<div class="err" style="grid-column:1/-1">មិនអាចផ្ទុកប្រតិទិនបាន — សាកម្ដងទៀត</div>`; });
+</script>
+</body>
+</html>

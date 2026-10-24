@@ -72,6 +72,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button.chip{border:0;color:inherit;text-align:left;cursor:pointer;font:inherit}
 .chip.near{background:linear-gradient(160deg,#0f4d3c,#221e47);box-shadow:inset 0 0 0 1px #2fe0a055}
 .chip.near .v{color:#5ff2b6}
+.chip.near.sila{background:linear-gradient(160deg,#5a4512,#221e47);box-shadow:inset 0 0 0 1px #ffd16655}
+.chip.near.sila .v{color:#ffd166}
 .chip.near.fuel{background:linear-gradient(160deg,#5a2a10,#221e47);box-shadow:inset 0 0 0 1px #ff9a4a55}
 .chip.near.fuel .v{color:#ffb070}
 .chip.near:active{transform:scale(.96)}
@@ -234,6 +236,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
   </section>
 
   <div class="strip" id="strip">
+    <button class="chip near sila" id="calChip" type="button"><div class="k">🙏 ថ្ងៃសីល</div><div class="v kh" id="silaChip">ប្រតិទិន →</div></button>
     <button class="chip near" id="evChip" type="button"><div class="k">⚡ សាកថ្ម EV</div><div class="v kh">ជិតខ្ញុំ →</div></button>
     <button class="chip near fuel" id="fuelChip" type="button"><div class="k">⛽ ស្ថានីយប្រេង</div><div class="v kh">ជិតខ្ញុំ →</div></button>
     <div class="chip"><div class="k" id="wxName">ភ្នំពេញ</div><div class="v" id="wx">—</div></div>
@@ -345,7 +348,7 @@ const SECTIONS = [
     ["kb", "📚", "AI ឯកសារ", "c7", "kb ឯកសារ document"],
   ]},
   { t: "📅 ជីវិត & ព័ត៌មាន", s: "ព័ត៌មានសំខាន់ៗ", items: [
-    ["calendar", "📅", "ប្រតិទិនខ្មែរ", "c3", "calendar ថ្ងៃ ប្រតិទិន", "ឥតគិតថ្លៃ"],
+    ["page:calendar.html", "📅", "ប្រតិទិនខ្មែរ", "c3", "calendar ថ្ងៃ ប្រតិទិន សីល ចន្ទគតិ", "ថ្ងៃសីល"],
     ["morning", "☀️", "ព័ត៌មានព្រឹក", "c8", "morning ព្រឹក"],
     ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["gold", "🪙", "មាស", "c8", "gold មាស"],
@@ -370,6 +373,7 @@ const SECTIONS = [
 function go(key) {
   haptic("medium");
   if (key.startsWith("url:")) { location.href = key.slice(4); return; }
+  if (key.startsWith("page:")) { location.href = key.slice(5); return; }   // hub pages open inside the mini app
   const link = "https://t.me/" + BOT + "?start=go_" + key;
   if (tg && tg.openTelegramLink) {
     tg.openTelegramLink(link);
@@ -492,6 +496,13 @@ $("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https:
   if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
 $("teamApp").addEventListener("click", () => { haptic("medium"); const u = "https://team-smos-snea.lovable.app/";
   if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); });
+$("calChip").addEventListener("click", () => { haptic("medium"); location.href = "calendar.html"; });
+// Next sila day on the chip (same data file as the calendar page)
+fetch("khmer-calendar.json").then(r => r.json()).then(j => {
+  const [y, m, d] = j.start.split("-").map(Number), n = new Date(), t = new Date(n.getTime() + (n.getTimezoneOffset() + 420) * 60000);
+  const i0 = Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
+  for (let i = 0; i < 16; i++) { const r = j.days[i0 + i]; if (r && r[6]) { $("silaChip").textContent = i === 0 ? "ថ្ងៃនេះ 🙏" : i === 1 ? "ស្អែក →" : KH(i) + " ថ្ងៃទៀត →"; break; } }
+}).catch(() => {});
 $("evChip").addEventListener("click", () => nearMe("EV charging station"));
 $("fuelChip").addEventListener("click", () => nearMe("gas station"));
 if (D.h) { $("holChip").hidden = false; $("hol").textContent = D.h[0].slice(0, 22) + " · " + KH(D.h[1]) + "ថ្ងៃ"; }
