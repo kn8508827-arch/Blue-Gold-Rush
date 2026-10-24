@@ -193,6 +193,17 @@ body.btn-soft .app .t{color:#d9d4f5}
 .tpn .acts button{padding:10px 8px;border-radius:14px;font-weight:700;font-size:13.5px;background:#ffffff1f;box-shadow:inset 0 0 0 1px #ffffff33;transition:transform .15s}
 .tpn .acts button.main{background:linear-gradient(135deg,#7fd3ff,#4f7dff);color:#0d1640;box-shadow:0 6px 16px -6px #4fb4ffaa}
 .tpn .acts button:active{transform:scale(.96)}
+/* 🚗 E1 Auto Services — partner garage */
+.e1a{margin:12px 0 0;padding:12px;border-radius:var(--r-md);
+  background:linear-gradient(160deg,rgba(8,16,48,.85),rgba(20,70,170,.55));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:inset 0 0 0 1px #3fb7ff55,0 10px 26px -12px #1e90ffaa}
+.e1a .logo{display:block;width:100%;max-width:340px;height:auto;margin:0 auto;filter:drop-shadow(0 0 10px #2aa8ff88)}
+.e1a .tt{display:flex;flex-direction:column;align-items:center;text-align:center;line-height:1.35;margin-top:4px}
+.e1a .tt b{font-size:15px} .e1a .tt small{font-size:12.5px;color:#cfe6ff}
+.e1a .acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.e1a .acts button{padding:10px 6px;border-radius:14px;font-weight:700;font-size:13.5px;background:#ffffff1a;box-shadow:inset 0 0 0 1px #ffffff2e;transition:transform .15s}
+.e1a .acts button.main{background:linear-gradient(135deg,#5fe0ff,#1e7bff);color:#06112e;box-shadow:0 6px 16px -6px #2aa8ffaa}
+.e1a .acts button:active{transform:scale(.96)}
 /* ⚙️ theme settings */
 .gear{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:19px;background:var(--glass);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;margin-left:10px}
@@ -327,6 +338,15 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button type="button" data-web="https://www.facebook.com/TPnews99">📘 Facebook Page</button>
       <button type="button" data-tg="https://t.me/Teppon">💬 ទាក់ទងផ្ទាល់</button>
       <button type="button" data-web="https://www.facebook.com/l457psnf5f">👤 FB ផ្ទាល់ខ្លួន</button>
+    </div>
+  </section>
+  <section class="e1a" aria-label="E1 Auto Services">
+    <img class="logo" src="e1auto-logo.png" alt="E1 Auto Services" width="640" height="235">
+    <div class="tt"><b>យានដ្ឋានថែរក្សាយានយន្ត</b><small>ដៃគូរបស់ក្រុម · ម្ចាស់យានដ្ឋាន លីអេង (LyEng)</small></div>
+    <div class="acts">
+      <button type="button" class="main" data-call="+85511802190">📞 Call</button>
+      <button type="button" data-tg="https://t.me/E1autoServices">💬 Telegram</button>
+      <button type="button" data-web="https://www.facebook.com/share/17mwesCzZX/">📘 Facebook</button>
     </div>
   </section>
   <label class="search">
@@ -562,9 +582,10 @@ $("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https:
   if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
 $("teamApp").addEventListener("click", () => { haptic("medium"); const u = "https://team-smos-snea.lovable.app/";
   if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); });
-// 📰 TPNews partner buttons: Telegram links stay inside Telegram, Facebook opens in the browser
-document.querySelectorAll(".tpn [data-tg],.tpn [data-web]").forEach(b => b.addEventListener("click", () => {
+// 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
+document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call]").forEach(b => b.addEventListener("click", () => {
   haptic("light");
+  if (b.dataset.call) { location.href = "tel:" + b.dataset.call; return; }
   if (b.dataset.tg) return tgOpen(b.dataset.tg);
   if (tg && tg.openLink) tg.openLink(b.dataset.web); else window.open(b.dataset.web, "_blank");
 }));
