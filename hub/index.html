@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15132e">
+<title>Cooler Hub</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --ink:#15132e; --deep:#221e47; --deep2:#2c2758; --paper:#f5f2ff; --mist:#a9a3d6; --gold:#f2c14e;
+  --holo:linear-gradient(115deg,#7cf3ff 0%,#b48cff 28%,#ff8ad8 52%,#ffe08a 74%,#7cf3ff 100%);
+  --r-lg:28px; --r-md:20px; --r-sm:14px;
+  --kh:"Kantumruy Pro",system-ui,sans-serif; --dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--kh);font-size:16px;line-height:1.5}
+body{min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 40px);
+  background:
+    radial-gradient(700px 420px at 110% -10%,rgba(180,140,255,.22),transparent 60%),
+    radial-gradient(600px 400px at -20% 30%,rgba(124,243,255,.12),transparent 60%),
+    var(--ink)}
+.wrap{max-width:560px;margin:0 auto}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid #7cf3ff;outline-offset:3px;border-radius:10px}
+
+/* greeting */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 18px}
+.hello{font-size:15px;color:var(--mist);margin:0}
+.name{font-family:var(--kh);font-weight:700;font-size:26px;line-height:1.25;margin:2px 0 0}
+.clock{font-family:var(--dsp);font-weight:500;font-size:22px;color:var(--paper);text-align:right;letter-spacing:.5px}
+.clock small{display:block;font-family:var(--kh);font-size:12px;color:var(--mist);letter-spacing:0}
+
+/* the one bold thing: holographic member card */
+.holo{position:relative;border-radius:var(--r-lg);padding:22px 22px 20px;overflow:hidden;isolation:isolate;
+  background:#1d1940;box-shadow:0 20px 50px -20px rgba(180,140,255,.55);transform-style:preserve-3d;
+  transition:transform .25s ease-out;animation:deal .9s cubic-bezier(.2,1.2,.3,1) both}
+.holo::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--holo);background-size:220% 220%;
+  background-position:var(--hx,30%) var(--hy,40%);opacity:.92;mix-blend-mode:normal}
+.holo::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:repeating-linear-gradient(-55deg,rgba(255,255,255,.0) 0 9px,rgba(255,255,255,.13) 9px 10px),
+             radial-gradient(circle at var(--hx,30%) var(--hy,40%),rgba(255,255,255,.55),transparent 45%);
+  mix-blend-mode:soft-light}
+.holo.off::before{filter:saturate(.25) brightness(.75)}
+@keyframes deal{from{transform:translateY(24px) rotateX(18deg) scale(.96);opacity:0}}
+.holo .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.brand{font-family:var(--dsp);font-weight:900;font-size:24px;line-height:1;color:#15132e}
+.brand span{display:block;font-weight:500;font-size:12px;margin-top:6px;letter-spacing:1px}
+.days{font-family:var(--dsp);font-weight:900;font-size:56px;line-height:.9;color:#15132e;text-align:right}
+.days small{display:block;font-family:var(--kh);font-weight:700;font-size:13px;letter-spacing:0;margin-top:6px}
+.holo .who{margin-top:26px;color:#15132e}
+.who b{display:block;font-size:20px;font-weight:700}
+.who span{font-size:14px;font-weight:600;opacity:.8}
+.bar{height:8px;border-radius:8px;background:rgba(21,19,46,.18);margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px;background:#15132e;width:var(--p,0%);transition:width 1s .4s ease}
+.join[hidden]{display:none}
+.join{margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:#15132e;color:var(--paper);
+  font-weight:700;padding:10px 18px;border-radius:999px}
+
+/* today strip */
+.strip{display:flex;gap:10px;overflow-x:auto;margin:16px -16px 6px;padding:2px 16px 6px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-width:132px;background:var(--deep);border-radius:var(--r-md);padding:12px 14px}
+.chip .k{font-size:12.5px;color:var(--mist)}
+.chip .v{font-family:var(--dsp);font-weight:700;font-size:20px;margin-top:2px;white-space:nowrap}
+.chip .v.kh{font-family:var(--kh);font-size:16px;font-weight:700}
+.chip.gold{background:linear-gradient(160deg,#3a2f12,#221e47)}
+.chip.gold .v{color:var(--gold)}
+
+/* search */
+.search{position:relative;margin:14px 0 6px}
+.search input{width:100%;font:inherit;color:var(--paper);background:var(--deep);border:1px solid #3a3470;border-radius:16px;
+  padding:13px 16px 13px 44px;outline:none}
+.search input::placeholder{color:#7d77ad}
+.search input:focus{border-color:#b48cff}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.7}
+
+/* sections & app icons */
+h2{font-size:17px;font-weight:700;margin:22px 4px 10px;display:flex;align-items:baseline;gap:8px}
+h2 small{font-size:13px;font-weight:400;color:var(--mist)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px}
+.app{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:4px 2px;border-radius:16px}
+.app .ic{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:28px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -10px rgba(0,0,0,.6);transition:transform .15s}
+.app:active .ic{transform:scale(.9)}
+.app .t{font-size:12.5px;line-height:1.3;color:#e9e5ff}
+.app.lock .ic{filter:grayscale(.2)}
+.app .badge{position:absolute;transform:translate(22px,-6px);background:var(--gold);color:#15132e;font-size:10px;font-weight:700;
+  border-radius:999px;padding:1px 6px}
+.app{position:relative}
+.c1{background:linear-gradient(145deg,#7cf3ff,#3a8cff)} .c2{background:linear-gradient(145deg,#ff8ad8,#9b4dff)}
+.c3{background:linear-gradient(145deg,#ffe08a,#ff8a4c)} .c4{background:linear-gradient(145deg,#8affc1,#18a88a)}
+.c5{background:linear-gradient(145deg,#b48cff,#5b3cff)} .c6{background:linear-gradient(145deg,#ff9a9a,#e8325b)}
+.c7{background:linear-gradient(145deg,#c7d2fe,#6470c8)} .c8{background:linear-gradient(145deg,#f2c14e,#b07c12)}
+
+/* panels */
+.panel{background:var(--deep);border-radius:var(--r-lg);padding:18px;margin-top:12px}
+.money{display:grid;grid-template-columns:118px 1fr;gap:16px;align-items:center}
+.donut{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#3a3470 0 100%)}
+.donut div{width:78px;height:78px;border-radius:50%;background:var(--deep);display:grid;place-items:center;text-align:center;
+  font-family:var(--dsp);font-weight:700;font-size:15px;line-height:1.1}
+.donut small{display:block;font-family:var(--kh);font-weight:400;font-size:11px;color:var(--mist)}
+.legend{list-style:none;margin:0;padding:0;font-size:14px}
+.legend li{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}
+.legend b{font-family:var(--dsp);font-weight:500;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpi{background:var(--deep2);border-radius:var(--r-sm);padding:12px}
+.kpi .v{font-family:var(--dsp);font-weight:700;font-size:20px}
+.kpi .k{font-size:12px;color:var(--mist)}
+.owner-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.owner-head b{font-size:16px}
+.pill{font-size:12.5px;background:var(--deep2);border-radius:999px;padding:6px 12px}
+.empty{color:var(--mist);font-size:14px;padding:10px 4px}
+footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translate(-50%,20px);opacity:0;
+  background:#f5f2ff;color:#15132e;font-weight:700;border-radius:999px;padding:10px 18px;transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.holo{animation:none;transition:none}.bar i{transition:none}}
+@media (min-width:480px){.grid{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="hello" id="hello">សួស្ដី</p>
+      <p class="name" id="name">Cooler Fan</p>
+    </div>
+    <div class="clock" id="clock">--:--<small id="dateSmall"></small></div>
+  </header>
+
+  <section class="holo" id="card" aria-label="សមាជិកភាព">
+    <div class="row">
+      <div class="brand">COOLER<span id="tier">MEMBER</span></div>
+      <div class="days" id="days">—<small id="daysLabel">ថ្ងៃនៅសល់</small></div>
+    </div>
+    <div class="who"><b id="cardName">Cooler Fan</b><span id="cardSub">ចុចដើម្បីចូលជាសមាជិក</span></div>
+    <div class="bar" id="bar"><i></i></div>
+    <button class="join" id="join" hidden>💳 ចូលជាសមាជិក 1$ / ខែ</button>
+  </section>
+
+  <div class="strip" id="strip">
+    <div class="chip"><div class="k">ថ្ងៃខ្មែរ</div><div class="v kh" id="lunar">—</div></div>
+    <div class="chip"><div class="k" id="wxName">ភ្នំពេញ</div><div class="v" id="wx">—</div></div>
+    <div class="chip"><div class="k">១ ដុល្លារ</div><div class="v" id="usd">—</div></div>
+    <div class="chip gold"><div class="k">មាស / ជី</div><div class="v" id="gold">—</div></div>
+    <div class="chip" id="holChip" hidden><div class="k">ថ្ងៃឈប់បន្ទាប់</div><div class="v kh" id="hol">—</div></div>
+  </div>
+
+  <label class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5f2ff" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="រកមុខងារ… ឧ. ច្រៀង, លុយ, ហ្គេម" autocomplete="off" aria-label="រកមុខងារ">
+  </label>
+
+  <main id="sections"></main>
+
+  <section class="panel" id="moneyPanel" hidden>
+    <h2 style="margin-top:0">💵 លុយខែនេះ <small>ពី /cash</small></h2>
+    <div class="money">
+      <div class="donut" id="donut"><div id="left">—<small>នៅសល់</small></div></div>
+      <ul class="legend" id="legend"></ul>
+    </div>
+  </section>
+
+  <section class="panel" id="ownerPanel" hidden>
+    <div class="owner-head"><b>👑 ផ្ទាំង Owner</b><button class="pill" data-go="stats">លម្អិត /stats</button></div>
+    <div class="kpis">
+      <div class="kpi"><div class="v" id="kToday">$0</div><div class="k">ថ្ងៃនេះ</div></div>
+      <div class="kpi"><div class="v" id="kMonth">$0</div><div class="k">ខែនេះ</div></div>
+      <div class="kpi"><div class="v" id="kLast">$0</div><div class="k">ខែមុន</div></div>
+      <div class="kpi"><div class="v" id="kUsers">0</div><div class="k">សមាជិក</div></div>
+      <div class="kpi"><div class="v" id="kGroups">0</div><div class="k">Group បង់</div></div>
+      <div class="kpi"><div class="v" id="kPending">0</div><div class="k">រង់ចាំ Approve</div></div>
+    </div>
+  </section>
+
+  <footer>Cooler Bot · Vid Cooler 🇰🇭</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const tg = window.Telegram && window.Telegram.WebApp;
+try { tg && tg.ready(); tg && tg.expand(); tg && tg.setHeaderColor && tg.setHeaderColor("#15132e"); tg && tg.setBackgroundColor && tg.setBackgroundColor("#15132e"); } catch (e) {}
+const $ = id => document.getElementById(id);
+const haptic = k => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(k || "light"); } catch (e) {} };
+const KH = s => String(s).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+
+// personal data from the bot: ?d=base64url(JSON)
+let D = {};
+try {
+  const raw = new URLSearchParams(location.search).get("d");
+  if (raw) {
+    const b = raw.replace(/-/g, "+").replace(/_/g, "/");
+    D = JSON.parse(decodeURIComponent(escape(atob(b + "===".slice((b.length + 3) % 4)))));
+  }
+} catch (e) { D = {}; }
+const BOT = D.b || "TeamSmosSneabot";
+const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
+const NAME = D.n || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") : "Cooler Fan");
+
+const GAME = "https://kn8508827-arch.github.io/Blue-Gold-Rush/";
+const SECTIONS = [
+  { t: "✨ AI Studio", s: "បង្កើតរបស់ថ្មីដោយ AI", items: [
+    ["imagine", "🎨", "គូររូប", "c2", "គូររូប imagine draw"],
+    ["song", "🎧", "ច្រៀង & Rap", "c5", "ច្រៀង song music rap beat"],
+    ["say", "🎙️", "Voice-over", "c1", "សំឡេង voice say"],
+    ["prompt", "✍️", "Prompt", "c7", "prompt video"],
+    ["studio", "🖼️", "កែរូប", "c6", "កែរូប photo studio"],
+    ["rap", "🎤", "សរសេរ Rap", "c3", "rap"],
+    ["fortune", "🔮", "ទស្សន៍ទាយ", "c5", "ទាយ fortune palm dream"],
+    ["beat", "🥁", "Beat", "c4", "beat ភ្លេង"],
+  ]},
+  { t: "🎮 លេងកម្សាន្ត", s: "ហ្គេម និងពិន្ទុ", items: [
+    ["url:" + GAME + "merge-racer/", "🏎️", "Merge Racer", "c3", "game ហ្គេម ឡាន", "ថ្មី"],
+    ["url:" + GAME + "cooler-fly/", "🚀", "Cooler Fly", "c1", "game ហ្គេម fly"],
+    ["url:" + GAME, "⚡", "Blue Gold Rush", "c8", "game ហ្គេម run"],
+    ["url:" + GAME + "arcade/", "🕹️", "Arcade ១៦", "c5", "game ហ្គេម arcade sudoku"],
+    ["url:" + GAME + "arcade/?g=khla", "🎲", "ខ្លាឃ្លោក", "c6", "game ហ្គេម khla"],
+    ["play", "🎯", "Game Center", "c4", "dice play"],
+    ["quiz", "🧠", "Quiz", "c7", "quiz សំណួរ"],
+    ["checkin", "🎁", "Check-in", "c2", "checkin ពិន្ទុ"],
+  ]},
+  { t: "🧰 ជំនួយប្រចាំថ្ងៃ", s: "ប្រើរាល់ថ្ងៃ", items: [
+    ["scam", "🚨", "ឆែក Scam", "c6", "scam បោក", "ឥតគិតថ្លៃ"],
+    ["totext", "📝", "Voice→អក្សរ", "c1", "voice text អក្សរ"],
+    ["translate", "🌐", "បកប្រែ", "c4", "translate បកប្រែ"],
+    ["homework", "📚", "លំហាត់", "c3", "homework លំហាត់"],
+    ["remind", "⏰", "រំលឹក", "c2", "remind រំលឹក"],
+    ["cash", "💵", "កត់លុយ", "c8", "cash លុយ money"],
+    ["report", "📊", "របាយការណ៍", "c5", "report លុយ"],
+    ["kb", "📚", "AI ឯកសារ", "c7", "kb ឯកសារ document"],
+  ]},
+  { t: "📅 ជីវិត & ព័ត៌មាន", s: "ព័ត៌មានសំខាន់ៗ", items: [
+    ["calendar", "📅", "ប្រតិទិនខ្មែរ", "c3", "calendar ថ្ងៃ ប្រតិទិន", "ឥតគិតថ្លៃ"],
+    ["morning", "☀️", "ព័ត៌មានព្រឹក", "c8", "morning ព្រឹក"],
+    ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
+    ["gold", "🪙", "មាស", "c8", "gold មាស"],
+    ["news", "📰", "ព័ត៌មាន", "c7", "news ព័ត៌មាន"],
+    ["weather", "🌤️", "អាកាសធាតុ", "c1", "weather អាកាសធាតុ"],
+    ["trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
+    ["health", "🧓", "សុខភាព", "c6", "health សុខភាព"],
+  ]},
+  { t: "👥 Group & សមាជិក", s: "សម្រាប់ Group និងគណនី", items: [
+    ["guard", "🛡️", "ការពារ Group", "c7", "guard spam group"],
+    ["summary", "🧾", "សង្ខេប Group", "c5", "summary សង្ខេប"],
+    ["memory", "🧠", "Bot ចាំខ្ញុំ", "c2", "memory ចាំ"],
+    ["invite", "🤝", "ណែនាំមិត្ត", "c4", "invite មិត្ត"],
+    ["pay", "💳", "បង់ប្រាក់", "c8", "pay បង់ vip"],
+    ["myplan", "🎟️", "កាត VIP", "c3", "plan vip"],
+    ["follow", "📲", "Vid Cooler", "c6", "follow tiktok youtube"],
+    ["sos", "🆘", "លេខបន្ទាន់", "c6", "sos"],
+  ]},
+];
+
+function go(key) {
+  haptic("medium");
+  if (key.startsWith("url:")) { location.href = key.slice(4); return; }
+  const link = "https://t.me/" + BOT + "?start=go_" + key;
+  if (tg && tg.openTelegramLink) {
+    tg.openTelegramLink(link);
+    setTimeout(() => { try { tg.close(); } catch (e) {} }, 350);
+  } else {
+    location.href = link;
+  }
+}
+
+function render(filter) {
+  const q = (filter || "").trim().toLowerCase();
+  const host = $("sections");
+  host.innerHTML = "";
+  let shown = 0;
+  for (const sec of SECTIONS) {
+    const items = sec.items.filter(i => !q || (i[2] + " " + i[4]).toLowerCase().includes(q));
+    if (!items.length) continue;
+    shown += items.length;
+    const h = document.createElement("h2");
+    h.innerHTML = `${sec.t} <small>${sec.s}</small>`;
+    const g = document.createElement("div");
+    g.className = "grid";
+    for (const [key, icon, label, color, , badge] of items) {
+      const b = document.createElement("button");
+      b.className = "app";
+      b.type = "button";
+      b.setAttribute("aria-label", label);
+      b.innerHTML = `<span class="ic ${color}" aria-hidden="true">${icon}</span><span class="t">${label}</span>` +
+        (badge ? `<span class="badge">${badge}</span>` : "");
+      b.addEventListener("click", () => go(key));
+      g.appendChild(b);
+    }
+    host.append(h, g);
+  }
+  if (!shown) host.innerHTML = `<p class="empty">រកមិនឃើញ «${q.replace(/[<>&]/g, "")}» — សាកពាក្យផ្សេង ឬវាយសួរ AI ផ្ទាល់ក្នុង Chat 🤖</p>`;
+}
+$("q").addEventListener("input", e => render(e.target.value));
+render("");
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+
+// greeting + clock (Cambodia time)
+function tick() {
+  const now = new Date(Date.now() + (new Date().getTimezoneOffset() + 420) * 60000);
+  const h = now.getHours();
+  $("hello").textContent = h < 11 ? "អរុណសួស្ដី ☀️" : h < 14 ? "ទិវាសួស្ដី 🌤️" : h < 18 ? "សាយណ្ហសួស្ដី 🌇" : "រាត្រីសួស្ដី 🌙";
+  $("clock").firstChild.nodeValue = String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+  const months = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+  $("dateSmall").textContent = KH(now.getDate()) + " " + months[now.getMonth()];
+}
+tick(); setInterval(tick, 15000);
+$("name").textContent = NAME;
+$("cardName").textContent = NAME;
+
+// membership card
+const M = D.m || {};
+if (M.o) {
+  $("tier").textContent = "OWNER";
+  $("days").firstChild.nodeValue = "∞";
+  $("daysLabel").textContent = "គ្មានកំណត់";
+  $("cardSub").textContent = "👑 Owner · ប្រើគ្រប់មុខងារ";
+  $("bar").style.setProperty("--p", "100%");
+} else if (M.a) {
+  $("tier").textContent = "VIP PASS";
+  $("days").firstChild.nodeValue = M.l;
+  $("cardSub").textContent = "សមាជិកសកម្ម · ដល់ " + M.u;
+  requestAnimationFrame(() => $("bar").style.setProperty("--p", Math.min(100, Math.round(100 * M.l / (M.t || 30))) + "%"));
+} else if (!D.m) {
+  // opened from the chat menu button: no personal data, so don't claim anything
+  $("tier").textContent = "HUB";
+  $("days").firstChild.nodeValue = "★";
+  $("daysLabel").textContent = "Cooler Hub";
+  $("cardSub").textContent = "ចុចដើម្បីមើលកាតសមាជិករបស់អ្នក";
+} else {
+  $("card").classList.add("off");
+  $("days").firstChild.nodeValue = "0";
+  $("cardSub").textContent = "មិនទាន់ជាសមាជិក";
+  $("join").hidden = false;
+}
+$("join").addEventListener("click", () => go("pay"));
+$("card").addEventListener("click", e => { if (e.target.id !== "join") go("myplan"); });
+
+// holographic shine follows the finger / phone tilt (motion answers the user)
+const card = $("card");
+function shine(x, y) {
+  card.style.setProperty("--hx", (x * 100).toFixed(1) + "%");
+  card.style.setProperty("--hy", (y * 100).toFixed(1) + "%");
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    card.style.transform = `perspective(900px) rotateY(${(x - .5) * 10}deg) rotateX(${(.5 - y) * 8}deg)`;
+}
+card.addEventListener("pointermove", e => { const r = card.getBoundingClientRect(); shine((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height); });
+card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+window.addEventListener("deviceorientation", e => {
+  if (e.gamma == null) return;
+  shine(Math.min(1, Math.max(0, .5 + e.gamma / 60)), Math.min(1, Math.max(0, .5 + (e.beta - 45) / 60)));
+}, { passive: true });
+
+// today strip
+if (D.k) $("lunar").textContent = D.k.split(" ឆ្នាំ")[0] + (D.s ? " 🙏" : "");
+if (D.h) { $("holChip").hidden = false; $("hol").textContent = D.h[0].slice(0, 22) + " · " + KH(D.h[1]) + "ថ្ងៃ"; }
+const WMO = c => c === 0 ? "☀️" : c <= 3 ? "⛅" : c <= 48 ? "🌫️" : c <= 67 ? "🌧️" : c <= 82 ? "🌦️" : "⛈️";
+fetch("https://api.open-meteo.com/v1/forecast?latitude=11.5564&longitude=104.9282&current=temperature_2m,weather_code&timezone=Asia/Phnom_Penh")
+  .then(r => r.json()).then(j => { $("wx").textContent = WMO(j.current.weather_code) + " " + Math.round(j.current.temperature_2m) + "°"; })
+  .catch(() => { $("wx").textContent = "—"; });
+fetch("https://open.er-api.com/v6/latest/USD").then(r => r.json())
+  .then(j => { if (j.rates && j.rates.KHR) $("usd").textContent = Math.round(j.rates.KHR).toLocaleString("en") + " ៛"; })
+  .catch(() => {});
+fetch("https://api.gold-api.com/price/XAU").then(r => r.json())
+  .then(j => { if (j.price) $("gold").textContent = "$" + Math.round(j.price / 31.1034768 * 3.75).toLocaleString("en"); })
+  .catch(() => {});
+
+// money panel
+if (D.c) {
+  $("moneyPanel").hidden = false;
+  const cols = ["#7cf3ff", "#ff8ad8", "#ffe08a", "#8affc1", "#b48cff"];
+  const total = D.c.g.reduce((s, x) => s + x[1], 0) || 1;
+  let acc = 0;
+  const stops = D.c.g.map((x, i) => { const a = acc; acc += x[1] / total * 100; return `${cols[i % 5]} ${a}% ${acc}%`; });
+  if (stops.length) $("donut").style.background = `conic-gradient(${stops.join(",")})`;
+  const left = D.c.i - D.c.o;
+  $("left").innerHTML = (left < 0 ? "-$" : "$") + Math.abs(left).toFixed(0) + "<small>នៅសល់</small>";
+  $("legend").innerHTML = `<li><span>➕ ចំណូល</span><b>$${D.c.i.toFixed(2)}</b></li><li><span>➖ ចំណាយ</span><b>$${D.c.o.toFixed(2)}</b></li>` +
+    D.c.g.map((x, i) => `<li><span><i style="background:${cols[i % 5]}"></i>${x[0].replace(/[<>&]/g, "")}</span><b>$${x[1].toFixed(0)}</b></li>`).join("");
+  $("moneyPanel").addEventListener("click", () => go("report"));
+}
+
+// owner panel
+if (D.x) {
+  $("ownerPanel").hidden = false;
+  const money = v => "$" + (v >= 100 ? Math.round(v) : v.toFixed(v % 1 ? 2 : 0));
+  $("kToday").textContent = money(D.x.rt || 0);
+  $("kMonth").textContent = money(D.x.r || 0);
+  $("kLast").textContent = money(D.x.rl || 0);
+  $("kUsers").textContent = D.x.u || 0;
+  $("kGroups").textContent = D.x.g || 0;
+  $("kPending").textContent = D.x.p || 0;
+}
+</script>
+</body>
+</html>
