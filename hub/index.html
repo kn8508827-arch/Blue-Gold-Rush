@@ -108,6 +108,20 @@ body.btn-soft .app .ic{filter:saturate(.62) brightness(.92);box-shadow:inset 0 1
 body.btn-soft .app .t{color:#d9d4f5}
 .c1{--gl:#3fb7ffaa;--sd:#1d5bb8} .c2{--gl:#e463ffaa;--sd:#6b2bb8} .c3{--gl:#ffae5caa;--sd:#b85a22} .c4{--gl:#3fe0a8aa;--sd:#0f7360}
 .c5{--gl:#8c6bffaa;--sd:#3a24b0} .c6{--gl:#ff6b8aaa;--sd:#a3203f} .c7{--gl:#9aa6ffaa;--sd:#424c99} .c8{--gl:#f2c14eaa;--sd:#7a560c}
+/* 🎙️ ICOM quick-join */
+.icom{display:flex;align-items:center;gap:14px;width:100%;margin:12px 0 0;padding:12px 14px 12px 12px;border-radius:var(--r-md);text-align:left;
+  background:linear-gradient(120deg,rgba(255,176,48,.55),rgba(255,92,140,.42));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:inset 0 0 0 1px #ffd59a55,0 12px 28px -12px #ff8a3caa;transition:transform .18s}
+.icom:active{transform:scale(.97)}
+.icom .mic{position:relative;flex:0 0 auto;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:28px;
+  background:radial-gradient(circle at 35% 30%,#fff3d6,#ffb347 55%,#e8642c);box-shadow:0 0 0 2px #ffffffcc,0 0 22px #ffb34799}
+.icom .ring{position:absolute;inset:-2px;border-radius:50%;border:2px solid #ffd27a;animation:icomPulse 2s ease-out infinite;pointer-events:none}
+.icom .ring.r2{animation-delay:1s}
+@keyframes icomPulse{from{transform:scale(1);opacity:.9}to{transform:scale(1.6);opacity:0}}
+.icom .tt{flex:1;display:flex;flex-direction:column;line-height:1.35}
+.icom .tt b{font-size:16px} .icom .tt small{font-size:12.5px;color:#fff1dc}
+.icom .live{font:700 11px/1 var(--dsp);letter-spacing:.08em;padding:6px 8px;border-radius:99px;background:#ff3b5c;color:#fff;box-shadow:0 0 12px #ff3b5c99}
+@media (prefers-reduced-motion:reduce){.icom .ring{animation:none;opacity:0}}
 /* 💙 Team ស្មោះស្នេហ៍ app banner */
 .team{display:flex;align-items:center;gap:12px;width:100%;margin:12px 0 0;padding:10px 14px 10px 10px;border-radius:var(--r-md);text-align:left;
   background:linear-gradient(120deg,rgba(40,110,230,.55),rgba(120,70,220,.45));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -217,6 +231,11 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
     <div class="chip" id="holChip" hidden><div class="k">ថ្ងៃឈប់បន្ទាប់</div><div class="v kh" id="hol">—</div></div>
   </div>
 
+  <button class="icom" id="icomGo" type="button" aria-label="ចូលនិយាយ ICOM">
+    <span class="mic"><span class="ring"></span><span class="ring r2"></span>🎙️</span>
+    <span class="tt"><b>ICOM — ចូលនិយាយភ្លាម</b><small>Push-to-talk ជាមួយក្រុម · ចុចមួយដង</small></span>
+    <span class="live">LIVE</span>
+  </button>
   <button class="team" id="teamApp" type="button" aria-label="បើក App Team ស្មោះស្នេហ៍">
     <img src="team-logo.png" alt="" width="58" height="58">
     <span class="tt"><b>Team ស្មោះស្នេហ៍</b><small>App ផ្លូវការរបស់ក្រុម — ចុចបើក</small></span>
@@ -444,6 +463,9 @@ function nearMe(what) {
          p.coords.latitude.toFixed(5) + "," + p.coords.longitude.toFixed(5) + ",14z");
   }, () => { if (!done) { done = true; clearTimeout(t); plain(); } }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 120000 });
 }
+$("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https://team-smos-snea.lovable.app/icom";
+  // External browser: the microphone and the saved login work there (Telegram's in-app view can block the mic)
+  if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
 $("teamApp").addEventListener("click", () => { haptic("medium"); const u = "https://team-smos-snea.lovable.app/";
   if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); });
 $("evChip").addEventListener("click", () => nearMe("EV charging station"));
