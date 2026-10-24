@@ -530,7 +530,7 @@ $("botHandle").textContent = "@" + BOT + " · AI ជំនួយការរប�
 const tgOpen = link => { if (tg && tg.openTelegramLink) tg.openTelegramLink(link); else location.href = link; };
 $("botChat").addEventListener("click", () => { haptic("light"); tgOpen("https://t.me/" + BOT); });
 // Opens Telegram's group picker; the bot then asks the group to pay with /pay (5$ / 30 days)
-$("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?startgroup=true"); });
+$("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?start=go_addgroup"); });  // members only: pay 5$ first, then pick a group
 $("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https://team-smos-snea.lovable.app/icom";
   // External browser: the microphone and the saved login work there (Telegram's in-app view can block the mic)
   if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
