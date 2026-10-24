@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15132e">
+<title>Friend Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--ink:#15132e;--deep:#221e47;--paper:#f5f2ff;--mist:#a9a3d6;--me:#7cf3ff;--fr:#ff8ad8}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--paper);font-family:"Kantumruy Pro",system-ui,sans-serif}
+#map{position:fixed;inset:0;background:#1d1940}
+.top{position:fixed;z-index:500;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);
+  background:rgba(21,19,46,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:10px 14px}
+.top b{font-size:16px}.top small{display:block;color:var(--mist);font-size:12.5px}
+.list{position:fixed;z-index:500;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;background:rgba(21,19,46,.94);
+  border-radius:22px 22px 0 0;padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 14px)}
+.row{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer}
+.row:last-child{border:0}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#15132e;background:var(--fr);flex:0 0 auto}
+.row .n{flex:1}.row .n b{display:block}.row .n small{color:var(--mist)}
+.row a{color:#15132e;background:var(--paper);text-decoration:none;font-weight:700;font-size:13px;border-radius:999px;padding:7px 12px}
+.pin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;color:#15132e;
+  border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.pin.me{background:var(--me)}.pin.fr{background:var(--fr)}
+.ring{border-radius:50%}
+.empty{padding:40vh 24px;text-align:center;color:var(--mist)}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="top"><b id="title">📍 Friend Map</b><small id="sub">មានតែអ្នកដែលព្រមចែករំលែកប៉ុណ្ណោះ</small></div>
+<div class="list" id="list"></div>
+<script>
+"use strict";
+const tg = window.Telegram && window.Telegram.WebApp;
+try { tg && tg.ready(); tg && tg.expand(); } catch (e) {}
+let D = null;
+try {
+  const raw = new URLSearchParams(location.search).get("d");
+  const b = raw.replace(/-/g, "+").replace(/_/g, "/");
+  D = JSON.parse(decodeURIComponent(escape(atob(b + "===".slice((b.length + 3) % 4)))));
+} catch (e) { D = null; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const km = (a, b) => { const r = Math.PI / 180, dl = (b[0] - a[0]) * r, dn = (b[1] - a[1]) * r;
+  const h = Math.sin(dl / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dn / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); };
+const ago = m => m < 1 ? "ទើបតែឥឡូវ" : m < 60 ? m + " នាទីមុន" : Math.floor(m / 60) + " ម៉ោងមុន";
+if (!D || !D.me) {
+  document.body.innerHTML = '<p class="empty">បើក Friend Map ពី Bot (/nearby) ដើម្បីមើលមិត្ត 📍</p>';
+} else {
+  document.getElementById("title").textContent = "📍 " + D.g;
+  document.getElementById("sub").textContent = D.f.length + " នាក់កំពុងចែករំលែក · មានតែអ្នកព្រមចែកប៉ុណ្ណោះ";
+  const map = L.map("map", { zoomControl: false, attributionControl: true });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+  const icon = (cls, text) => L.divIcon({ className: "", html: `<div class="pin ${cls}">${esc(text)}</div>`, iconSize: [34, 34], iconAnchor: [17, 17] });
+  const pts = [D.me];
+  L.marker(D.me, { icon: icon("me", "ខ្ញុំ") }).addTo(map);
+  const list = document.getElementById("list");
+  const friends = D.f.map(f => ({ name: f[0], pt: [f[1], f[2]], mins: f[3], precise: f[4] }))
+    .sort((a, b) => km(D.me, a.pt) - km(D.me, b.pt));
+  for (const f of friends) {
+    pts.push(f.pt);
+    const initial = Array.from(f.name)[0] || "?";
+    const mk = L.marker(f.pt, { icon: icon("fr", initial) }).addTo(map).bindPopup(`<b>${esc(f.name)}</b><br>${ago(f.mins)}`);
+    if (!f.precise) L.circle(f.pt, { radius: 900, color: "#ff8ad8", weight: 1, fillOpacity: .12 }).addTo(map);
+    const d = km(D.me, f.pt), dist = d < 1 ? Math.round(d * 1000) + " m" : d.toFixed(1) + " km";
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div class="av">${esc(initial)}</div><div class="n"><b>${esc(f.name)}</b><small>${dist}${f.precise ? "" : " (ប្រហែល)"} · ${ago(f.mins)}</small></div>` +
+      `<a href="https://www.google.com/maps/dir/?api=1&destination=${f.pt[0]},${f.pt[1]}" target="_blank" rel="noopener">🧭 ទៅរក</a>`;
+    row.addEventListener("click", e => { if (e.target.tagName !== "A") { map.flyTo(f.pt, 16); mk.openPopup(); } });
+    list.appendChild(row);
+  }
+  map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 16, paddingBottomRight: [0, 160] });
+}
+</script>
+</body>
+</html>
