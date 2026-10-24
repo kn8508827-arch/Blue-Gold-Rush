@@ -91,9 +91,44 @@ h2{font-size:17px;font-weight:700;margin:22px 4px 10px;display:flex;align-items:
 h2 small{font-size:13px;font-weight:400;color:var(--mist)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px}
 .app{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:4px 2px;border-radius:16px}
-.app .ic{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:28px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -10px rgba(0,0,0,.6);transition:transform .15s}
+.app .ic{position:relative;overflow:hidden;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:28px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -10px rgba(0,0,0,.6);transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .2s,filter .2s}
 .app:active .ic{transform:scale(.9)}
+.app .t{text-shadow:0 1px 3px rgba(0,0,0,.65)}
+/* 🫧 Glow (default): glossy glass top, soft coloured halo */
+body.btn-glow .app .ic{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -6px 12px rgba(0,0,0,.18),0 10px 22px -8px var(--gl,#7c5cff99),0 0 0 1px rgba(255,255,255,.12)}
+body.btn-glow .app .ic::before{content:"";position:absolute;inset:0 0 50% 0;border-radius:18px 18px 40% 40%/18px 18px 12px 12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.05));pointer-events:none}
+body.btn-glow .app:hover .ic{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 14px 28px -8px var(--gl,#7c5cffaa),0 0 0 1px rgba(255,255,255,.18)}
+/* 🍬 3D: raised like a real key, presses down */
+body.btn-3d .app .ic{border-radius:20px;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 -3px 0 rgba(0,0,0,.18),0 6px 0 var(--sd,#2a1f66),0 14px 18px -6px rgba(0,0,0,.55)}
+body.btn-3d .app:active .ic{transform:translateY(5px);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 var(--sd,#2a1f66),0 4px 8px -4px rgba(0,0,0,.5)}
+/* 🌙 Soft: calm pastel, easy on the eyes at night */
+body.btn-soft .app .ic{filter:saturate(.62) brightness(.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 6px 14px -10px rgba(0,0,0,.5)}
+body.btn-soft .app .t{color:#d9d4f5}
+.c1{--gl:#3fb7ffaa;--sd:#1d5bb8} .c2{--gl:#e463ffaa;--sd:#6b2bb8} .c3{--gl:#ffae5caa;--sd:#b85a22} .c4{--gl:#3fe0a8aa;--sd:#0f7360}
+.c5{--gl:#8c6bffaa;--sd:#3a24b0} .c6{--gl:#ff6b8aaa;--sd:#a3203f} .c7{--gl:#9aa6ffaa;--sd:#424c99} .c8{--gl:#f2c14eaa;--sd:#7a560c}
+/* ⚙️ theme settings */
+.gear{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:19px;background:var(--glass);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;margin-left:10px}
+.topR{display:flex;align-items:center}
+.sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(4,3,18,.55)}
+.sheet.on{display:flex;animation:fade .2s}
+.sheet .box{width:100%;max-width:560px;max-height:86vh;overflow:auto;background:rgba(24,20,58,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:26px 26px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom,0px) + 20px);box-shadow:0 -10px 40px rgba(0,0,0,.5),inset 0 1px 0 #ffffff22;animation:up .28s cubic-bezier(.2,1,.3,1)}
+@keyframes up{from{transform:translateY(40px);opacity:.4}} @keyframes fade{from{opacity:0}}
+.sheet h3{margin:0 0 4px;font-size:18px} .sheet .sub{margin:0 0 14px;color:var(--mist);font-size:13px}
+.sheet h4{margin:16px 0 8px;font-size:14px;color:#cfc9ff}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.opt{border-radius:16px;padding:8px;background:#ffffff0d;box-shadow:inset 0 0 0 1px #ffffff1a;text-align:center;font-size:12.5px;color:#e9e5ff}
+.opt .pv{height:58px;border-radius:12px;margin-bottom:6px;display:grid;place-items:center;font-size:24px}
+.opt.sel{box-shadow:inset 0 0 0 2px #7cf3ff,0 0 18px -4px #7cf3ff88;background:#7cf3ff14}
+.rowset{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;font-size:14px}
+.rowset input[type=range]{width:55%;accent-color:#7cf3ff}
+.sw{width:50px;height:30px;border-radius:99px;background:#ffffff26;position:relative;transition:.2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:#2fd3a0} .sw.on::after{left:23px}
+.done{width:100%;margin-top:14px;padding:13px;border-radius:16px;font-weight:700;background:linear-gradient(135deg,#7cf3ff,#b48cff);color:#15132e}
 .app .t{font-size:12.5px;line-height:1.3;color:#e9e5ff}
 .app.lock .ic{filter:grayscale(.2)}
 .app .badge{position:absolute;transform:translate(22px,-6px);background:var(--gold);color:#15132e;font-size:10px;font-weight:700;
@@ -131,7 +166,16 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
 @media (min-width:480px){.grid{grid-template-columns:repeat(5,1fr)}}
 </style>
 </head>
-<body>
+<body class="btn-glow">
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Theme"><div class="box">
+  <h3>🎨 ប្ដូរ Theme របស់អ្នក</h3><p class="sub">ជ្រើសផ្ទៃខាងក្រោយ និងរចនាប៊ូតុង — រក្សាទុកដោយស្វ័យប្រវត្តិ</p>
+  <h4>🖼️ ផ្ទៃខាងក្រោយ (Wallpaper)</h4><div class="opts" id="optBg"></div>
+  <h4>🔘 រចនាប៊ូតុង</h4><div class="opts" id="optBtn"></div>
+  <h4>⚙️ ផ្សេងៗ</h4>
+  <div class="rowset"><span>✨ ចលនា</span><button class="sw on" id="swMotion" type="button" aria-label="ចលនា"></button></div>
+  <div class="rowset"><span>🌗 បន្ថយពន្លឺផ្ទៃក្រោយ</span><input type="range" id="dim" min="0" max="60" value="0" aria-label="បន្ថយពន្លឺ"></div>
+  <button class="done" id="sheetDone" type="button">✅ រួចរាល់</button>
+</div></div>
 <canvas id="space" aria-hidden="true"></canvas>
 <div class="wrap">
   <header class="top">
@@ -139,7 +183,8 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <p class="hello" id="hello">សួស្ដី</p>
       <p class="name" id="name">Cooler Fan</p>
     </div>
-    <div class="clock" id="clock">--:--<small id="dateSmall"></small></div>
+    <div class="topR"><div class="clock" id="clock">--:--<small id="dateSmall"></small></div>
+      <button class="gear" id="gear" type="button" aria-label="ប្ដូរ Theme">🎨</button></div>
   </header>
 
   <section class="holo" id="card" aria-label="សមាជិកភាព">
@@ -431,7 +476,15 @@ if (D.x) {
 (() => {
   const cv = document.getElementById("space"); if (!cv || !cv.getContext) return;
   const ctx = cv.getContext("2d");
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const S = { bg: "orbit", dim: 0 };
+  const PAL = {
+    orbit:  ["rgba(160,90,255,.20)", "rgba(40,200,255,.12)", "rgba(255,80,190,.12)", ["#0a0626", "#120a3a", "#060418"]],
+    galaxy: ["rgba(255,120,220,.24)", "rgba(90,120,255,.22)", "rgba(255,190,90,.14)", ["#0b0420", "#1a0838", "#05031a"]],
+    tech:   ["rgba(255,60,200,.20)", "rgba(40,240,255,.18)", "rgba(120,80,255,.16)", ["#07051d", "#170a3d", "#0b0230"]],
+    aurora: ["rgba(40,255,170,.10)", "rgba(60,140,255,.14)", "rgba(170,90,255,.12)", ["#030b1c", "#061a2c", "#020812"]],
+    calm:   ["rgba(90,80,200,.10)", "rgba(40,120,200,.07)", "rgba(160,80,160,.06)", ["#06051a", "#0b0a26", "#040312"]],
+  };
   let W = 0, H = 0, DPR = 1, stars = [], dust = [], shoot = [], t0 = performance.now();
   let px = 0, py = 0, tx = 0, ty = 0, scrollY = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -468,16 +521,17 @@ if (D.x) {
   }
 
   function nebula(t) {
+    const P = PAL[S.bg] || PAL.orbit;
     const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, "#0a0626"); g.addColorStop(.5, "#120a3a"); g.addColorStop(1, "#060418");
+    g.addColorStop(0, P[3][0]); g.addColorStop(.5, P[3][1]); g.addColorStop(1, P[3][2]);
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = "lighter";
     const blob = (x, y, r, col) => { const gg = ctx.createRadialGradient(x, y, 0, x, y, r); gg.addColorStop(0, col); gg.addColorStop(1, "transparent"); ctx.fillStyle = gg; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
     const s = Math.sin(t * .00007), c = Math.cos(t * .00005);
-    blob(W * (.85 + s * .04) - px * 10, H * .12 - py * 8, W * .9, "rgba(160,90,255,.20)");
-    blob(W * .05 - px * 14, H * (.45 + c * .03) - py * 10, W * .8, "rgba(40,200,255,.12)");
-    blob(W * .7 - px * 8, H * .78 - py * 6, W * .7, "rgba(255,80,190,.12)");
-    for (const d of dust) blob(d.x - px * 18, d.y - py * 14, d.r, `hsla(${d.h},90%,70%,${d.a})`);
+    blob(W * (.85 + s * .04) - px * 10, H * .12 - py * 8, W * .9, P[0]);
+    blob(W * .05 - px * 14, H * (.45 + c * .03) - py * 10, W * .8, P[1]);
+    blob(W * .7 - px * 8, H * .78 - py * 6, W * .7, P[2]);
+    if (S.bg !== "calm") for (const d of dust) blob(d.x - px * 18, d.y - py * 14, d.r, `hsla(${d.h},90%,70%,${d.a})`);
     // milky way band
     ctx.save(); ctx.translate(W / 2 - px * 12, H / 2 - py * 10); ctx.rotate(-.55);
     const band = ctx.createLinearGradient(0, -H * .18, 0, H * .18);
@@ -542,8 +596,8 @@ if (D.x) {
     ctx.globalCompositeOperation = "source-over";
   }
 
-  function techPlanet(t) {
-    const r = Math.min(W, H) * .11, cx = W * .8 - px * 40, cy = H * .2 - py * 30 - scrollY * .08;
+  function techPlanet(t, fx = .8, fy = .2, k = 1) {
+    const r = Math.min(W, H) * .11 * k, cx = W * fx - px * 40, cy = H * fy - py * 30 - scrollY * .08;
     const tilt = -.35, ang = reduce ? 0 : t * .0006;
     const ring = (front) => { ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt); ctx.scale(1, .28);
       ctx.beginPath(); ctx.arc(0, 0, r * 1.9, front ? 0 : Math.PI, front ? Math.PI : Math.PI * 2);
@@ -604,19 +658,114 @@ if (D.x) {
     ctx.fillStyle = sg; ctx.fillRect(0, scan - 60, W, 120);
   }
 
+  // 🌌 spiral galaxy (particles on two log-spiral arms, slowly turning)
+  const gal = Array.from({ length: 1100 }, (_, i) => { const arm = i % 2, d = Math.random() ** .7;
+    return { a: arm * Math.PI + d * 5.2 + rnd(-.35, .35) * (1.2 - d), d, s: rnd(.4, 1.6),
+             c: d < .18 ? "255,226,170" : d < .5 ? "255,160,230" : Math.random() < .5 ? "150,170,255" : "190,140,255" }; });
+  function galaxy(t) {
+    const R = Math.min(W, H) * .62, cx = W * .5 - px * 26, cy = H * .6 - py * 20 - scrollY * .06, rot = reduce ? 0 : t * .00004;
+    const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * .35);
+    core.addColorStop(0, "rgba(255,240,210,.85)"); core.addColorStop(.25, "rgba(255,170,220,.25)"); core.addColorStop(1, "transparent");
+    ctx.globalCompositeOperation = "lighter";
+    for (const p of gal) { const a = p.a + rot, x = cx + Math.cos(a) * p.d * R, y = cy + Math.sin(a) * p.d * R * .42;
+      ctx.fillStyle = `rgba(${p.c},${.75 - p.d * .45})`; ctx.fillRect(x, y, p.s, p.s); }
+    ctx.fillStyle = core; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+    ctx.globalCompositeOperation = "source-over";
+  }
+  // 🪐 neon horizon grid (tech world)
+  function grid(t) {
+    const hz = H * .7 - py * 10, sp = reduce ? 0 : (t * .03) % 40;
+    const g = ctx.createLinearGradient(0, hz, 0, H); g.addColorStop(0, "rgba(255,60,200,.0)"); g.addColorStop(1, "rgba(60,20,120,.6)");
+    ctx.fillStyle = g; ctx.fillRect(0, hz, W, H - hz);
+    ctx.strokeStyle = "rgba(124,243,255,.35)"; ctx.lineWidth = 1;
+    for (let i = -12; i <= 12; i++) { ctx.beginPath(); ctx.moveTo(W / 2 + i * 14 - px * 20, hz); ctx.lineTo(W / 2 + i * W * .22 - px * 60, H); ctx.stroke(); }
+    for (let k = 0; k < 14; k++) { const y = hz + ((k * 40 + sp) / 560) ** 2 * (H - hz);
+      ctx.strokeStyle = `rgba(255,90,210,${.15 + .5 * (y - hz) / (H - hz)})`; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    const sun = ctx.createLinearGradient(0, hz - 120, 0, hz); sun.addColorStop(0, "#ffe08a"); sun.addColorStop(1, "#ff4fb5");
+    ctx.save(); ctx.beginPath(); ctx.arc(W * .5 - px * 18, hz, Math.min(W, H) * .16, Math.PI, 0); ctx.clip();
+    ctx.fillStyle = sun; ctx.fillRect(0, hz - 200, W, 200); ctx.fillStyle = "#170a3d";
+    for (let k = 0; k < 6; k++) ctx.fillRect(0, hz - 8 - k * 12, W, 2 + k * .6); ctx.restore();
+  }
+  // 🌠 aurora ribbons
+  function aurora(t) {
+    ctx.globalCompositeOperation = "lighter";
+    const cols = [[60, 255, 170], [90, 200, 255], [190, 110, 255]];
+    for (let k = 0; k < 3; k++) { const base = H * (.2 + k * .1) - py * 12, [r, g, b] = cols[k];
+      for (let x = 0; x <= W; x += 5) {
+        const y = base + Math.sin(x * .008 + t * .0004 * (1 + k * .3) + k) * 38 + Math.sin(x * .021 + t * .0007) * 14;
+        const h = 90 + 60 * Math.sin(x * .013 + t * .0005 + k);
+        const gg = ctx.createLinearGradient(0, y - h, 0, y);
+        gg.addColorStop(0, "transparent"); gg.addColorStop(1, `rgba(${r},${g},${b},.13)`);
+        ctx.fillStyle = gg; ctx.fillRect(x - px * 16, y - h, 6, h + 6);
+      } }
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "#020610"; ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 20) ctx.lineTo(x, H * .86 - Math.abs(Math.sin(x * .011)) * 60 - Math.sin(x * .037) * 14);
+    ctx.lineTo(W, H); ctx.fill();
+  }
+  const SCENES = {
+    orbit:  (t, dt) => { nebula(t); drawStars(t); farPlanets(); techPlanet(t); shooting(t, dt); earth(t); cockpit(t); },
+    galaxy: (t, dt) => { nebula(t); drawStars(t); galaxy(t); farPlanets(); shooting(t, dt); },
+    tech:   (t, dt) => { nebula(t); drawStars(t); techPlanet(t, .8, .48, 1.3); grid(t); shooting(t, dt); },
+    aurora: (t, dt) => { nebula(t); drawStars(t); aurora(t); shooting(t, dt); },
+    calm:   (t) => { nebula(t); drawStars(t); },
+  };
+
   let last = performance.now(), raf = 0;
   function frame(now) {
     const dt = Math.min(60, now - last); last = now; const t = now - t0;
     px += (tx - px) * .05; py += (ty - py) * .05;
-    nebula(t); drawStars(t); farPlanets(); techPlanet(t); shooting(t, dt); earth(t); cockpit(t);
+    (SCENES[S.bg] || SCENES.orbit)(t, dt);
+    if (S.dim) { ctx.fillStyle = `rgba(0,0,0,${S.dim / 100})`; ctx.fillRect(0, 0, W, H); }
     raf = reduce ? 0 : requestAnimationFrame(frame);
   }
+  window.SPACE = {
+    set(o) { Object.assign(S, o); if ("motion" in o) { reduce = !o.motion; }
+      cancelAnimationFrame(raf); raf = 0; last = performance.now(); frame(last); },
+  };
   addEventListener("resize", () => { resize(); if (reduce) frame(performance.now()); });
   addEventListener("scroll", () => { scrollY = window.scrollY || 0; if (reduce) frame(performance.now()); }, { passive: true });
   addEventListener("pointermove", e => { tx = (e.clientX / W - .5) * 2; ty = (e.clientY / H - .5) * 2; }, { passive: true });
   addEventListener("deviceorientation", e => { if (e.gamma == null) return; tx = Math.max(-1, Math.min(1, e.gamma / 30)); ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); }, { passive: true });
   document.addEventListener("visibilitychange", () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); } });
   resize(); frame(performance.now());
+})();
+
+/* 🎨 Theme settings — saved on this phone and in Telegram Cloud (follows the user to other devices) */
+(() => {
+  const BG = [["orbit", "🌍", "ផែនដីពីយានអវកាស", "linear-gradient(180deg,#120a3a 55%,#1f6fd1 56%,#0b2a6b)"],
+              ["galaxy", "🌌", "Galaxy", "radial-gradient(circle at 55% 45%,#ffe2aa,#ff8ad8 18%,#3a1d8a 45%,#0b0420 75%)"],
+              ["tech", "🪐", "ភពបច្ចេកវិទ្យា", "linear-gradient(180deg,#170a3d 55%,#ff4fb5 56%,#3c1478)"],
+              ["aurora", "🌠", "ពន្លឺ Aurora", "linear-gradient(180deg,#061a2c,#1a7a63 45%,#5b2f9b 70%,#020610)"],
+              ["calm", "🌙", "យប់ស្ងាត់", "linear-gradient(180deg,#0b0a26,#06051a)"]];
+  const BTN = [["glow", "🫧", "Glow ភ្លឺ", "linear-gradient(145deg,#b48cff,#5b3cff)"],
+               ["3d", "🍬", "3D ផុស", "linear-gradient(145deg,#ffe08a,#ff8a4c)"],
+               ["soft", "🌿", "ស្រាលភ្នែក", "linear-gradient(145deg,#a8c7c0,#6f8f9b)"]];
+  const KEY = "coolerTheme";
+  let st = { bg: "orbit", btn: "glow", motion: true, dim: 0 };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  const cloud = tg && tg.CloudStorage;
+  const apply = () => {
+    document.body.classList.remove("btn-glow", "btn-3d", "btn-soft"); document.body.classList.add("btn-" + st.btn);
+    if (window.SPACE) SPACE.set({ bg: st.bg, dim: +st.dim, motion: st.motion && !matchMedia("(prefers-reduced-motion: reduce)").matches });
+    $("swMotion").classList.toggle("on", !!st.motion); $("dim").value = st.dim;
+    document.querySelectorAll(".opt").forEach(o => o.classList.toggle("sel", st[o.dataset.k] === o.dataset.v));
+  };
+  const save = () => { const j = JSON.stringify(st); try { localStorage.setItem(KEY, j); } catch (e) {}
+    try { cloud && cloud.setItem(KEY, j, () => {}); } catch (e) {} };
+  const build = (host, list, k) => { $(host).innerHTML = list.map(([v, e, n, bg]) =>
+    `<button class="opt" type="button" data-k="${k}" data-v="${v}"><div class="pv" style="background:${bg}">${e}</div>${n}</button>`).join(""); };
+  build("optBg", BG, "bg"); build("optBtn", BTN, "btn");
+  document.querySelectorAll(".opt").forEach(o => o.addEventListener("click", () => { haptic("light"); st[o.dataset.k] = o.dataset.v; apply(); save(); }));
+  $("swMotion").addEventListener("click", () => { haptic("light"); st.motion = !st.motion; apply(); save(); });
+  $("dim").addEventListener("input", e => { st.dim = +e.target.value; apply(); });
+  $("dim").addEventListener("change", save);
+  const open = on => { $("sheet").classList.toggle("on", on); if (on) haptic("medium"); };
+  $("gear").addEventListener("click", () => open(true));
+  $("sheetDone").addEventListener("click", () => open(false));
+  $("sheet").addEventListener("click", e => { if (e.target.id === "sheet") open(false); });
+  apply();
+  try { cloud && cloud.getItem(KEY, (err, v) => { if (!err && v) { try { Object.assign(st, JSON.parse(v)); apply(); } catch (e) {} } }); } catch (e) {}
 })();
 </script>
 </body>
