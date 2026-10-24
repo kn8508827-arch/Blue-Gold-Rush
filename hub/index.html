@@ -35,11 +35,45 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .name{font-family:var(--kh);font-weight:700;font-size:26px;line-height:1.25;margin:2px 0 0}
 .clock{font-family:var(--dsp);font-weight:500;font-size:22px;color:var(--paper);text-align:right;letter-spacing:.5px}
 .clock small{display:block;font-family:var(--kh);font-size:12px;color:var(--mist);letter-spacing:0}
+button.clock{border:0;background:none;color:var(--paper);cursor:pointer;padding:4px 6px;border-radius:14px;line-height:1.15}
+button.clock:active{background:#ffffff14}
+.clock small.lunar{color:#cfe9ff;font-weight:600;margin-top:2px}
+.silaPill{display:inline-block;margin-top:5px;padding:3px 9px;border-radius:99px;font:700 11.5px/1.3 var(--kh);letter-spacing:0;
+  color:#2a2003;background:linear-gradient(135deg,#ffe08a,#f2c14e);box-shadow:0 4px 12px -4px #f2c14eaa}
+.silaPill[hidden]{display:none}
 
+/* 🔄 flipping card: A member · B today's info · C what matters */
+.cardflip{perspective:1200px;animation:deal .9s cubic-bezier(.2,1.2,.3,1) both;transition:transform .25s ease-out;cursor:pointer}
+.flipper{position:relative;display:grid;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.3,1.35,.45,1)}
+.flipper > .side{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:214px}
+.flipper > .side.back{transform:rotateY(180deg)}
+.flipnav{display:flex;align-items:center;justify-content:center;gap:7px;margin:10px 0 2px}
+.flipnav .dot{width:7px;height:7px;border-radius:50%;background:#ffffff38;transition:all .3s}
+.flipnav .dot.on{width:22px;border-radius:6px;background:linear-gradient(90deg,#7cf3ff,#ff8ad8)}
+.flipnav em{font-style:normal;font-size:12px;color:var(--mist);margin-left:6px}
+.pts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pts[hidden]{display:none}
+.pts span{background:#15132e;color:#fff4d6;font-weight:700;font-size:13px;padding:5px 11px;border-radius:99px}
+.side[data-face="b"]{--holo:linear-gradient(115deg,#7cf3ff 0%,#5ad1ff 30%,#8affc1 60%,#c8ffe9 100%)}
+.side[data-face="c"]{--holo:linear-gradient(115deg,#ffe08a 0%,#ffb86b 35%,#ff8ad8 70%,#ffe08a 100%)}
+.face{color:#15132e}
+.face h3{margin:0;font-family:var(--dsp);font-weight:900;font-size:18px;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
+.face h3 small{font-family:var(--kh);font-weight:700;font-size:12px;opacity:.7;letter-spacing:0}
+.face .kd{font-weight:700;font-size:17px;line-height:1.45;margin-top:10px}
+.face .sd{font-size:13.5px;font-weight:600;opacity:.75}
+.face .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.face .tile{background:rgba(21,19,46,.12);border-radius:14px;padding:8px 10px}
+.face .tile b{display:block;font-family:var(--dsp);font-size:16px}
+.face .tile span{font-size:11.5px;font-weight:700;opacity:.7}
+.face ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px}
+.face li{display:flex;gap:10px;align-items:center;background:rgba(21,19,46,.12);border-radius:14px;padding:8px 11px;font-size:14px;font-weight:600;line-height:1.35}
+.face li i{font-style:normal;font-size:18px}
+.face li em{font-style:normal;margin-left:auto;font-size:12px;font-weight:700;white-space:nowrap;background:#15132e;color:#fff;border-radius:99px;padding:3px 9px}
+@media (prefers-reduced-motion:reduce){.flipper{transition:none}}
 /* the one bold thing: holographic member card */
 .holo{position:relative;border-radius:var(--r-lg);padding:22px 22px 20px;overflow:hidden;isolation:isolate;
   background:#1d1940;box-shadow:0 20px 50px -20px rgba(180,140,255,.55);transform-style:preserve-3d;
-  transition:transform .25s ease-out;animation:deal .9s cubic-bezier(.2,1.2,.3,1) both}
+  transition:transform .25s ease-out}
 .holo::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--holo);background-size:220% 220%;
   background-position:var(--hx,30%) var(--hy,40%);opacity:.92;mix-blend-mode:normal}
 .holo::after{content:"";position:absolute;inset:0;z-index:-1;
@@ -221,22 +255,28 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <p class="hello" id="hello">សួស្ដី</p>
       <p class="name" id="name">Cooler Fan</p>
     </div>
-    <div class="topR"><div class="clock" id="clock">--:--<small id="dateSmall"></small></div>
+    <div class="topR"><button class="clock" id="clock" type="button" aria-label="បើកប្រតិទិនខ្មែរ">--:--<small id="dateSmall"></small><small class="lunar" id="lunarSmall"></small><span class="silaPill" id="silaPill" hidden></span></button>
       <button class="gear" id="gear" type="button" aria-label="ប្ដូរ Theme">🎨</button></div>
   </header>
 
-  <section class="holo" id="card" aria-label="សមាជិកភាព">
+  <section class="cardflip" id="cardflip" aria-label="កាត Cooler — ចុចដើម្បីបង្វិល">
+    <div class="flipper" id="flipper">
+      <div class="side holo" id="card" data-face="a"><div class="faceA" id="faceA">
     <div class="row">
       <div class="brand">COOLER<span id="tier">MEMBER</span></div>
       <div class="days" id="days">—<small id="daysLabel">ថ្ងៃនៅសល់</small></div>
     </div>
     <div class="who"><b id="cardName">Cooler Fan</b><span id="cardSub">ចុចដើម្បីចូលជាសមាជិក</span></div>
     <div class="bar" id="bar"><i></i></div>
+    <div class="pts" id="pts" hidden></div>
     <button class="join" id="join" hidden>💳 ចូលជាសមាជិក 1$ / ខែ</button>
+      </div></div>
+      <div class="side holo back" id="side2" data-face="b"></div>
+    </div>
   </section>
+  <div class="flipnav" aria-hidden="true"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><em>ចុចកាតដើម្បីបង្វិល ↻</em></div>
 
   <div class="strip" id="strip">
-    <button class="chip near sila" id="calChip" type="button"><div class="k">🙏 ថ្ងៃសីល</div><div class="v kh" id="silaChip">ប្រតិទិន →</div></button>
     <button class="chip near" id="evChip" type="button"><div class="k">⚡ សាកថ្ម EV</div><div class="v kh">ជិតខ្ញុំ →</div></button>
     <button class="chip near fuel" id="fuelChip" type="button"><div class="k">⛽ ស្ថានីយប្រេង</div><div class="v kh">ជិតខ្ញុំ →</div></button>
     <div class="chip"><div class="k" id="wxName">ភ្នំពេញ</div><div class="v" id="wx">—</div></div>
@@ -421,8 +461,7 @@ function tick() {
   $("hello").textContent = h < 11 ? "អរុណសួស្ដី ☀️" : h < 14 ? "ទិវាសួស្ដី 🌤️" : h < 18 ? "សាយណ្ហសួស្ដី 🌇" : "រាត្រីសួស្ដី 🌙";
   $("clock").firstChild.nodeValue = String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
   const months = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
-  $("dateSmall").textContent = KH(now.getDate()) + " " + months[now.getMonth()] +
-    (D.k ? " · " + D.k.split(" ឆ្នាំ")[0] + (D.s ? " 🙏" : "") : "");
+  $("dateSmall").textContent = KH(now.getDate()) + " " + months[now.getMonth()];
 }
 tick(); setInterval(tick, 15000);
 $("name").textContent = NAME;
@@ -454,10 +493,11 @@ if (M.o) {
   $("join").hidden = false;
 }
 $("join").addEventListener("click", () => go("pay"));
-$("card").addEventListener("click", e => { if (e.target.id !== "join") go("myplan"); });
+// points & level (sent by the bot with /hub)
+if (D.p) { $("pts").hidden = false; $("pts").innerHTML = `<span>⭐ ${KH(D.p[0])} ពិន្ទុ</span><span>${D.p[1]}</span>` + (D.p[2] ? `<span>🔥 ${KH(D.p[2])} ថ្ងៃ</span>` : ""); }
 
 // holographic shine follows the finger / phone tilt (motion answers the user)
-const card = $("card");
+const card = $("cardflip");
 function shine(x, y) {
   card.style.setProperty("--hx", (x * 100).toFixed(1) + "%");
   card.style.setProperty("--hy", (y * 100).toFixed(1) + "%");
@@ -496,13 +536,78 @@ $("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https:
   if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
 $("teamApp").addEventListener("click", () => { haptic("medium"); const u = "https://team-smos-snea.lovable.app/";
   if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); });
-$("calChip").addEventListener("click", () => { haptic("medium"); location.href = "calendar.html"; });
-// Next sila day on the chip (same data file as the calendar page)
+// 📅 Khmer calendar data (same file as calendar.html): lunar line + next sila under the clock
+const SMN = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+const WDN = ["អាទិត្យ","ចន្ទ","អង្គារ","ពុធ","ព្រហស្បតិ៍","សុក្រ","សៅរ៍"];
+const khToday = () => { const n = new Date(); return new Date(n.getTime() + (n.getTimezoneOffset() + 420) * 60000); };
+let CAL = null;
+const calAt = (j, i0, i) => { const r = j.days[i0 + i]; if (!r) return null;
+  return { day: r[0], waning: r[1], month: j.months[r[2]], animal: j.animals[r[3]], sak: j.saks[r[4]], be: r[5] + 2500, sila: !!r[6] }; };
 fetch("khmer-calendar.json").then(r => r.json()).then(j => {
-  const [y, m, d] = j.start.split("-").map(Number), n = new Date(), t = new Date(n.getTime() + (n.getTimezoneOffset() + 420) * 60000);
+  const [y, m, d] = j.start.split("-").map(Number), t = khToday();
   const i0 = Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
-  for (let i = 0; i < 16; i++) { const r = j.days[i0 + i]; if (r && r[6]) { $("silaChip").textContent = i === 0 ? "ថ្ងៃនេះ 🙏" : i === 1 ? "ស្អែក →" : KH(i) + " ថ្ងៃទៀត →"; break; } }
+  const k = calAt(j, i0, 0);
+  if (!k) return;
+  CAL = { today: k, sila: null, hol: null };
+  $("lunarSmall").textContent = "🌙 " + KH(k.day) + (k.waning ? "រោច" : "កើត") + " " + k.month;
+  for (let i = 0; i < 16; i++) { const x = calAt(j, i0, i); if (x && x.sila) { CAL.sila = [i, addD(t, i), x]; break; } }
+  for (let i = 0; i < 120; i++) { const dd = addD(t, i), h = j.hol[isoD(dd)]; if (h) { CAL.hol = [i, dd, h]; break; } }
+  if (CAL.sila) { const i = CAL.sila[0]; $("silaPill").hidden = false;
+    $("silaPill").textContent = i === 0 ? "🙏 ថ្ងៃនេះ ថ្ងៃសីល" : i === 1 ? "🙏 សីល ស្អែក" : "🙏 សីល " + KH(i) + " ថ្ងៃទៀត"; }
 }).catch(() => {});
+function addD(t, i) { return new Date(t.getFullYear(), t.getMonth(), t.getDate() + i); }
+function isoD(x) { return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); }
+$("clock").addEventListener("click", () => { haptic("medium"); location.href = "calendar.html"; });
+
+// 🔄 flip card: A (member) → B (today's info) → C (what matters) → A …
+const FACES = ["a", "b", "c"], faceA = $("faceA");
+let faceIdx = 0, turns = 0, frontIsCard = true;
+const inWords = i => i === 0 ? "ថ្ងៃនេះ" : i === 1 ? "ស្អែក" : KH(i) + " ថ្ងៃទៀត";
+function faceB() {
+  const t = khToday(), k = CAL && CAL.today;
+  const v = id => ($(id) && $(id).textContent.trim()) || "—";
+  return `<div class="face"><h3>TODAY <small>ព័ត៌មានទូទៅ</small></h3>
+    <div class="kd">${k ? "ថ្ងៃ" + WDN[t.getDay()] + " " + KH(k.day) + (k.waning ? "រោច" : "កើត") + " ខែ" + k.month : "—"}</div>
+    <div class="sd">${k ? "ឆ្នាំ" + k.animal + " " + k.sak + " ព.ស. " + KH(k.be) + " · " : ""}${KH(t.getDate())} ${SMN[t.getMonth()]} ${KH(t.getFullYear())}</div>
+    <div class="tiles"><div class="tile"><span>${v("wxName")}</span><b>${v("wx")}</b></div>
+      <div class="tile"><span>១ ដុល្លារ</span><b>${v("usd")}</b></div><div class="tile"><span>មាស / ជី</span><b>${v("gold")}</b></div></div></div>`;
+}
+function faceC() {
+  const rows = [];
+  if (CAL && CAL.sila) { const [i, dd, x] = CAL.sila;
+    rows.push(`<li><i>🙏</i><span>ថ្ងៃសីល · ${WDN[dd.getDay()]} ${KH(dd.getDate())} ${SMN[dd.getMonth()]}</span><em>${inWords(i)}</em></li>`); }
+  if (CAL && CAL.hol) { const [i, , name] = CAL.hol;
+    rows.push(`<li><i>🎉</i><span>${name.split(" · ")[0].slice(0, 34)}</span><em>${inWords(i)}</em></li>`); }
+  const M = D.m || {};
+  if (M.o) rows.push(`<li><i>👑</i><span>Owner · ប្រើគ្រប់មុខងារ</span></li>`);
+  else if (M.a) rows.push(`<li><i>🎟️</i><span>VIP ដល់ ${M.u}</span><em>${KH(M.l)} ថ្ងៃ</em></li>`);
+  else if (D.m) rows.push(`<li><i>💳</i><span>ចូលជាសមាជិក 1$ / ខែ — /pay</span></li>`);
+  if (D.x) rows.push(`<li><i>💰</i><span>ចំណូលខែនេះ $${D.x.r} · រង់ចាំ ${KH(D.x.p)}</span><em>${KH(D.x.u)} នាក់</em></li>`);
+  else if (D.c) rows.push(`<li><i>📒</i><span>ខែនេះ ចំណូល $${D.c.i.toFixed(0)} · ចំណាយ $${D.c.o.toFixed(0)}</span></li>`);
+  rows.push(`<li><i>🎙️</i><span>ICOM · និយាយជាមួយក្រុម</span><em>LIVE</em></li>`);
+  return `<div class="face"><h3>FOR YOU <small>ចំណុចសំខាន់ៗ</small></h3><ul>${rows.slice(0, 4).join("")}</ul></div>`;
+}
+function flip(dir) {
+  haptic("light");
+  faceIdx = (faceIdx + (dir < 0 ? 2 : 1)) % 3;
+  const hidden = frontIsCard ? $("side2") : $("card");
+  const f = FACES[faceIdx];
+  hidden.dataset.face = f;
+  hidden.classList.toggle("off", f === "a" && $("card").classList.contains("wasOff"));
+  if (f === "a") hidden.replaceChildren(faceA); else hidden.innerHTML = f === "b" ? faceB() : faceC();
+  turns += dir < 0 ? -1 : 1; frontIsCard = !frontIsCard;
+  $("flipper").style.transform = `rotateY(${turns * 180}deg)`;
+  document.querySelectorAll(".flipnav .dot").forEach((d, i) => d.classList.toggle("on", i === faceIdx));
+}
+if ($("card").classList.contains("off")) $("card").classList.add("wasOff");
+$("cardflip").addEventListener("click", e => {
+  if (e.target.closest("#join")) return;
+  flip(1);
+});
+let fx = null;
+$("cardflip").addEventListener("touchstart", e => { fx = e.touches[0].clientX; }, { passive: true });
+$("cardflip").addEventListener("touchend", e => { if (fx === null) return; const dx = e.changedTouches[0].clientX - fx; fx = null;
+  if (Math.abs(dx) > 45) { e.preventDefault(); flip(dx < 0 ? 1 : -1); } });
 $("evChip").addEventListener("click", () => nearMe("EV charging station"));
 $("fuelChip").addEventListener("click", () => nearMe("gas station"));
 if (D.h) { $("holChip").hidden = false; $("hol").textContent = D.h[0].slice(0, 22) + " · " + KH(D.h[1]) + "ថ្ងៃ"; }
