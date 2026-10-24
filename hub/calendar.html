@@ -13,7 +13,7 @@
 <style>
 :root{
   --bg:#0b1d14; --card:#13301f; --card2:#1a3d28; --line:#2a5a3c; --ink:#f3fff6; --mist:#a9cdb5;
-  --green:#4cd17a; --gold:#ffd166; --red:#ff6b6b; --today:#7cf3ff;
+  --green:#4cd17a; --gold:#ffd166; --red:#ff6b6b; --blue:#7fb4ff; --today:#7cf3ff;
   --kh:"Kantumruy Pro",system-ui,sans-serif; --dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -34,7 +34,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .today .sol{font-size:14px;color:#e6fff0;margin-top:2px}
 .sila{display:flex;align-items:center;gap:12px;margin-top:12px;padding:14px;border-radius:20px;background:linear-gradient(135deg,#4a3a10,#2b2410);
   box-shadow:inset 0 0 0 1px #ffd16655}
-.sila .ic{font-size:30px}
+.sila .ic{font-size:30px}.sila .ic .buddha{width:34px;height:34px;vertical-align:middle}
 .sila b{display:block;color:var(--gold);font-size:16px}
 .sila span{font-size:13.5px;color:#f5e6c2}
 .cal{margin-top:16px;background:var(--card);border-radius:24px;padding:14px 10px 12px}
@@ -49,13 +49,17 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .d{position:relative;min-height:58px;border-radius:12px;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px}
 .d .n{font-family:var(--dsp);font-weight:700;font-size:15px}
 .d .l{font-size:10.5px;color:var(--mist);white-space:nowrap}
-.d.sun .n{color:#ff9a9a}
 .d.empty{background:none}
-.d.sila{background:linear-gradient(160deg,#5a4512,#3a2d0c);box-shadow:inset 0 0 0 1px #ffd16688}
-.d.sila .l{color:var(--gold);font-weight:700}
-.d.sila::after{content:"🙏";position:absolute;top:1px;right:3px;font-size:10px}
-.d.hol .n{color:var(--red)}
+/* 🔴 Sunday · public holiday / big festival   🔵 notice day   🪷 sila = gold Buddha   everything else stays plain */
+.d.obs .n{color:var(--blue)}
+.d.sun .n,.d.hol .n{color:var(--red)}   /* red wins over blue */
+.d.hol{background:linear-gradient(160deg,#4a2226,#2f1a1d);box-shadow:inset 0 0 0 1px #ff6b6b55}
+.d.hol .l{color:#ffb3b3}
+.d.obs:not(.hol)::before{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--blue)}
 .d.hol::before{content:"";position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.buddha{display:inline-block;width:13px;height:13px;vertical-align:-2px}
+.d .buddha{position:absolute;top:2px;left:2px;width:12px;height:12px;filter:drop-shadow(0 0 3px #ffd16699)}
+.d.sl .l{color:var(--gold);font-weight:700}
 .d.today{box-shadow:0 0 0 2px var(--today),0 0 14px #7cf3ff66}
 .d.newm .l{color:var(--green);font-weight:700}
 .legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-size:12.5px;color:var(--mist);margin-top:10px}
@@ -78,11 +82,20 @@ h2{font-size:16px;margin:20px 4px 8px}
 .sheet .tag{display:inline-block;margin-top:10px;padding:6px 12px;border-radius:99px;font-weight:700;font-size:14px}
 .sheet .tag.s{background:#ffd16633;color:var(--gold)}
 .sheet .tag.h{background:#ff6b6b33;color:#ffb3b3}
+.sheet .tag.o{background:#7fb4ff33;color:#cfe0ff}
 .sheet .close{width:100%;margin-top:16px;padding:12px;border-radius:16px;background:var(--green);color:#0b1d14;font-weight:700}
 .err{padding:20px;text-align:center;color:var(--mist)}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="budg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset="1" stop-color="#e0a21a"/></linearGradient>
+  <symbol id="bud" viewBox="0 0 24 24"><g fill="url(#budg)">
+    <path d="M12 1.2l1.1 2.2h-2.2z"/><circle cx="12" cy="5.6" r="2.5"/>
+    <path d="M12 8.6c-2.6 0-4.4 1.6-4.9 4.4l-.6 3.3c1.6-.5 3.5-.7 5.5-.7s3.9.2 5.5.7l-.6-3.3c-.5-2.8-2.3-4.4-4.9-4.4z"/>
+    <path d="M3.5 18.6c1.8-1.5 5-2.3 8.5-2.3s6.7.8 8.5 2.3c-1.6 1.6-4.9 2.5-8.5 2.5s-6.9-.9-8.5-2.5z"/>
+    <path d="M2.5 22h19c-.6-.9-1.4-1.4-2.4-1.6-2 1-4.5 1.5-7.1 1.5s-5.1-.5-7.1-1.5c-1 .2-1.8.7-2.4 1.6z"/></g></symbol>
+</defs></svg>
 <div class="wrap">
   <header class="top">
     <a class="back" id="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
@@ -96,7 +109,7 @@ h2{font-size:16px;margin:20px 4px 8px}
   </section>
 
   <section class="sila" id="silaBox">
-    <div class="ic">🙏</div>
+    <div class="ic"><svg class="buddha"><use href="#bud"/></svg></div>
     <div><b id="silaT">ថ្ងៃសីលបន្ទាប់</b><span id="silaS">—</span></div>
   </section>
 
@@ -108,8 +121,9 @@ h2{font-size:16px;margin:20px 4px 8px}
     </div>
     <div class="grid" id="grid"></div>
     <div class="legend">
-      <span><i style="background:#5a4512;box-shadow:inset 0 0 0 1px #ffd166"></i>ថ្ងៃសីល</span>
-      <span><i style="background:#ff6b6b"></i>ថ្ងៃឈប់សម្រាក</span>
+      <span><i style="background:#ff6b6b"></i>ថ្ងៃបុណ្យ · ឈប់សម្រាក · អាទិត្យ</span>
+      <span><i style="background:#7fb4ff"></i>ថ្ងៃជូនដំណឹង</span>
+      <span><svg class="buddha"><use href="#bud"/></svg> ថ្ងៃសីល</span>
       <span><i style="background:none;box-shadow:0 0 0 2px #7cf3ff"></i>ថ្ងៃនេះ</span>
     </div>
   </section>
@@ -118,6 +132,8 @@ h2{font-size:16px;margin:20px 4px 8px}
   <div class="list" id="silaList"></div>
   <h2>🎉 ថ្ងៃបុណ្យ & ឈប់សម្រាកខាងមុខ</h2>
   <div class="list" id="holList"></div>
+  <h2>📢 ថ្ងៃជូនដំណឹងខាងមុខ</h2>
+  <div class="list" id="obsList"></div>
 </div>
 
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="box">
@@ -137,13 +153,30 @@ const SM = ["មករា","កុម្ភៈ","មីនា","មេសា","�
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const khNow = () => { const n = new Date(); return new Date(n.getTime() + (n.getTimezoneOffset() + 420) * 60000); };
 let DATA = null, START = null, view = null;
+// 🔵 notice days (not public holidays). Solar: MM-DD → name. Lunar: worked out from the Khmer calendar data.
+const OBS = {
+  "02-14": "ទិវានៃក្ដីស្រឡាញ់ (Valentine)", "05-20": "ទិវាជាតិនៃការចងចាំ", "06-01": "ទិវាកុមារអន្តរជាតិ",
+  "06-05": "ទិវាបរិស្ថានពិភពលោក", "10-01": "ទិវាមនុស្សចាស់កម្ពុជា និងអន្តរជាតិ", "10-05": "ទិវាគ្រូបង្រៀនពិភពលោក",
+  "10-23": "ទិវារំលឹកខួបនៃកិច្ចព្រមព្រៀងសន្តិភាពទីក្រុងប៉ារីស", "10-31": "បុណ្យហាឡូវីន (Halloween)",
+  "12-10": "ទិវាសិទ្ធិមនុស្សអន្តរជាតិ", "12-25": "បុណ្យណូអែល (Christmas)", "12-31": "ថ្ងៃចុងឆ្នាំសកល",
+};
+function lunarObs(day, waning, month) {
+  // month index: 2 មាឃ · 7 អាសាឍ · 9 ភទ្របទ · 10 អស្សុជ · 13 ទុតិយាសាឍ (leap years)
+  if (month === 2 && !waning && day === 15) return "ពិធីបុណ្យមាឃបូជា";
+  if ((month === 7 || month === 13) && waning && day === 1) return "ចូលព្រះវស្សា";
+  if (month === 9 && waning && day <= 14) return "បិណ្ឌទី" + KH(day);
+  if (month === 10 && !waning && day === 15) return "ចេញព្រះវស្សា";
+  if (month === 10 && waning && day === 1) return "ចាប់ផ្ដើមកឋិនកាល";
+  return "";
+}
 
 function info(d) {
   const i = Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - START) / 86400000);
   const r = DATA.days[i];
   if (!r) return null;
   const [day, waning, month, animal, sak, be, sila] = r;
-  return { day, waning: !!waning, month, sila: !!sila, hol: DATA.hol[iso(d)] || "",
+  const obs = [OBS[iso(d).slice(5)], lunarObs(day, !!waning, month)].filter(Boolean).join(" · ");
+  return { day, waning: !!waning, month, sila: !!sila, hol: DATA.hol[iso(d)] || "", obs,
     short: KH(day) + (waning ? "រោច" : "កើត"),
     full: KH(day) + (waning ? "រោច" : "កើត") + " ខែ" + DATA.months[month] + " ឆ្នាំ" + DATA.animals[animal] + " " + DATA.saks[sak] + " ព.ស. " + KH(be + 2500) };
 }
@@ -162,12 +195,13 @@ function renderMonth() {
     const d = new Date(y, m, n), k = info(d);
     const cls = ["d"];
     if (d.getDay() === 0) cls.push("sun");
-    if (k && k.sila) cls.push("sila");
+    if (k && k.sila) cls.push("sl");
     if (k && k.hol) cls.push("hol");
+    if (k && k.obs) cls.push("obs");
     if (iso(d) === iso(t)) cls.push("today");
     if (k && !k.waning && k.day === 1) cls.push("newm");
     const lab = k ? (!k.waning && k.day === 1 ? DATA.months[k.month] : k.short) : "";
-    h += `<button type="button" class="${cls.join(" ")}" data-d="${iso(d)}" aria-label="${solar(d)}${k ? " · " + k.full : ""}"><span class="n">${KH(n)}</span><span class="l">${lab}</span></button>`;
+    h += `<button type="button" class="${cls.join(" ")}" data-d="${iso(d)}" aria-label="${solar(d)}${k ? " · " + k.full : ""}">${k && k.sila ? '<svg class="buddha" aria-hidden="true"><use href="#bud"/></svg>' : ""}<span class="n">${KH(n)}</span><span class="l">${lab}</span></button>`;
   }
   $("grid").innerHTML = h;
   $("grid").querySelectorAll("button.d").forEach(el => el.addEventListener("click", () => openDay(el.dataset.d)));
@@ -179,7 +213,8 @@ function openDay(s) {
   if (!k) return;
   $("shKh").textContent = k.full;
   $("shSol").textContent = solar(day);
-  $("shTags").innerHTML = (k.sila ? `<span class="tag s">🙏 ថ្ងៃសីល</span> ` : "") + (k.hol ? `<span class="tag h">🎉 ${k.hol}</span>` : "");
+  $("shTags").innerHTML = (k.sila ? `<span class="tag s"><svg class="buddha"><use href="#bud"/></svg> ថ្ងៃសីល</span> ` : "") +
+    (k.hol ? `<span class="tag h">🎉 ${k.hol}</span> ` : "") + (k.obs ? `<span class="tag o">📢 ${k.obs}</span>` : "");
   $("sheet").classList.add("on");
 }
 
@@ -188,12 +223,13 @@ function renderLists() {
   const tk = info(t);
   $("tKh").textContent = tk ? "ថ្ងៃ" + WD[t.getDay()] + " " + tk.full : "—";
   $("tSol").textContent = "ត្រូវនឹង" + solar(t).replace(/^ថ្ងៃ\S+ /, "");
-  const silas = [], hols = [];
-  for (let i = 0; i < 400 && (silas.length < 6 || hols.length < 6); i++) {
+  const silas = [], hols = [], obss = [];
+  for (let i = 0; i < 400 && (silas.length < 6 || hols.length < 6 || obss.length < 6); i++) {
     const d = addDays(t, i), k = info(d);
     if (!k) break;
     if (k.sila && silas.length < 6) silas.push([d, k, i]);
     if (k.hol && hols.length < 6) hols.push([d, k, i]);
+    if (k.obs && !k.hol && obss.length < 6) obss.push([d, k, i]);
   }
   const when = i => i === 0 ? "ថ្ងៃនេះ" : i === 1 ? "ស្អែក" : KH(i) + " ថ្ងៃទៀត";
   if (silas.length) {
@@ -203,7 +239,8 @@ function renderLists() {
   }
   const row = ([d, k, i], text) => `<div class="row"><div class="dd"><b>${KH(d.getDate())}</b><small>${SM[d.getMonth()]}</small></div>
     <div class="tx">${text}<small>ថ្ងៃ${WD[d.getDay()]} · ${k.short} ខែ${DATA.months[k.month]}</small></div><div class="in">${when(i)}</div></div>`;
-  $("silaList").innerHTML = silas.map(x => row(x, "🙏 ថ្ងៃសីល")).join("") || `<div class="err">—</div>`;
+  $("silaList").innerHTML = silas.map(x => row(x, '<svg class="buddha"><use href="#bud"/></svg> ថ្ងៃសីល')).join("") || `<div class="err">—</div>`;
+  $("obsList").innerHTML = obss.map(x => row(x, x[1].obs)).join("") || `<div class="err">—</div>`;
   $("holList").innerHTML = hols.map(x => row(x, x[1].hol)).join("") || `<div class="err">—</div>`;
 }
 
