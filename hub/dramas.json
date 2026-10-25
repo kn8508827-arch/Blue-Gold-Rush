@@ -1,0 +1,138 @@
+{
+ "note": "Only official / licensed places. Add a drama = add one object. links: label + url (official channel, app or a search inside it).",
+ "dramas": [
+  {
+   "id": "nirvana",
+   "zh": "琅琊榜",
+   "en": "Nirvana in Fire",
+   "year": 2015,
+   "eps": 54,
+   "genre": "នយោបាយ · សងសឹក",
+   "color": [
+    "#7a1f1f",
+    "#2a0d0d"
+   ],
+   "story": "អ្នកប្រាជ្ញម្នាក់ឈ្មោះ មៃ ឆាងស៊ូ ត្រឡប់មករាជធានីវិញ ក្រោមអត្តសញ្ញាណថ្មី ដើម្បីជួយព្រះអង្គម្ចាស់ដែលគេមើលងាយ ឡើងគ្រងរាជ្យ និងបើកកកាយការពិតនៃការក្បត់ដែលបានសម្លាប់គ្រួសារ និងទាហានរាប់ម៉ឺនរបស់គាត់កាលពី ១២ ឆ្នាំមុន។ រឿងល្បិចកលឆ្លាតវៃ ដែលគេចាត់ទុកជារឿងចិនល្អបំផុតមួយ។",
+   "links": [
+    {
+     "label": "▶️ Viki",
+     "url": "https://www.viki.com/tv/22943c"
+    }
+   ]
+  },
+  {
+   "id": "yanxi",
+   "zh": "延禧攻略",
+   "en": "Story of Yanxi Palace",
+   "year": 2018,
+   "eps": 70,
+   "genre": "រឿងក្នុងវាំង",
+   "color": [
+    "#1f4a7a",
+    "#0b1d33"
+   ],
+   "story": "នារីក្លាហានម្នាក់ ចូលធ្វើជាអ្នកបម្រើក្នុងវាំងអធិរាជឈីង ដើម្បីស្វែងរកការពិតពីការស្លាប់របស់បងស្រី។ ដោយភាពឆ្លាត និងមិនខ្លាចនរណា នាងឆ្លងកាត់ល្បិចកលក្នុងវាំង រហូតក្លាយជាព្រះស្នំជាទីស្រឡាញ់។",
+   "links": [
+    {
+     "label": "▶️ iQIYI",
+     "url": "https://www.iq.com/album/historia-del-palacio-yanxi-2018-15yrzo9s2o9?lang=en_us"
+    }
+   ]
+  },
+  {
+   "id": "zhenhuan",
+   "zh": "后宫甄嬛传",
+   "en": "Empresses in the Palace",
+   "year": 2011,
+   "eps": 76,
+   "genre": "រឿងក្នុងវាំង · ល្បិចកល",
+   "color": [
+    "#6b3f8a",
+    "#22122e"
+   ],
+   "story": "ក្មេងស្រីស្លូតត្រង់ ចិន ហ្សិនហួន ត្រូវជ្រើសរើសចូលជាស្នំរបស់អធិរាជយ៉ុងចេង។ ពីការស្រឡាញ់ដោយស្មោះ ទៅជាការតស៊ូដើម្បីរស់ នាងក្លាយជាស្ត្រីដែលខ្លាំងបំផុតក្នុងវាំង។",
+   "links": [
+    {
+     "label": "▶️ YouTube",
+     "url": "https://www.youtube.com/results?search_query=Empresses+in+the+Palace+full+episodes+official"
+    }
+   ]
+  },
+  {
+   "id": "joyoflife",
+   "zh": "庆余年",
+   "en": "Joy of Life",
+   "year": 2019,
+   "eps": 46,
+   "genre": "បុរាណ · កំប្លែង · ក្បាច់គុន",
+   "color": [
+    "#2f6b3a",
+    "#0e2414"
+   ],
+   "story": "យុវជនម្នាក់ដែលមានការចងចាំពីពិភពទំនើប កើតជាថ្មីក្នុងសម័យបុរាណ។ ដោយប្រើចំណេះដឹង និងប្រាជ្ញាវាងវៃ គាត់ចូលរាជធានី ស្វែងរកអាថ៌កំបាំងម្ដាយ ហើយប្រឈមនឹងនយោបាយ និងក្បាច់គុនដ៏គ្រោះថ្នាក់។ កំប្លែង និងរំភើបគ្រប់ភាគ។",
+   "links": [
+    {
+     "label": "▶️ WeTV · YouTube",
+     "url": "https://www.youtube.com/results?search_query=WeTV+Joy+of+Life+full+episode"
+    }
+   ]
+  },
+  {
+   "id": "untamed",
+   "zh": "陈情令",
+   "en": "The Untamed",
+   "year": 2019,
+   "eps": 50,
+   "genre": "Fantasy · មិត្តភាព",
+   "color": [
+    "#2a3f6b",
+    "#0d1426"
+   ],
+   "story": "វេ អ៊ូស៊ាន និង ឡាន វ៉ាងជី ជាសិស្សពីរនាក់នៃត្រកូលវេទមន្តផ្សេងគ្នា ដែលរួមគ្នាដោះស្រាយអាថ៌កំបាំងងងឹត។ រឿងរ៉ាវមិត្តភាព ភាពស្មោះត្រង់ និងការលះបង់ ក្នុងពិភពវេទមន្តដ៏ស្រស់ស្អាត។",
+   "links": [
+    {
+     "label": "▶️ WeTV · YouTube",
+     "url": "https://www.youtube.com/results?search_query=WeTV+The+Untamed+full+episode"
+    }
+   ]
+  },
+  {
+   "id": "canglan",
+   "zh": "苍兰诀",
+   "en": "Love Between Fairy and Devil",
+   "year": 2022,
+   "eps": 36,
+   "genre": "Fantasy · ស្នេហា",
+   "color": [
+    "#5a2a6b",
+    "#1a0d24"
+   ],
+   "story": "ទេពធីតាតូចមួយរូប និងស្ដេចមារដ៏កាចសាហាវ ត្រូវវិញ្ញាណភ្ជាប់គ្នាដោយចៃដន្យ។ ពីសត្រូវក្លាយជាអ្នកស្រឡាញ់គ្នា ហើយត្រូវរួមគ្នាការពារពិភពទាំងពីរពីគ្រោះមហន្តរាយ។",
+   "links": [
+    {
+     "label": "▶️ iQIYI",
+     "url": "https://www.iq.com/search?query=Love%20Between%20Fairy%20and%20Devil"
+    }
+   ]
+  },
+  {
+   "id": "hiddenlove",
+   "zh": "偷偷藏不住",
+   "en": "Hidden Love",
+   "year": 2023,
+   "eps": 25,
+   "genre": "ស្នេហាសម័យទំនើប",
+   "color": [
+    "#8a3f5a",
+    "#2e1220"
+   ],
+   "story": "សាំង ជី ស្រឡាញ់មិត្តរបស់បងប្រុសខ្លួនដោយស្ងាត់ៗតាំងពីនៅក្មេង។ ច្រើនឆ្នាំក្រោយមក ពួកគេជួបគ្នាម្ដងទៀតនៅទីក្រុងតែមួយ ហើយស្នេហាដែលលាក់ទុក ចាប់ផ្ដើមរីកដុះដាល។ ស្រាលៗ ផ្អែមល្ហែម មើលហើយញញឹម។",
+   "links": [
+    {
+     "label": "▶️ Youku · YouTube",
+     "url": "https://www.youtube.com/results?search_query=YOUKU+Hidden+Love+full+episode"
+    }
+   ]
+  }
+ ]
+}
