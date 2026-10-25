@@ -564,7 +564,7 @@ const SECTIONS = [
     ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["gold", "🪙", "មាស", "c8", "gold មាស"],
     ["news", "📰", "ព័ត៌មាន", "c7", "news ព័ត៌មាន"],
-    ["sheet:tpSheet", "img:tpnews-logo.png", "TPNews", "c1", "tpnews tp news ព័ត៌មាន ទេព ប៉ុន", (D.tp && D.tp.length && Date.now() / 1000 - D.tp[0][2] < 48 * 3600) ? "ថ្មី" : "ដៃគូ"],
+    ["sheet:tpSheet", "img:tpnews-logo.png", "TPNews", "c1", "tpnews tp news ព័ត៌មាន ទេព ប៉ុន", ((D.sp || []).some(x => x[0] === "tpnews")) ? "ថ្មី" : "ដៃគូ"],
     ["weather", "🌤️", "អាកាសធាតុ", "c1", "weather អាកាសធាតុ"],
     ["trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
     ["health", "🧓", "សុខភាព", "c6", "health សុខភាព"],
@@ -729,12 +729,9 @@ document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [d
 // Newest poster on top; a new post moves that partner back to the top and restarts its 48 h.
 // No activity for 48 h → its card disappears. Nobody active → only ICOM, then Cooler Voice.
 const SPOT_HOURS = 48;
-const posts = [];   // {key, logo, name, text, ts, open}
-if (D.tp && D.tp.length) {
-  const ch = D.tc || "TPNEWSREPORT";
-  D.tp.forEach(([pid, title, ts]) => posts.push({ key: "tpnews", logo: "tpnews-logo.png", name: "TPNews", text: title, ts,
-    open: () => tgOpen("https://t.me/" + ch + "/" + pid) }));
-}
+const posts = [];   // {key, logo, name, text, ts, open} — from partner FACEBOOK PAGES only (D.sp, made by the bot)
+const openWeb = u => { if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); };
+(D.sp || []).forEach(([key, name, logo, text, ts, link]) => posts.push({ key, logo, name, text, ts, open: () => openWeb(link) }));
 const latestBy = {};
 posts.forEach(p => { if (!latestBy[p.key] || p.ts > latestBy[p.key].ts) latestBy[p.key] = p; });
 const live = Object.values(latestBy).filter(p => Date.now() / 1000 - p.ts < SPOT_HOURS * 3600).sort((a, b) => b.ts - a.ts);
