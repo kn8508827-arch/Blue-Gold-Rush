@@ -124,6 +124,40 @@ button.chip{border:0;color:inherit;text-align:left;cursor:pointer;font:inherit}
 
 /* sections & app icons */
 h2{font-size:17px;font-weight:700;margin:22px 4px 10px;display:flex;align-items:baseline;gap:8px}
+/* 💎 Vitrea glass: frosted section cards, hairline gradient borders, pill nav, KPI rings */
+.gsec{position:relative;margin-top:14px;padding:14px 12px 16px;border-radius:28px;scroll-margin-top:70px;
+  background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.02) 40%,rgba(255,255,255,.04));
+  backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+  box-shadow:0 24px 50px -28px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.14)}
+.gsec::before,.kring::before,.pillnav::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(140deg,rgba(255,255,255,.38),rgba(255,255,255,.04) 35%,rgba(255,255,255,.02) 65%,rgba(180,140,255,.30));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.gsec .ghead{display:flex;align-items:center;justify-content:space-between;margin:0 4px 12px}
+.gsec h2{margin:0;font-size:16.5px}
+.gsec .cnt{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mist)}
+.gsec .cnt i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;
+  background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.pillnav{position:sticky;top:8px;z-index:6;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:14px -4px 0;padding:5px;border-radius:999px;
+  background:rgba(20,18,40,.55);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:0 12px 30px -16px rgba(0,0,0,.8)}
+.pillnav::-webkit-scrollbar{display:none}
+.pillnav button{flex:0 0 auto;padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:#d9d3ff;white-space:nowrap;transition:background .25s,color .25s}
+.pillnav button.on{color:#fff;background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 14px -8px rgba(124,243,255,.6)}
+.kpis3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:-6px 0 16px}
+.kpis3[hidden]{display:none}
+.kpis3 .kp{display:flex;align-items:center;gap:9px;min-width:0}
+.kring{position:relative;flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:17px;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18),rgba(255,255,255,.03) 70%);box-shadow:0 8px 18px -10px rgba(0,0,0,.8)}
+.kpis3 b{display:block;font-family:var(--dsp);font-weight:700;font-size:17px;line-height:1.1;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpis3 small{display:block;font-size:11px;color:var(--mist);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* glass icons: frosted tile, coloured glow underneath, specular sheen */
+body.btn-glass .app .ic{background:linear-gradient(155deg,rgba(255,255,255,.22),rgba(255,255,255,.05)) !important;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.16),0 12px 24px -10px var(--gl,#7c5cff99)}
+body.btn-glass .app .ic::after{content:"";position:absolute;inset:auto 10% -40% 10%;height:60%;border-radius:50%;z-index:-1;filter:blur(10px);
+  background:var(--gl,#7c5cff99);opacity:.9}
+body.btn-glass .app .ic::before{content:"";position:absolute;inset:0 0 55% 0;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);pointer-events:none}
+body.btn-glass .app:active .ic{transform:scale(.9) rotateX(12deg)}
 h2 small{font-size:13px;font-weight:400;color:var(--mist)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px}
 .app{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:4px 2px;border-radius:16px}
@@ -354,7 +388,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
 @media (min-width:480px){.grid{grid-template-columns:repeat(5,1fr)}}
 </style>
 </head>
-<body class="btn-glow">
+<body class="btn-glass">
 <div class="sheet" id="tpSheet" role="dialog" aria-modal="true" aria-label="TPNews"><div class="box">
   <section class="tpn" aria-label="TPNews">
     <div class="hd">
@@ -441,6 +475,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button class="gear" id="gear" type="button" aria-label="ប្ដូរ Theme">🎨</button></div>
   </header>
 
+  <div class="kpis3" id="kpis3" hidden></div>
   <section class="cardflip" id="cardflip" aria-label="កាត Cooler — ចុចដើម្បីបង្វិល">
     <div class="flipper" id="flipper">
       <div class="side holo" id="card" data-face="a"><div class="faceA" id="faceA">
@@ -504,6 +539,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
     <input id="q" type="search" placeholder="រកមុខងារ… ឧ. ច្រៀង, លុយ, ហ្គេម" autocomplete="off" aria-label="រកមុខងារ">
   </label>
 
+  <nav class="pillnav" id="pillnav" aria-label="ផ្នែក"></nav>
   <main id="sections"></main>
 
   <section class="panel" id="topPanel" hidden>
@@ -675,8 +711,11 @@ function render(filter) {
     const items = sec.items.filter(i => !q || (i[2] + " " + i[4]).toLowerCase().includes(q));
     if (!items.length) continue;
     shown += items.length;
-    const h = document.createElement("h2");
-    h.innerHTML = `${sec.t} <small>${sec.s}</small>`;
+    const wrap = document.createElement("section");
+    wrap.className = "gsec"; wrap.id = "sec" + SECTIONS.indexOf(sec);
+    const h = document.createElement("div");
+    h.className = "ghead";
+    h.innerHTML = `<h2>${sec.t} <small>${sec.s}</small></h2><span class="cnt">${KH(items.length)} <i>↗</i></span>`;
     const g = document.createElement("div");
     g.className = "grid";
     for (const [key, icon, label, color, , badge] of items) {
@@ -691,12 +730,27 @@ function render(filter) {
       b.addEventListener("click", () => go(key));
       g.appendChild(b);
     }
-    host.append(h, g);
+    wrap.append(h, g);
+    host.append(wrap);
   }
   if (!shown) host.innerHTML = `<p class="empty">រកមិនឃើញ «${q.replace(/[<>&]/g, "")}» — សាកពាក្យផ្សេង ឬវាយសួរ AI ផ្ទាល់ក្នុង Chat 🤖</p>`;
 }
 $("q").addEventListener("input", e => render(e.target.value));
 render("");
+// 💎 pill nav: jump between sections; the pill of the section on screen lights up
+(() => {
+  const nav = $("pillnav");
+  nav.innerHTML = SECTIONS.map((sec, i) => `<button type="button" data-i="${i}">${sec.t.replace(/&/g, "&amp;")}</button>`).join("");
+  const btns = [...nav.querySelectorAll("button")];
+  const mark = i => btns.forEach((b, k) => { b.classList.toggle("on", k === i); if (k === i) b.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" }); });
+  btns.forEach(b => b.addEventListener("click", () => { haptic("light"); const el = $("sec" + b.dataset.i);
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); mark(+b.dataset.i); } }));
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) mark(+e.target.id.slice(3)); }), { rootMargin: "-40% 0px -55% 0px" });
+    document.querySelectorAll(".gsec").forEach(s => io.observe(s));
+  }
+  mark(0);
+})();
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
 
 // greeting + clock (Cambodia time)
@@ -925,6 +979,22 @@ fetch("https://api.gold-api.com/price/XAU").then(r => r.json())
   .then(j => { if (j.price) $("gold").textContent = "$" + Math.round(j.price / 31.1034768 * 3.75).toLocaleString("en"); })
   .catch(() => {});
 
+// 💎 KPI rings under the greeting: your numbers first, today's numbers fill the rest
+function fillKpis() {
+  const M2 = D.m || {}, k = [];
+  if (D.p) k.push(["⭐", KH(D.p[0]), "ពិន្ទុ · " + D.p[1].replace(/^\S+\s/, "")]);
+  if (M2.o) k.push(["👑", "∞", "Owner"]); else if (M2.a) k.push(["🎟️", KH(M2.l), "ថ្ងៃ VIP នៅសល់"]);
+  if (D.r) k.push(["🏆", "#" + KH(D.r), "ចំណាត់ថ្នាក់"]);
+  if (k.length < 3 && typeof CAL !== "undefined" && CAL && CAL.sila) k.push(["🙏", CAL.sila[0] === 0 ? "ថ្ងៃនេះ" : KH(CAL.sila[0]) + " ថ្ងៃ", "ដល់ថ្ងៃសីល"]);
+  const wx = $("wx") && $("wx").textContent.trim(), usd = $("usd") && $("usd").textContent.trim();
+  if (k.length < 3 && wx && wx !== "—") k.push(["🌤️", wx.replace(/^\S+\s/, ""), $("wxName").textContent]);
+  if (k.length < 3 && usd && usd !== "—") k.push(["💵", usd.replace(" ៛", ""), "៛ / ១ ដុល្លារ"]);
+  if (!k.length) return;
+  $("kpis3").hidden = false;
+  $("kpis3").innerHTML = k.slice(0, 3).map(([i, v, l]) => `<div class="kp"><span class="kring">${i}</span><span><b>${v}</b><small>${l}</small></span></div>`).join("");
+}
+fillKpis(); setTimeout(fillKpis, 1500); setTimeout(fillKpis, 4000);
+
 // 🏆 leaderboard (top 5 from the bot) + my rank
 if (D.t && D.t.length) {
   $("topPanel").hidden = false;
@@ -968,14 +1038,49 @@ if (D.x) {
   const cv = document.getElementById("space"); if (!cv || !cv.getContext) return;
   const ctx = cv.getContext("2d");
   let reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const S = { bg: "orbit", dim: 0 };
+  const S = { bg: "glass", dim: 0 };
   const PAL = {
     orbit:  ["rgba(160,90,255,.20)", "rgba(40,200,255,.12)", "rgba(255,80,190,.12)", ["#0a0626", "#120a3a", "#060418"]],
     galaxy: ["rgba(255,120,220,.24)", "rgba(90,120,255,.22)", "rgba(255,190,90,.14)", ["#0b0420", "#1a0838", "#05031a"]],
     tech:   ["rgba(255,60,200,.20)", "rgba(40,240,255,.18)", "rgba(120,80,255,.16)", ["#07051d", "#170a3d", "#0b0230"]],
     aurora: ["rgba(40,255,170,.10)", "rgba(60,140,255,.14)", "rgba(170,90,255,.12)", ["#030b1c", "#061a2c", "#020812"]],
     calm:   ["rgba(90,80,200,.10)", "rgba(40,120,200,.07)", "rgba(160,80,160,.06)", ["#06051a", "#0b0a26", "#040312"]],
+    glass:  ["rgba(120,140,255,.10)", "rgba(124,243,255,.07)", "rgba(255,138,216,.06)", ["#1a1b22", "#121318", "#0b0c10"]],
   };
+  // 🫧 floating 3D glass bubbles (refraction rim + specular highlight), drifting with parallax
+  const bub = Array.from({ length: 9 }, (_, i) => ({ x: Math.random(), y: Math.random(), r: 26 + Math.random() * (i < 2 ? 140 : 70),
+    vx: (Math.random() - .5) * .00002, vy: -.000012 - Math.random() * .00002, z: .3 + Math.random() * .9, ph: Math.random() * 6.3 }));
+  function bubbles(t, alpha = 1) {
+    for (const b of bub) {
+      if (!reduce) { b.x += b.vx * 16; b.y += b.vy * 16; if (b.y < -.25) { b.y = 1.25; b.x = Math.random(); } if (b.x < -.25) b.x = 1.25; if (b.x > 1.25) b.x = -.25; }
+      const r = b.r * (Math.min(W, H) / 420), cx = b.x * W - px * 30 * b.z, cy = b.y * H - py * 24 * b.z - scrollY * .05 * b.z + Math.sin(t * .0006 + b.ph) * 6;
+      ctx.save(); ctx.globalAlpha = alpha;
+      const body = ctx.createRadialGradient(cx - r * .3, cy - r * .35, r * .1, cx, cy, r);
+      body.addColorStop(0, "rgba(255,255,255,.10)"); body.addColorStop(.7, "rgba(255,255,255,.025)"); body.addColorStop(1, "rgba(255,255,255,.09)");
+      ctx.fillStyle = body; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+      const rim = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+      rim.addColorStop(0, "rgba(255,255,255,.55)"); rim.addColorStop(.45, "rgba(255,255,255,.05)"); rim.addColorStop(1, "rgba(160,190,255,.35)");
+      ctx.strokeStyle = rim; ctx.lineWidth = Math.max(1, r * .025); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx - r * .38, cy - r * .42, r * .28, r * .13, -.6, 0, 7);
+      ctx.fillStyle = "rgba(255,255,255,.28)"; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, r * .82, .3, 1.4); ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = Math.max(1, r * .04); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  function glassScene(t) {
+    const P = PAL.glass, g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, P[3][0]); g.addColorStop(.55, P[3][1]); g.addColorStop(1, P[3][2]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // big soft light arcs (like studio reflections on glass)
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    for (const [cx, cy, r, a] of [[W * 1.05 - px * 12, H * .1, W * .75, .07], [W * -.2 - px * 8, H * .75, W * .9, .05]]) {
+      ctx.beginPath(); ctx.arc(cx, cy - scrollY * .03, r, 0, 7); ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 2; ctx.stroke();
+      const f = ctx.createRadialGradient(cx, cy, r * .6, cx, cy, r); f.addColorStop(0, "transparent"); f.addColorStop(1, `rgba(140,160,255,${a})`);
+      ctx.fillStyle = f; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+    bubbles(t);
+  }
   let W = 0, H = 0, DPR = 1, stars = [], dust = [], shoot = [], t0 = performance.now();
   let px = 0, py = 0, tx = 0, ty = 0, scrollY = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -1195,11 +1300,12 @@ if (D.x) {
     ctx.lineTo(W, H); ctx.fill();
   }
   const SCENES = {
-    orbit:  (t, dt) => { nebula(t); drawStars(t); farPlanets(); techPlanet(t); shooting(t, dt); earth(t); cockpit(t); },
-    galaxy: (t, dt) => { nebula(t); drawStars(t); galaxy(t); farPlanets(); shooting(t, dt); },
+    orbit:  (t, dt) => { nebula(t); drawStars(t); farPlanets(); techPlanet(t); shooting(t, dt); earth(t); bubbles(t, .45); cockpit(t); },
+    galaxy: (t, dt) => { nebula(t); drawStars(t); galaxy(t); farPlanets(); shooting(t, dt); bubbles(t, .45); },
     tech:   (t, dt) => { nebula(t); drawStars(t); techPlanet(t, .8, .48, 1.3); grid(t); shooting(t, dt); },
     aurora: (t, dt) => { nebula(t); drawStars(t); aurora(t); shooting(t, dt); },
-    calm:   (t) => { nebula(t); drawStars(t); },
+    calm:   (t) => { nebula(t); drawStars(t); bubbles(t, .5); },
+    glass:  (t) => { glassScene(t); },
   };
 
   let last = performance.now(), raf = 0;
@@ -1224,20 +1330,22 @@ if (D.x) {
 
 /* 🎨 Theme settings — saved on this phone and in Telegram Cloud (follows the user to other devices) */
 (() => {
-  const BG = [["orbit", "🌍", "ផែនដីពីយានអវកាស", "linear-gradient(180deg,#120a3a 55%,#1f6fd1 56%,#0b2a6b)"],
+  const BG = [["glass", "💎", "Glass 3D", "radial-gradient(circle at 30% 35%,rgba(255,255,255,.35),rgba(255,255,255,.05) 22%,transparent 23%),radial-gradient(circle at 72% 65%,rgba(255,255,255,.25),transparent 18%),linear-gradient(160deg,#2a2c36,#0b0c10)"],
+              ["orbit", "🌍", "ផែនដីពីយានអវកាស", "linear-gradient(180deg,#120a3a 55%,#1f6fd1 56%,#0b2a6b)"],
               ["galaxy", "🌌", "Galaxy", "radial-gradient(circle at 55% 45%,#ffe2aa,#ff8ad8 18%,#3a1d8a 45%,#0b0420 75%)"],
               ["tech", "🪐", "ភពបច្ចេកវិទ្យា", "linear-gradient(180deg,#170a3d 55%,#ff4fb5 56%,#3c1478)"],
               ["aurora", "🌠", "ពន្លឺ Aurora", "linear-gradient(180deg,#061a2c,#1a7a63 45%,#5b2f9b 70%,#020610)"],
               ["calm", "🌙", "យប់ស្ងាត់", "linear-gradient(180deg,#0b0a26,#06051a)"]];
-  const BTN = [["glow", "🫧", "Glow ភ្លឺ", "linear-gradient(145deg,#b48cff,#5b3cff)"],
+  const BTN = [["glass", "💎", "Glass 3D", "linear-gradient(155deg,rgba(255,255,255,.45),rgba(255,255,255,.08)),linear-gradient(145deg,#5a6bff,#2a2c36)"],
+               ["glow", "🫧", "Glow ភ្លឺ", "linear-gradient(145deg,#b48cff,#5b3cff)"],
                ["3d", "🍬", "3D ផុស", "linear-gradient(145deg,#ffe08a,#ff8a4c)"],
                ["soft", "🌿", "ស្រាលភ្នែក", "linear-gradient(145deg,#a8c7c0,#6f8f9b)"]];
   const KEY = "coolerTheme";
-  let st = { bg: "orbit", btn: "glow", motion: true, dim: 0 };
+  let st = { bg: "glass", btn: "glass", motion: true, dim: 0 };   // 💎 new default look; saved choices still win
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   const cloud = tg && tg.CloudStorage;
   const apply = () => {
-    document.body.classList.remove("btn-glow", "btn-3d", "btn-soft"); document.body.classList.add("btn-" + st.btn);
+    document.body.classList.remove("btn-glass", "btn-glow", "btn-3d", "btn-soft"); document.body.classList.add("btn-" + st.btn);
     if (window.SPACE) SPACE.set({ bg: st.bg, dim: +st.dim, motion: st.motion && !matchMedia("(prefers-reduced-motion: reduce)").matches });
     $("swMotion").classList.toggle("on", !!st.motion); $("dim").value = st.dim;
     document.querySelectorAll(".opt").forEach(o => o.classList.toggle("sel", st[o.dataset.k] === o.dataset.v));
