@@ -228,6 +228,10 @@ body.btn-soft .app .t{color:#d9d4f5}
 .tpn .acts button{padding:10px 8px;border-radius:14px;font-weight:700;font-size:13.5px;background:#ffffff1f;box-shadow:inset 0 0 0 1px #ffffff33;transition:transform .15s}
 .tpn .acts button.main{background:linear-gradient(135deg,#7fd3ff,#4f7dff);color:#0d1640;box-shadow:0 6px 16px -6px #4fb4ffaa}
 .tpn .acts button:active{transform:scale(.96)}
+/* 📰 KA News — partner news outlet (navy & red) */
+.tpn.kan{background:linear-gradient(120deg,rgba(14,22,110,.70),rgba(190,40,48,.50));box-shadow:inset 0 0 0 1px #ffb3b340,0 10px 26px -12px #c8283099}
+.tpn.kan img{background:#ececec;box-shadow:0 0 0 2px #ffffffcc,0 0 18px #ff6b6b88}
+.tpn.kan .acts button.main{background:linear-gradient(135deg,#ff7b7b,#c82830);color:#fff;box-shadow:0 6px 16px -6px #c82830aa}
 /* 🚗 E1 Auto Services — partner garage */
 .e1a{margin:0;padding:12px;border-radius:var(--r-md);
   background:linear-gradient(160deg,rgba(8,16,48,.85),rgba(20,70,170,.55));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -403,6 +407,20 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button type="button" data-web="https://www.facebook.com/l457psnf5f">👤 FB ផ្ទាល់ខ្លួន</button>
     </div>
     <div class="acts" style="grid-template-columns:1fr"><button type="button" data-go="tpnews">🔔 ទទួលដំណឹងរាល់ពេល TPNews ផុសថ្មី</button></div>
+  </section>
+</div></div>
+<div class="sheet" id="kaSheet" role="dialog" aria-modal="true" aria-label="KA News"><div class="box">
+  <section class="tpn kan" aria-label="KA News">
+    <div class="hd">
+      <img src="kanews-logo.png" alt="KA News" width="58" height="58">
+      <div class="tt"><b>KA News</b><small>ដៃគូព័ត៌មាន · ម្ចាស់អង្គភាព Kaka</small></div>
+      <span class="tag">NEWS</span>
+    </div>
+    <div class="acts">
+      <button type="button" class="main" data-tg="https://t.me/KaNewstoday">📢 Telegram News</button>
+      <button type="button" data-web="https://www.facebook.com/share/v/1DkGjNuKiD/">📘 Facebook</button>
+      <button type="button" data-call="+855966799949" style="grid-column:1/-1">📞 ទូរស័ព្ទ 096 679 9949</button>
+    </div>
   </section>
 </div></div>
 <div class="sheet" id="e1Sheet" role="dialog" aria-modal="true" aria-label="E1 Auto Services"><div class="box">
@@ -640,6 +658,7 @@ const SECTIONS = [
     ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["gold", "🪙", "មាស", "c8", "gold មាស"],
     ["news", "📰", "ព័ត៌មាន", "c7", "news ព័ត៌មាន"],
+    ["sheet:kaSheet", "img:kanews-logo.png", "KA News", "c6", "ka news kanews kaka ព័ត៌មាន news telegram", "ដៃគូ"],
     ["sheet:tpSheet", "img:tpnews-logo.png", "TPNews", "c1", "tpnews tp news ព័ត៌មាន ទេព ប៉ុន", (D.tp && D.tp.length && Date.now() / 1000 - D.tp[0][2] < 48 * 3600) ? "ថ្មី" : "ដៃគូ"],
     ["weather", "🌤️", "អាកាសធាតុ", "c1", "weather អាកាសធាតុ"],
     ["trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
@@ -835,7 +854,7 @@ $("icomGo").addEventListener("click", () => { haptic("heavy");
   // It talks to the bot's server for voice; Telegram's signed initData goes along in the hash.
   location.href = "icom.html" + (tg && tg.initData ? "#tg=" + encodeURIComponent(tg.initData) : ""); });
 // 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
-document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.tpn [data-call],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
   haptic("light");
   if (b.dataset.call) { location.href = "tel:" + b.dataset.call; return; }
   if (b.dataset.tg) return tgOpen(b.dataset.tg);
@@ -892,7 +911,7 @@ function styRender() {
 }
 styRender();
 $("stySheet").addEventListener("click", e => { if (e.target.id === "stySheet") e.currentTarget.classList.remove("on"); });
-["tpSheet", "e1Sheet", "xcSheet", "vdSheet", "btSheet"].forEach(id => $(id).addEventListener("click", e => { if (e.target.id === id) e.currentTarget.classList.remove("on"); }));
+["tpSheet", "kaSheet", "e1Sheet", "xcSheet", "vdSheet", "btSheet"].forEach(id => $(id).addEventListener("click", e => { if (e.target.id === id) e.currentTarget.classList.remove("on"); }));
 // 📅 Khmer calendar data (same file as calendar.html): lunar line + next sila under the clock
 const SMN = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
 const WDN = ["អាទិត្យ","ចន្ទ","អង្គារ","ពុធ","ព្រហស្បតិ៍","សុក្រ","សៅរ៍"];
