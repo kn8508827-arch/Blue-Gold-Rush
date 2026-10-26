@@ -716,10 +716,9 @@ $("botChat").addEventListener("click", () => { haptic("light"); tgOpen("https://
 // Opens Telegram's group picker; the bot then asks the group to pay with /pay (5$ / 30 days)
 $("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?start=go_addgroup"); });  // members only: pay 5$ first, then pick a group
 $("icomGo").addEventListener("click", () => { haptic("heavy");
-  // New ICOM on the bot's server (D.i): stays inside Telegram, no Sign-in — Telegram's signed initData goes along
-  if (D && D.i && tg && tg.initData) { location.href = D.i + "#tg=" + encodeURIComponent(tg.initData); return; }
-  // Old Hub link without the ICOM address: ask the bot (/icom) — it answers with the in-Telegram ICOM button
-  tgOpen("https://t.me/" + BOT + "?start=go_icom"); });
+  // ICOM page lives on this same site (hub/icom.html) → opens inside Telegram on iPhone and Android, no Sign-in.
+  // It talks to the bot's server for voice; Telegram's signed initData goes along in the hash.
+  location.href = "icom.html" + (tg && tg.initData ? "#tg=" + encodeURIComponent(tg.initData) : ""); });
 // 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
 document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
   haptic("light");
