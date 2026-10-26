@@ -299,7 +299,8 @@ body.btn-soft .app .t{color:#d9d4f5}
 .sw.on{background:#2fd3a0} .sw.on::after{left:23px}
 .done{width:100%;margin-top:14px;padding:13px;border-radius:16px;font-weight:700;background:linear-gradient(135deg,#7cf3ff,#b48cff);color:#15132e}
 .app .t{font-size:12.5px;line-height:1.3;color:#e9e5ff}
-.app.lock .ic{filter:grayscale(.2)}
+.app.lock .ic{filter:grayscale(.55) brightness(.8)}
+.app .lk{position:absolute;transform:translate(-24px,-8px);font-size:13px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 .app .badge{position:absolute;transform:translate(22px,-6px);background:var(--gold);color:#15132e;font-size:10px;font-weight:700;
   border-radius:999px;padding:1px 6px}
 .app{position:relative}
@@ -591,8 +592,28 @@ const SECTIONS = [
   ]},
 ];
 
+// 🔒 Members only: games, calendar, dramas, map … open for paying members (and owner/admins).
+// The bot's server confirms membership from Telegram's signed initData; outside Telegram (Messenger, browser) = locked.
+const API = "https://bot-smos-smea-production.up.railway.app";
+let MEMBER = !!(D.m && (D.m.a || D.m.o));
+const LOCKS = k => k.startsWith("url:") || k.startsWith("page:") || k.startsWith("web:");
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); }
+(async () => {
+  if (!(tg && tg.initData)) { MEMBER = false; render($("q").value); return; }
+  try {
+    const r = await fetch(API + "/hub/me", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ initData: tg.initData }) });
+    const j = await r.json(); MEMBER = !!j.member;
+  } catch (e) {}
+  render($("q").value);
+})();
+
 function go(key) {
   haptic("medium");
+  if (!MEMBER && LOCKS(key)) {
+    toast("🔒 សម្រាប់សមាជិក — បង់ 1$ ប្រើបានគ្រប់មុខងារ 30 ថ្ងៃ");
+    setTimeout(() => go("pay"), 900);
+    return;
+  }
   if (key.startsWith("url:")) { location.href = key.slice(4); return; }
   if (key.startsWith("web:")) { const u = key.slice(4); if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); return; }
   if (key.startsWith("sheet:")) { $(key.slice(6)).classList.add("on"); return; }   // partner card (TPNews ...)
@@ -621,12 +642,13 @@ function render(filter) {
     g.className = "grid";
     for (const [key, icon, label, color, , badge] of items) {
       const b = document.createElement("button");
-      b.className = "app";
+      const locked = !MEMBER && LOCKS(key);
+      b.className = "app" + (locked ? " lock" : "");
       b.type = "button";
       b.setAttribute("aria-label", label);
       const ic = icon.startsWith("img:") ? `<img src="${icon.slice(4)}" alt="">` : icon;
       b.innerHTML = `<span class="ic ${color}${icon.startsWith("img:") ? " pic" : ""}" aria-hidden="true">${ic}</span><span class="t">${label}</span>` +
-        (badge ? `<span class="badge">${badge}</span>` : "");
+        (badge ? `<span class="badge">${badge}</span>` : "") + (locked ? `<span class="lk" aria-label="សម្រាប់សមាជិក">🔒</span>` : "");
       b.addEventListener("click", () => go(key));
       g.appendChild(b);
     }
