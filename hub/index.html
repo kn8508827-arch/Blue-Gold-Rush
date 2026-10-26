@@ -718,9 +718,8 @@ $("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://
 $("icomGo").addEventListener("click", () => { haptic("heavy");
   // New ICOM on the bot's server (D.i): stays inside Telegram, no Sign-in — Telegram's signed initData goes along
   if (D && D.i && tg && tg.initData) { location.href = D.i + "#tg=" + encodeURIComponent(tg.initData); return; }
-  // Fallback: old Lovable ICOM in the external browser (its saved login works there)
-  const u = "https://team-smos-snea.lovable.app/icom";
-  if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
+  // Old Hub link without the ICOM address: ask the bot (/icom) — it answers with the in-Telegram ICOM button
+  tgOpen("https://t.me/" + BOT + "?start=go_icom"); });
 // 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
 document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
   haptic("light");
