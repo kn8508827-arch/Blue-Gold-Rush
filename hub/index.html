@@ -319,6 +319,15 @@ body.btn-soft .app .t{color:#d9d4f5}
 .c7{background:linear-gradient(145deg,#c7d2fe,#6470c8)} .c8{background:linear-gradient(145deg,#f2c14e,#b07c12)}
 
 /* panels */
+.lb{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:7px}
+.lb li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;background:#ffffff0f}
+.lb li .md{width:30px;text-align:center;font-size:20px}
+.lb li b{flex:1;font-weight:700}
+.lb li span{font-family:var(--dsp);font-weight:700;color:#ffe08a}
+.lb li.me{box-shadow:inset 0 0 0 1px #7cf3ff99;background:#7cf3ff14}
+.topActs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.topActs button{padding:11px;border-radius:14px;font-weight:700;background:#ffffff1a;box-shadow:inset 0 0 0 1px #ffffff2a}
+.topActs button.hot{background:linear-gradient(135deg,#ffe08a,#ff8ad8);color:#15132e;box-shadow:0 6px 16px -6px #ff8ad8aa}
 .panel{background:var(--glass);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:inset 0 0 0 1px #ffffff14;border-radius:var(--r-lg);padding:18px;margin-top:12px}
 .money{display:grid;grid-template-columns:118px 1fr;gap:16px;align-items:center}
 .donut{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#3a3470 0 100%)}
@@ -497,6 +506,12 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
 
   <main id="sections"></main>
 
+  <section class="panel" id="topPanel" hidden>
+    <h2 style="margin-top:0">🏆 Top សមាជិក <small id="myRank"></small></h2>
+    <ol class="lb" id="topList"></ol>
+    <div class="topActs"><button type="button" data-go="checkin">🎁 Check-in +៥</button><button type="button" data-go="redeem" class="hot">🎟️ ប្ដូរពិន្ទុ → VIP</button></div>
+  </section>
+
   <section class="panel" id="moneyPanel" hidden>
     <h2 style="margin-top:0">💵 លុយខែនេះ <small>ពី /cash</small></h2>
     <div class="money">
@@ -566,6 +581,9 @@ const SECTIONS = [
     ["quiz", "🧠", "Quiz", "c7", "quiz សំណួរ"],
     ["page:dramas.html", "🎬", "រឿងភាគចិន", "c6", "drama movie រឿង ភាគ ចិន chinese series film", "ថ្មី"],
     ["checkin", "🎁", "Check-in", "c2", "checkin ពិន្ទុ"],
+    ["redeem", "🎟️", "ប្ដូរពិន្ទុ", "c8", "redeem rewards ពិន្ទុ vip រង្វាន់ ប្ដូរ", "ថ្មី"],
+    ["top", "🏆", "Top 10", "c3", "leaderboard top ពិន្ទុ ចំណាត់ថ្នាក់"],
+    ["page:music.html", "🎵", "Vid Cooler Music", "c5", "music ចម្រៀង song vid cooler youtube tiktok rap ស្ដាប់", "ថ្មី"],
   ]},
   { t: "🧰 ជំនួយប្រចាំថ្ងៃ", s: "ប្រើរាល់ថ្ងៃ", items: [
     ["scam", "🚨", "ឆែក Scam", "c6", "scam បោក", "ឥតគិតថ្លៃ"],
@@ -580,6 +598,8 @@ const SECTIONS = [
   ]},
   { t: "📅 ជីវិត & ព័ត៌មាន", s: "ព័ត៌មានសំខាន់ៗ", items: [
     ["page:calendar.html", "📅", "ប្រតិទិនខ្មែរ", "c3", "calendar ថ្ងៃ ប្រតិទិន សីល ចន្ទគតិ", "ថ្ងៃសីល"],
+    ["sila", "🙏", "រំលឹកថ្ងៃសីល", "c8", "sila សីល រំលឹក ព្រះ វត្ត ធម៌", "ថ្មី"],
+    ["anniv", "🕯️", "ខួប & បុណ្យ", "c5", "anniv ខួប កំណើត birthday បុណ្យ ចន្ទគតិ រំលឹក", "ថ្មី"],
     ["morning", "☀️", "ព័ត៌មានព្រឹក", "c8", "morning ព្រឹក"],
     ["rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["gold", "🪙", "មាស", "c8", "gold មាស"],
@@ -904,6 +924,14 @@ fetch("https://open.er-api.com/v6/latest/USD").then(r => r.json())
 fetch("https://api.gold-api.com/price/XAU").then(r => r.json())
   .then(j => { if (j.price) $("gold").textContent = "$" + Math.round(j.price / 31.1034768 * 3.75).toLocaleString("en"); })
   .catch(() => {});
+
+// 🏆 leaderboard (top 5 from the bot) + my rank
+if (D.t && D.t.length) {
+  $("topPanel").hidden = false;
+  const medals = ["🥇", "🥈", "🥉", "4", "5"], myPts = D.p ? D.p[0] : null;
+  $("topList").innerHTML = D.t.map((x, i) => `<li class="${D.r === i + 1 ? "me" : ""}"><span class="md">${medals[i]}</span><b>${x[0].replace(/[<>&]/g, "")}</b><span>⭐ ${KH(x[1])}</span></li>`).join("");
+  if (D.r) $("myRank").textContent = "· អ្នកលេខ " + KH(D.r) + (myPts != null ? " (" + KH(myPts) + " ពិន្ទុ)" : "");
+}
 
 // money panel
 if (D.c) {
