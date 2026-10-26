@@ -715,8 +715,11 @@ const tgOpen = link => { if (tg && tg.openTelegramLink) tg.openTelegramLink(link
 $("botChat").addEventListener("click", () => { haptic("light"); tgOpen("https://t.me/" + BOT); });
 // Opens Telegram's group picker; the bot then asks the group to pay with /pay (5$ / 30 days)
 $("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?start=go_addgroup"); });  // members only: pay 5$ first, then pick a group
-$("icomGo").addEventListener("click", () => { haptic("heavy"); const u = "https://team-smos-snea.lovable.app/icom";
-  // External browser: the microphone and the saved login work there (Telegram's in-app view can block the mic)
+$("icomGo").addEventListener("click", () => { haptic("heavy");
+  // New ICOM on the bot's server (D.i): stays inside Telegram, no Sign-in — Telegram's signed initData goes along
+  if (D && D.i && tg && tg.initData) { location.href = D.i + "#tg=" + encodeURIComponent(tg.initData); return; }
+  // Fallback: old Lovable ICOM in the external browser (its saved login works there)
+  const u = "https://team-smos-snea.lovable.app/icom";
   if (tg && tg.openLink) tg.openLink(u, { try_browser: true }); else window.open(u, "_blank"); });
 // 📰 TPNews / 🚗 E1 Auto partner buttons (📞 opens the phone dialer): Telegram links stay inside Telegram, Facebook opens in the browser
 document.querySelectorAll(".tpn [data-tg],.tpn [data-web],.e1a [data-tg],.e1a [data-web],.e1a [data-call],.xc [data-tg],.xc [data-web],.xc [data-call],.vd [data-tg],.vd [data-web],.vd [data-call],.bt [data-tg],.bt [data-web]").forEach(b => b.addEventListener("click", () => {
