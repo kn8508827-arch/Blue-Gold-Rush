@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12081f">
+<title>Vid Cooler Music</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#12081f;--card:#1f1236;--ink:#fff5fb;--mist:#c9b6dd;--pink:#ff4fa3;--gold:#ffd166;--cyan:#7cf3ff;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);
+  background:radial-gradient(520px 360px at 90% -5%,rgba(255,79,163,.35),transparent 60%),
+             radial-gradient(480px 360px at -10% 35%,rgba(124,243,255,.18),transparent 60%),var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+button,a{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:10px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;border-radius:14px;background:var(--card);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.hero{position:relative;margin-top:14px;border-radius:28px;padding:22px;overflow:hidden;
+  background:linear-gradient(135deg,#ff4fa3 0%,#8a3dff 55%,#2a0f55 100%);box-shadow:0 20px 50px -20px #ff4fa3aa}
+.hero h1{margin:0;font-family:var(--dsp);font-weight:900;font-size:34px;letter-spacing:.5px;line-height:1.05}
+.hero p{margin:6px 0 0;font-weight:600;color:#ffe3f2}
+.bars{display:flex;gap:4px;align-items:flex-end;height:46px;margin-top:16px}
+.bars i{flex:1;border-radius:4px;background:linear-gradient(#fff,#ffd6ec);opacity:.85;animation:eq 1.1s ease-in-out infinite}
+@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+@media (prefers-reduced-motion:reduce){.bars i{animation:none;height:60%}}
+.links{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.links button{padding:12px 6px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1px #ffffff1c;font-weight:700;font-size:14px}
+.links button span{display:block;font-size:22px}
+h2{font-size:17px;margin:22px 4px 8px}
+.list{display:grid;gap:8px}
+.song{display:flex;gap:12px;align-items:center;padding:10px;border-radius:18px;background:var(--card);box-shadow:inset 0 0 0 1px #ffffff14;text-align:left;width:100%}
+.song .art{flex:0 0 auto;width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#ff4fa3,#8a3dff);display:grid;place-items:center;font-size:24px;overflow:hidden}
+.song .art img{width:100%;height:100%;object-fit:cover}
+.song b{display:block;font-size:15px}
+.song small{color:var(--mist);font-size:12.5px}
+.song .pl{margin-left:auto;width:40px;height:40px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-size:16px;box-shadow:0 6px 14px -6px #ff4fa3}
+.empty{padding:18px;border-radius:18px;background:var(--card);color:var(--mist);text-align:center;font-size:14px}
+.ai{margin-top:14px;display:flex;gap:12px;align-items:center;padding:14px;border-radius:20px;background:linear-gradient(135deg,#2b1a4f,#1f1236);box-shadow:inset 0 0 0 1px #b48cff55}
+.ai b{display:block}
+.ai small{color:var(--mist)}
+.ai button{margin-left:auto;padding:10px 14px;border-radius:14px;font-weight:700;background:linear-gradient(135deg,var(--cyan),#b48cff);color:#15132e;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="back" id="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a><b>🎵 Music</b></header>
+  <section class="hero">
+    <h1 id="artist">Vid Cooler</h1>
+    <p id="tagline">Rapper · Cambodia 🇰🇭</p>
+    <div class="bars" aria-hidden="true" id="bars"></div>
+  </section>
+  <div class="links" id="links"></div>
+  <h2>🎧 ចម្រៀង</h2>
+  <div class="list" id="songs"></div>
+  <section class="ai">
+    <div><b>🤖 Cooler Bot ច្រៀងឲ្យ</b><small>Rap & ចម្រៀង AI មានភ្លេង</small></div>
+    <button type="button" id="aiSong">🎤 /song</button>
+  </section>
+</div>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+try { tg && tg.ready(); tg && tg.expand(); } catch (e) {}
+const $ = id => document.getElementById(id);
+const esc = s => String(s || "").replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
+const open = u => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); } catch (e) {}
+  if (/^https:\/\/t\.me\//.test(u) && tg && tg.openTelegramLink) tg.openTelegramLink(u);
+  else if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); };
+$("bars").innerHTML = Array.from({ length: 24 }, (_, i) => `<i style="animation-delay:${(i * 97 % 900) / 1000}s"></i>`).join("");
+$("back").addEventListener("click", e => { if (history.length > 1 && document.referrer) { e.preventDefault(); history.back(); } });
+$("aiSong").addEventListener("click", () => open("https://t.me/TeamSmosSneabot?start=go_song"));
+fetch("music.json").then(r => r.json()).then(j => {
+  $("artist").textContent = j.artist || "Vid Cooler";
+  $("tagline").textContent = j.tagline || "";
+  $("links").innerHTML = (j.links || []).map((l, i) => `<button type="button" data-i="${i}"><span>${esc(l.icon)}</span>${esc(l.label)}</button>`).join("");
+  $("links").querySelectorAll("button").forEach(b => b.addEventListener("click", () => open(j.links[b.dataset.i].url)));
+  const songs = j.songs || [];
+  $("songs").innerHTML = songs.length ? songs.map((s, i) => `<button type="button" class="song" data-i="${i}">
+      <span class="art">${s.cover ? `<img src="${esc(s.cover)}" alt="" loading="lazy">` : "🎤"}</span>
+      <span><b>${esc(s.title)}</b><small>${esc(s.note || s.year || "")}</small></span><span class="pl">▶</span></button>`).join("")
+    : `<div class="empty">ចម្រៀងថ្មីៗនឹងមកដល់ឆាប់ៗ 🎶<br>តាមដាន Vid Cooler លើ TikTok & YouTube</div>`;
+  $("songs").querySelectorAll(".song").forEach(b => b.addEventListener("click", () => open(songs[b.dataset.i].url)));
+}).catch(() => { $("songs").innerHTML = `<div class="empty">មិនអាចផ្ទុកបាន — សាកម្ដងទៀត</div>`; });
+</script>
+</body>
+</html>

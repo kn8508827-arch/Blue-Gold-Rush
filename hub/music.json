@@ -1,0 +1,10 @@
+{
+  "artist": "Vid Cooler",
+  "tagline": "Rapper · Cambodia 🇰🇭",
+  "links": [
+    { "label": "TikTok", "icon": "🎵", "url": "https://www.tiktok.com/@vidcooler52" },
+    { "label": "YouTube", "icon": "▶️", "url": "https://www.youtube.com/results?search_query=Vid+Cooler" },
+    { "label": "Facebook", "icon": "📘", "url": "https://www.facebook.com/search/top?q=Vid%20Cooler" }
+  ],
+  "songs": []
+}
