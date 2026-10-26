@@ -277,6 +277,15 @@ body.btn-soft .app .t{color:#d9d4f5}
 @keyframes tpBlink{50%{opacity:.55}}
 .spot .side em{font-style:normal;font-size:11px;color:#d6e8ff}
 @media (prefers-reduced-motion:reduce){.spot,.spot .ring,.spot .live{animation:none}}
+/* 💇 Style Studio sheet */
+.sty .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 8px}
+.sty .tabs.k{grid-template-columns:1fr 1fr}
+.sty .tabs button{padding:9px 4px;border-radius:14px;font-weight:700;font-size:13px;background:#ffffff14;box-shadow:inset 0 0 0 1px #ffffff26}
+.sty .tabs button.on{background:linear-gradient(135deg,#ffb3e6,#b48cff);color:#1b1240;box-shadow:0 6px 16px -6px #ff8fd6aa}
+.sty .list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.sty .list button{padding:12px 8px;border-radius:16px;font-weight:700;font-size:13.5px;text-align:left;background:#ffffff12;box-shadow:inset 0 0 0 1px #ffffff22;transition:transform .15s}
+.sty .list button:active{transform:scale(.96)}
+.sty .how{margin:10px 2px 0;color:var(--mist);font-size:12.5px;line-height:1.5}
 /* ⚙️ theme settings */
 .gear{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:19px;background:var(--glass);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px #ffffff1f;margin-left:10px}
@@ -395,6 +404,13 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button type="button" data-web="https://www.facebook.com/share/19fJPYiuwD/">📘 Facebook</button>
     </div>
   </section>
+</div></div>
+<div class="sheet" id="stySheet" role="dialog" aria-modal="true" aria-label="Style Studio"><div class="box sty">
+  <h3>💇 Style Studio</h3><p class="sub">សាកម៉ូដសក់ និងស្ទាយថតរូបលើរូបខ្លួនឯងដោយ AI — មុខនៅដដែល</p>
+  <div class="tabs" id="styG"></div>
+  <div class="tabs k" id="styK"></div>
+  <div class="list" id="styList"></div>
+  <p class="how">① ជ្រើសម៉ូដ → ② Bot បើក → ③ ផ្ញើ Selfie មួយសន្លឹក → AI ធ្វើរូបឲ្យក្នុង 10–40 វិនាទី ✨<br>សាកម៉ូដផ្សេងទៀតលើរូបដដែលបាន មិនបាច់ផ្ញើម្ដងទៀត</p>
 </div></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Theme"><div class="box">
   <h3>🎨 ប្ដូរ Theme របស់អ្នក</h3><p class="sub">ជ្រើសផ្ទៃខាងក្រោយ និងរចនាប៊ូតុង — រក្សាទុកដោយស្វ័យប្រវត្តិ</p>
@@ -534,6 +550,7 @@ const SECTIONS = [
     ["say", "🎙️", "Voice-over", "c1", "សំឡេង voice say"],
     ["prompt", "✍️", "Prompt", "c7", "prompt video"],
     ["studio", "🖼️", "កែរូប", "c6", "កែរូប photo studio"],
+    ["sheet:stySheet", "💇", "ម៉ូដសក់ & Pose", "c3", "style hair សក់ កាត់សក់ ម៉ូដ pose ស្ទាយ ថតរូប selfie ប្រុស ស្រី ចាស់ ក្មេង", "ថ្មី"],
     ["rap", "🎤", "សរសេរ Rap", "c3", "rap"],
     ["fortune", "🔮", "ទស្សន៍ទាយ", "c5", "ទាយ fortune palm dream"],
     ["beat", "🥁", "Beat", "c4", "beat ភ្លេង"],
@@ -773,6 +790,32 @@ if (live.length) {
   try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); } catch (e) {}   // 📳 something new
 }
 // partner sheets (TPNews, E1 Auto ...): tap the dark backdrop to close
+// 💇 Style Studio — the same keys as style_studio.py in the bot (go_sty_<key> → "/style <key>")
+const STY = [["m_twoblock", "m", "hair", "✂️ Two Block កូរ៉េ"], ["m_fade", "m", "hair", "💈 Skin Fade"], ["m_undercut", "m", "hair", "🔥 Undercut"], ["m_crop", "m", "hair", "🧢 French Crop"], ["m_curtain", "m", "hair", "🎭 Curtain ចែកកណ្ដាល"], ["m_quiff", "m", "hair", "🕺 Quiff"], ["m_perm", "m", "hair", "🌀 Perm រួញកូរ៉េ"], ["m_buzz", "m", "hair", "⚡ Buzz Cut"], ["w_bob", "w", "hair", "💁‍♀️ Bob ខ្លី"], ["w_layer", "w", "hair", "🌊 Layer វែង"], ["w_bangs", "w", "hair", "🎀 Curtain Bangs"], ["w_wavy", "w", "hair", "🌸 រលកធំ"], ["w_hush", "w", "hair", "✨ Hush Cut"], ["w_pony", "w", "hair", "🎗️ Ponytail ខ្ពស់"], ["w_bun", "w", "hair", "🍡 Bun សក់ចង"], ["w_pixie", "w", "hair", "🧚 Pixie"], ["e_classic", "e", "hair", "🎩 ចែកចំហៀងបុរាណ"], ["e_silver", "e", "hair", "🤍 Silver ខ្លីស្អាត"], ["e_crew", "e", "hair", "💈 Crew Cut"], ["e_bobsilver", "e", "hair", "👵 Bob ពណ៌ប្រាក់"], ["e_curls", "e", "hair", "🌼 រួញខ្លីទន់"], ["e_bun", "e", "hair", "🪷 Bun បុរាណ"], ["k_mushroom", "k", "hair", "🍄 សក់ផ្សិត"], ["k_spiky", "k", "hair", "🦔 ស្រួចឡើងលើ"], ["k_side", "k", "hair", "👦 ចែកចំហៀង"], ["k_bob", "k", "hair", "👧 Bob មានកន្ទុយ"], ["k_pigtails", "k", "hair", "🎀 ចងពីរ"], ["k_braids", "k", "hair", "🌸 ក្រងពីរ"], ["m_lean", "m", "pose", "🧱 ផ្អែកជញ្ជាំង"], ["m_walk", "m", "pose", "🚶 ដើរ Candid"], ["m_pocket", "m", "pose", "😎 ដៃក្នុងហោប៉ៅ"], ["m_stairs", "m", "pose", "🪜 អង្គុយជណ្ដើរ"], ["m_golden", "m", "pose", "🌅 Side Profile ថ្ងៃលិច"], ["w_hairtouch", "w", "pose", "💫 ដៃប៉ះសក់"], ["w_shoulder", "w", "pose", "👀 ងាកមើលក្រោយ"], ["w_walk", "w", "pose", "👗 ដើររំលាយ"], ["w_cafe", "w", "pose", "☕ ហាងកាហ្វេ"], ["w_flowers", "w", "pose", "💐 កាន់ផ្កា"], ["e_garden", "e", "pose", "🌳 សួនច្បារ"], ["e_temple", "e", "pose", "🛕 ប្រាសាទខ្មែរ"], ["e_chair", "e", "pose", "🪑 រូបផ្លូវការលើកៅអី"], ["e_tea", "e", "pose", "🍵 ផឹកតែ"], ["k_jump", "k", "pose", "🤸 លោតសប្បាយ"], ["k_balloon", "k", "pose", "🎈 កាន់ប៉េងប៉ោង"], ["k_school", "k", "pose", "🎒 ទៅសាលា"], ["k_park", "k", "pose", "🛝 លេងនៅសួន"]];
+const STY_G = [["m", "👨 ប្រុស"], ["w", "👩 ស្រី"], ["e", "👴 ចាស់"], ["k", "👶 ក្មេង"]];
+const STY_K = [["hair", "💇 ម៉ូដសក់"], ["pose", "📸 ស្ទាយថតរូប"]];
+let styG = "m", styK = "hair";
+function styRender() {
+  const tab = (host, list, cur, set) => {
+    host.innerHTML = "";
+    list.forEach(([code, label]) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+      if (code === cur) b.className = "on";
+      b.addEventListener("click", () => { haptic("light"); set(code); styRender(); });
+      host.appendChild(b);
+    });
+  };
+  tab($("styG"), STY_G, styG, c => styG = c);
+  tab($("styK"), STY_K, styK, c => styK = c);
+  const host = $("styList"); host.innerHTML = "";
+  STY.filter(i => i[1] === styG && i[2] === styK).forEach(([key, , , label]) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+    b.addEventListener("click", () => go("sty_" + key));
+    host.appendChild(b);
+  });
+}
+styRender();
+$("stySheet").addEventListener("click", e => { if (e.target.id === "stySheet") e.currentTarget.classList.remove("on"); });
 ["tpSheet", "e1Sheet", "xcSheet", "vdSheet", "btSheet"].forEach(id => $(id).addEventListener("click", e => { if (e.target.id === id) e.currentTarget.classList.remove("on"); }));
 // 📅 Khmer calendar data (same file as calendar.html): lunar line + next sila under the clock
 const SMN = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
