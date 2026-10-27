@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c12">
+<title>Cooler AI Studio</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b0c12;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#f4f3ff;--mist:#a7a6c6;
+  --cyan:#7cf3ff;--violet:#b48cff;--gold:#ffd166;--pink:#ff8ad8;--ok:#4cd17a;--bad:#ff9aaa;--acc:#b48cff;--acc2:#7cf3ff;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  background:radial-gradient(520px 360px at 90% -10%,color-mix(in srgb,var(--acc) 30%,transparent),transparent 60%),
+             radial-gradient(520px 380px at -15% 40%,color-mix(in srgb,var(--acc2) 16%,transparent),transparent 60%),var(--bg);
+  transition:background .4s}
+.wrap{max-width:620px;margin:0 auto}
+button,a,input,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:12px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;flex:none;border-radius:14px;background:var(--glass);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.top h1{flex:1;min-width:0;margin:0;font-family:var(--dsp);font-weight:700;font-size:18px;letter-spacing:.3px}
+.top small{display:block;font-family:var(--kh);font-weight:400;font-size:12.5px;color:var(--mist);letter-spacing:0}
+.quota{flex:none;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:2px 16px 6px;scrollbar-width:none;scroll-snap-type:x proximity}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;width:78px;padding:9px 4px;border-radius:20px;font-size:12px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);line-height:1.25;text-align:center}
+.tab i{font-style:normal;font-size:24px}
+.tab.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 40%,transparent),color-mix(in srgb,var(--acc2) 26%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc),0 10px 22px -12px var(--acc)}
+.banner{display:none;margin-top:14px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,138,216,.14));box-shadow:inset 0 0 0 1px rgba(255,209,102,.35)}
+.banner.show{display:block}
+.banner b{display:block;font-size:15px}
+.banner p{margin:4px 0 10px;font-size:13.5px;color:#e9e6ff}
+.banner a{display:inline-block;padding:9px 14px;border-radius:14px;font-weight:700;color:#14122e;text-decoration:none;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.card{position:relative;margin-top:14px;padding:16px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--line),0 20px 40px -24px #000}
+.hero{display:flex;gap:12px;align-items:center}
+.hero .ic{width:52px;height:52px;flex:none;border-radius:16px;display:grid;place-items:center;font-size:28px;background:linear-gradient(145deg,color-mix(in srgb,var(--acc) 55%,#fff0),color-mix(in srgb,var(--acc2) 40%,#fff0));box-shadow:0 10px 24px -12px var(--acc)}
+.hero h2{margin:0;font-size:17px}
+.hero p{margin:2px 0 0;font-size:13px;color:var(--mist)}
+.step{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:14px;font-weight:700}
+.step .n{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 11px var(--dsp);background:#ffffff1c}
+.step small{margin-left:auto;font-weight:400;font-size:12px;color:var(--mist)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;padding:4px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{padding:9px 4px;border-radius:12px;font-weight:700;font-size:13px;color:var(--mist)}
+.seg button.on{color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.chip.on{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#14122e;box-shadow:0 6px 16px -8px var(--acc)}
+.chip.ex{background:rgba(124,243,255,.07);box-shadow:inset 0 0 0 1px rgba(124,243,255,.22);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.grid.g3{grid-template-columns:repeat(3,1fr)}
+.opt{padding:11px 8px;border-radius:16px;font-size:13px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);text-align:center;line-height:1.35;min-height:48px}
+.opt.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 34%,transparent),color-mix(in srgb,var(--acc2) 22%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc2),0 8px 18px -10px var(--acc2)}
+textarea,input[type=text],input[type=number],input[type=date]{width:100%;padding:12px 14px;border-radius:16px;border:0;font-size:15px;line-height:1.65;
+  background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px var(--line);color-scheme:dark}
+textarea{min-height:110px;resize:vertical}
+textarea:focus,input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--acc2)}
+::placeholder{color:#7c7b98}
+.count{display:flex;justify-content:space-between;font-size:12px;color:var(--mist);margin-top:4px}
+.drop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1.5px dashed var(--line);border:1.5px dashed rgba(255,255,255,.18);cursor:pointer}
+.drop img{width:74px;height:74px;flex:none;border-radius:14px;object-fit:cover;background:#ffffff10}
+.drop .ph{width:74px;height:74px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:30px;background:#ffffff10}
+.drop b{display:block}
+.drop small{color:var(--mist)}
+.range{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.range input{flex:1;accent-color:var(--acc2)}
+.note{margin-top:8px;font-size:12.5px;color:var(--mist)}
+.go{width:100%;margin-top:16px;padding:16px;border-radius:20px;font-weight:700;font-size:16px;color:#14122e;
+  background:linear-gradient(135deg,var(--acc2),var(--acc) 60%,var(--pink));box-shadow:0 14px 30px -14px var(--acc)}
+.status{min-height:20px;margin-top:8px;font-size:13px;color:var(--mist);text-align:center}
+.status.err{color:var(--bad)}
+.progress{display:none;margin-top:14px}
+.progress.show{display:block}
+.bar{height:10px;border-radius:99px;background:#ffffff12;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc),var(--pink));transition:width .8s ease}
+.ptxt{display:flex;justify-content:space-between;margin-top:6px;font-size:12.5px;color:var(--mist)}
+.tip{margin-top:8px;font-size:13px;text-align:center;min-height:20px}
+.result{display:none}
+.result.show{display:block}
+.result h3{margin:0 0 10px;font-size:15.5px}
+.media img{display:block;width:100%;border-radius:18px;background:#ffffff08}
+.cmp{position:relative;border-radius:18px;overflow:hidden;touch-action:none;user-select:none}
+.cmp img{display:block;width:100%}
+.cmp .before{position:absolute;inset:0;overflow:hidden;width:50%}
+.cmp .before img{width:auto;height:100%;max-width:none}
+.cmp .knob{position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;transform:translateX(-50%)}
+.cmp .knob::after{content:"◂▸";font-size:13px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#14122e;font-weight:700}
+.cmp .lb{position:absolute;top:10px;padding:3px 9px;border-radius:99px;font-size:11.5px;background:rgba(0,0,0,.55)}
+audio{width:100%;margin-top:4px}
+.txt{white-space:pre-wrap;font-size:14.5px;line-height:1.8;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line)}
+.para{white-space:pre-wrap;font-size:14px;line-height:1.75;margin:8px 0}
+.pblock{position:relative;margin:8px 0 12px;border-radius:16px;background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(124,243,255,.25)}
+.pblock pre{margin:0;padding:12px 14px 14px;white-space:pre-wrap;word-break:break-word;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:#e8fbff}
+.pblock .bh{display:flex;align-items:center;justify-content:space-between;padding:7px 8px 0 14px;font-size:12px;color:var(--mist)}
+.copy{padding:6px 11px;border-radius:10px;font-size:12.5px;font-weight:700;background:#ffffff18}
+.copy.ok{background:var(--ok);color:#0c2414}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:12px 8px;border-radius:16px;font-weight:700;font-size:14px;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.acts .main{grid-column:1/-1;color:#14122e;background:linear-gradient(135deg,var(--gold),var(--pink));box-shadow:0 10px 24px -12px var(--pink)}
+.lyr{margin-top:10px}
+.lyr summary{cursor:pointer;font-weight:700;font-size:14px}
+.foot{margin-top:16px;text-align:center;font-size:11.5px;color:#7c7b98}
+.hide{display:none!important}
+@media (max-width:360px){.grid.g3{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>✨ AI Studio <small>បង្កើតរបស់ថ្មីដោយ AI · ចុចប្រើភ្លាម</small></h1>
+    <span class="quota" id="quota" hidden></span>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="មុខងារ"></nav>
+  <div class="banner" id="banner" role="alert"><b id="bTitle"></b><p id="bText"></p><a id="bLink" href="#"></a></div>
+
+  <section class="card" id="form" aria-live="polite"></section>
+
+  <section class="card progress" id="progress" aria-live="polite">
+    <div class="bar"><i id="barI"></i></div>
+    <div class="ptxt"><span id="pLabel">កំពុងបង្កើត…</span><span id="pTime">0s</span></div>
+    <div class="tip" id="pTip"></div>
+  </section>
+
+  <section class="card result" id="result" aria-label="លទ្ធផល"></section>
+  <div class="foot">Cooler AI Studio · ប្រើ AI របស់ Google Gemini · @TeamSmosSneabot</div>
+</div>
+
+<script>
+"use strict";
+const API = "https://bot-smos-smea-production.up.railway.app";
+const BOT = "TeamSmosSneabot";
+const tg = window.Telegram && window.Telegram.WebApp;
+const INIT = (tg && tg.initData) || (() => { const m = location.hash.match(/[#&]tg=([^&]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get(k, d) { try { const v = localStorage.getItem("cas:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("cas:" + k, JSON.stringify(v)); } catch (e) {} } };
+const haptic = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t || "light"); } catch (e) {} };
+const notify = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t); } catch (e) {} };
+if (tg) {
+  try { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#0b0c12"); tg.setBackgroundColor && tg.setBackgroundColor("#0b0c12"); } catch (e) {}
+  try { tg.BackButton.show(); tg.BackButton.onClick(() => { location.href = "./"; }); } catch (e) {}
+}
+
+// tool: icon, label, accent colours, lane (limit group), how long it usually takes (s)
+const TOOLS = {
+  imagine: { i: "🎨", t: "គូររូប", a: ["#ff7ad9", "#b48cff"], lane: "image", eta: 25, d: "សរសេររូបដែលចង់បាន — AI គូរជារូបភាពថ្មី" },
+  song: { i: "🎧", t: "ច្រៀង & Rap", a: ["#9b8cff", "#7cc4ff"], lane: "music", eta: 110, d: "AI សរសេរទំនុក ហើយច្រៀងជាមួយភ្លេងពេញ ~២ នាទី" },
+  prompt: { i: "✍️", t: "Prompt", a: ["#8fa2ff", "#c6b4ff"], lane: "prompt", eta: 40, d: "Prompt កម្រិតអ្នកជំនាញ សម្រាប់វីដេអូ ចម្រៀង រូបភាព និងរឿង" },
+  photo: { i: "🖼️", t: "កែរូប", a: ["#ff7a8a", "#ffb36b"], lane: "photo", eta: 30, d: "រក្សាមុខដើម ប្ដូរសម្លៀកបំពាក់ ផ្ទៃខាងក្រោយ និងពន្លឺ" },
+  style: { i: "💇", t: "ម៉ូដសក់ & Pose", a: ["#ffb36b", "#ffd166"], lane: "photo", eta: 30, d: "សាកម៉ូដសក់ ឬស្ទាយថតរូបលើរូបខ្លួនឯង" },
+  rap: { i: "🎤", t: "សរសេរ Rap", a: ["#ff9f5a", "#ff7ad9"], lane: "rap", eta: 12, d: "ផ្ញើពាក្យ ១-៣ ម៉ាត់ — AI សរសេរ Verse ថ្មីជាខ្មែរ" },
+  fortune: { i: "🔮", t: "ទស្សន៍ទាយ", a: ["#b48cff", "#ff8ad8"], lane: "fortune", eta: 12, d: "ទាយប្រចាំថ្ងៃ ចាប់ឆ្នោត លេខជីវិត និងទាយសុបិន (កម្សាន្ត)" },
+  beat: { i: "🥁", t: "Beat", a: ["#4cd1a0", "#7cf3ff"], lane: "music", eta: 45, d: "ភ្លេងឥតសំឡេងច្រៀង ៣០ វិនាទី សម្រាប់ Rap ឬវីដេអូ" },
+};
+const TIPS = {
+  imagine: ["💡 ពិពណ៌នា៖ នរណា · ធ្វើអី · នៅណា · ពេលណា · ស្ទាយ", "📐 9:16 ល្អសម្រាប់ TikTok · 16:9 សម្រាប់ YouTube", "🎨 សាកស្ទាយផ្សេងៗ លទ្ធផលខុសគ្នាឆ្ងាយ"],
+  song: ["🎤 AI កំពុងសរសេរទំនុក…", "🥁 កំពុងរៀបចំ Beat និងភ្លេង…", "🎧 កំពុងច្រៀង និង Mix… រង់ចាំបន្តិច", "💡 អាចបិទទំព័រ ហើយមកមើលវិញក្នុងរយៈ ១ ម៉ោង"],
+  beat: ["🥁 កំពុងវាយស្គរ…", "🎹 កំពុងបន្ថែមភ្លេង…", "🎚️ កំពុង Mix…"],
+  prompt: ["✍️ កំពុងសរសេរ Prompt កម្រិតខ្ពស់…", "🎬 កំពុងរៀបចំឈុត កាមេរ៉ា និងពន្លឺ…"],
+  photo: ["📸 កំពុងរក្សាមុខដើម…", "👔 កំពុងប្ដូរសម្លៀកបំពាក់ និងផ្ទៃខាងក្រោយ…", "✨ ជិតរួចហើយ…"],
+  style: ["💇 កំពុងកាត់សក់ឲ្យ…", "📸 កំពុងរៀបចំ Pose…", "✨ ជិតរួចហើយ…"],
+  rap: ["🎤 កំពុងរកពាក្យចុងចួន…"], fortune: ["🔮 គ្រូទាយកំពុងមើល…"],
+};
+const IMG_EX = ["ឆ្មាពាក់វ៉ែនតាខ្មៅ រាំ Hip-hop នៅអង្គរវត្ត ពេលថ្ងៃលិច", "ទីក្រុងភ្នំពេញឆ្នាំ 2050 ឡានហោះ ពន្លឺ Neon ពេលយប់", "ក្មេងប្រុសជិះកង់លើវាលស្រែ មេឃពណ៌ទឹកក្រូច", "Logo ហាងកាហ្វេ ឈ្មោះ Cooler Coffee"];
+const ASPECT_KH = { "1:1": "⬛ ការេ 1:1", "9:16": "📱 TikTok 9:16", "16:9": "🖥️ YouTube 16:9", "4:5": "📘 FB 4:5", "3:4": "🖼️ 3:4" };
+const SONG_EX = ["ស្រលាញ់ម៉ាក់", "Team ស្មោះស្នេហ៍ដើរលេងកំពត", "ខំប្រឹងធ្វើការឆ្ងាយផ្ទះ", "ថ្ងៃកំណើតមិត្តសម្លាញ់"];
+const RAP_EX = ["មិត្តភាព ភ្នំពេញ សុបិន", "ម៉ាក់ ការងារ ក្ដីស្រមៃ", "បាល់ទាត់ ឈ្នះ Team", "កាហ្វេ ព្រឹក ស្រស់ស្រាយ"];
+
+const S = { tool: null, cat: null, member: null, left: {}, owner: false, photo: {}, job: null, poll: null, t0: 0, res: null };
+const params = new URLSearchParams(location.search);
+let F = store.get("form", {});           // remembered choices per tool
+const saveF = () => store.set("form", F);
+
+// ---------- server ----------
+function post(path, data) {
+  return fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ initData: INIT }, data)) });
+}
+async function jsonOrErr(r) {
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.msg || `😔 មានបញ្ហា (${r.status})`);
+  return j;
+}
+function setStatus(t, bad) { const s = $("status"); if (!s) return; s.textContent = t || ""; s.classList.toggle("err", !!bad); }
+function banner(title, text, link, href) {
+  $("bTitle").textContent = title; $("bText").textContent = text; $("bLink").textContent = link; $("bLink").href = href; $("banner").classList.add("show");
+}
+function gate() {
+  if (!INIT) { banner("📱 បើកពី Telegram", "AI Studio ដំណើរការក្នុង Cooler Hub លើ Telegram (ដើម្បីស្គាល់សមាជិក)។", "🚀 បើក Cooler Bot", `https://t.me/${BOT}?start=hub`); setStatus("📱 សូមបើកពី Cooler Hub ក្នុង Telegram", true); return false; }
+  if (S.member === false) { setStatus("🔒 សម្រាប់សមាជិក — ចុចប៊ូតុងខាងលើដើម្បីចូលរួម", true); return false; }
+  return true;
+}
+function showQuota() {
+  const q = $("quota"), lane = TOOLS[S.tool].lane, n = S.left[lane];
+  if (!S.member) { q.hidden = true; return; }
+  q.hidden = false; q.textContent = n === null || n === undefined ? "♾️ មិនកំណត់" : `🎟️ នៅសល់ ${n} ថ្ងៃនេះ`;
+}
+
+// ---------- tabs ----------
+$("tabs").innerHTML = Object.entries(TOOLS).map(([k, t]) => `<button type="button" class="tab" role="tab" data-k="${k}"><i>${t.i}</i>${t.t}</button>`).join("");
+$("tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) selectTool(b.dataset.k, true); });
+function selectTool(k, user) {
+  if (!TOOLS[k]) k = "imagine";
+  S.tool = k; store.set("tool", k);
+  const t = TOOLS[k];
+  document.documentElement.style.setProperty("--acc", t.a[0]); document.documentElement.style.setProperty("--acc2", t.a[1]);
+  [...$("tabs").children].forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); if (on && user !== false) b.scrollIntoView({ inline: "center", block: "nearest", behavior: user ? "smooth" : "auto" }); });
+  try { history.replaceState(null, "", "?app=" + k + location.hash); } catch (e) {}
+  if (!S.job) { $("result").classList.remove("show"); }
+  renderForm(); showQuota(); if (user) haptic();
+}
+
+// ---------- form helpers ----------
+const fv = (k, d) => (F[S.tool] && F[S.tool][k] !== undefined) ? F[S.tool][k] : d;
+function setF(k, v) { (F[S.tool] = F[S.tool] || {})[k] = v; saveF(); }
+const head = () => { const t = TOOLS[S.tool]; return `<div class="hero"><span class="ic">${t.i}</span><div><h2>${t.t}</h2><p>${t.d}</p></div></div>`; };
+const step = (n, t, small) => `<div class="step"><span class="n">${n}</span>${t}${small ? `<small>${small}</small>` : ""}</div>`;
+const chips = (name, list, cur, cls) => `<div class="chips ${cls || ""}" data-name="${name}">${list.map(([v, l]) => `<button type="button" class="chip${String(v) === String(cur) ? " on" : ""}" data-v="${esc(v)}">${l}</button>`).join("")}</div>`;
+const opts = (name, list, cur, cls) => `<div class="grid ${cls || ""}" data-name="${name}">${list.map(([v, l]) => `<button type="button" class="opt${String(v) === String(cur) ? " on" : ""}" data-v="${esc(v)}">${l}</button>`).join("")}</div>`;
+const seg = (name, list, cur) => `<div class="seg" data-name="${name}" role="radiogroup">${list.map(([v, l]) => `<button type="button" role="radio" aria-checked="${String(v) === String(cur)}" class="${String(v) === String(cur) ? "on" : ""}" data-v="${esc(v)}">${l}</button>`).join("")}</div>`;
+const examples = (target, list) => `<div class="chips scroll" data-ex="${target}" style="margin-top:8px">${list.map(x => `<button type="button" class="chip ex">${esc(x)}</button>`).join("")}</div>`;
+const area = (name, ph, max, rows) => `<textarea id="f_${name}" data-f="${name}" maxlength="${max}" placeholder="${esc(ph)}" ${rows ? `style="min-height:${rows}px"` : ""}>${esc(fv(name, ""))}</textarea><div class="count"><span></span><span data-count="${name}">0 / ${max}</span></div>`;
+const photoPick = () => {
+  const p = S.photo[S.tool] || S.photo.any;
+  return `<label class="drop" for="pfile">${p ? `<img src="${p}" alt="រូបរបស់អ្នក">` : `<span class="ph">📷</span>`}<span><b>${p ? "✅ បានជ្រើសរូប — ចុចដើម្បីប្ដូរ" : "ជ្រើសរូបថត / Selfie"}</b><small>មុខច្បាស់ ពន្លឺល្អ · រូបមិនត្រូវរក្សាទុកទេ</small></span></label><input type="file" id="pfile" accept="image/*" hidden>`;
+};
+const goBtn = label => `<button class="go" id="go" type="button">${label}</button><div class="status" id="status" role="status"></div>`;
+
+// ---------- the 8 forms ----------
+function renderForm() {
+  const c = S.cat; const k = S.tool; let h = head();
+  if (!c) { $("form").innerHTML = h + `<div class="status">⏳ កំពុងផ្ទុក…</div>`; return; }
+  if (k === "imagine") {
+    h += step(1, "✍️ សរសេររូបដែលចង់បាន") + area("prompt", "ឧ. ឆ្មាពាក់វ៉ែនតាខ្មៅ រាំ Hip-hop នៅអង្គរវត្ត ពេលថ្ងៃលិច", 600) + examples("prompt", IMG_EX);
+    h += step(2, "🎨 ស្ទាយ") + opts("style", c.imageStyles, fv("style", "auto"), "g3");
+    h += step(3, "📐 ទំហំ") + chips("aspect", c.aspects.map(a => [a, ASPECT_KH[a] || a]), fv("aspect", "1:1"));
+    h += goBtn("🎨 គូររូប");
+  } else if (k === "song") {
+    const m = fv("mode", "ai");
+    h += step(1, "📝 ទំនុកច្រៀង") + seg("mode", [["ai", "🪄 AI សរសេរឲ្យ"], ["own", "📝 ទំនុកខ្លួនឯង"]], m);
+    h += m === "ai" ? `<div style="margin-top:10px">${area("topic", "ប្រធានបទ ឧ. ស្រលាញ់ម៉ាក់", 150, 70)}</div>` + examples("topic", SONG_EX)
+                    : `<div style="margin-top:10px">${area("lyrics", "[Verse 1]\nសរសេរទំនុករបស់អ្នក…\n[Chorus]\n…", 2500, 170)}</div>`;
+    h += step(2, "🎶 ស្ទីលបទ") + opts("styleKey", c.songStyles, fv("styleKey", "rap"));
+    h += `<div class="note">⏳ ប្រហែល ១-២ នាទី · 🎤 សំឡេង Cooler Bot · ទំនុកថ្មីទាំងអស់ មិនចម្លងបទគេ</div>` + goBtn("🎧 ធ្វើបទ");
+  } else if (k === "beat") {
+    h += step(1, "🥁 ជ្រើសស្ទីល Beat") + opts("preset", c.beats.map(b => [b[0], b[1]]), fv("preset", "trap"));
+    h += step(2, "✏️ បន្ថែម (ស្រេចចិត្ត)") + `<input type="text" id="f_desc" data-f="desc" maxlength="160" placeholder="ឧ. មាន piano · ងងឹត · សម្រាប់ TikTok" value="${esc(fv("desc", ""))}">`;
+    const bpm = fv("bpm", 0);
+    h += step(3, "⏱️ ល្បឿន (BPM)", bpm ? `${bpm} BPM` : "ស្វ័យប្រវត្តិ") + `<div class="range"><span>🐢</span><input type="range" id="f_bpm" min="0" max="180" step="2" value="${bpm}" aria-label="BPM (0 = ស្វ័យប្រវត្តិ)"><span>🐇</span></div><div class="note">អូសទៅឆ្វេងបំផុត = ស្វ័យប្រវត្តិ</div>`;
+    h += goBtn("🥁 បង្កើត Beat ៣០ វិនាទី");
+  } else if (k === "prompt") {
+    const mode = fv("mode", "video"); const pm = c.promptModes.find(m => m[0] === mode) || c.promptModes[0];
+    h += step(1, "🎯 Prompt សម្រាប់អ្វី?") + opts("mode", c.promptModes.map(m => [m[0], m[1]]), mode);
+    h += step(2, "💭 គំនិតរបស់អ្នក") + area("idea", "ឧ. " + pm[2], 600) + examples("idea", [pm[2]]);
+    h += `<div class="note">Prompt ជាភាសាអង់គ្លេស (AI ស្ដាប់បានល្អជាង) · ពន្យល់ជាខ្មែរ · ចុច Copy បានភ្លាម</div>` + goBtn("✍️ សរសេរ Prompt");
+  } else if (k === "photo") {
+    const sk = fv("styleKey", "realistic");
+    h += step(1, "📷 រូបរបស់អ្នក") + photoPick();
+    h += step(2, "👔 ជ្រើសម៉ូដ") + opts("styleKey", c.photoStyles, sk);
+    if (sk === "custom") h += `<div style="margin-top:10px">${area("custom", "ឧ. ពាក់អាវយឺតខ្មៅ ឈរលើឆ្នេរកែប ពេលថ្ងៃលិច", 600, 80)}</div>`;
+    h += goBtn("✨ កែរូប");
+  } else if (k === "style") {
+    const g = fv("group", "m"), kind = fv("kind", "hair");
+    const items = c.items.filter(i => i[1] === g && i[2] === kind);
+    let it = fv("item", ""); if (!items.some(i => i[0] === it)) it = items[0] ? items[0][0] : "";
+    h += step(1, "📷 Selfie របស់អ្នក") + photoPick();
+    h += step(2, "👤 សម្រាប់") + seg("group", c.groups, g);
+    h += `<div style="margin-top:8px">${seg("kind", c.kinds, kind)}</div>`;
+    h += step(3, kind === "hair" ? "💇 ម៉ូដសក់" : "📸 Pose") + opts("item", items.map(i => [i[0], i[3]]), it);
+    h += goBtn(kind === "hair" ? "💇 សាកម៉ូដសក់" : "📸 ថតតាម Pose");
+  } else if (k === "rap") {
+    h += step(1, "✍️ ពាក្យ ១-៣ ម៉ាត់") + area("words", "ឧ. មិត្តភាព ភ្នំពេញ សុបិន", 300, 70) + examples("words", RAP_EX);
+    h += `<div class="note">🎧 រួចហើយ អាចចុច "ធ្វើជាបទ" ឲ្យ Bot ច្រៀងជាមួយ Beat</div>` + goBtn("🎤 សរសេរ Rap");
+  } else if (k === "fortune") {
+    const w = fv("what", "daily");
+    h += chips("what", [["daily", "🐲 ប្រចាំថ្ងៃ"], ["stick", "🎋 ចាប់ឆ្នោត"], ["number", "🔢 លេខជីវិត"], ["dream", "💭 ទាយសុបិន"], ["ask", "🙋 សួរគ្រូទាយ"]], w, "scroll");
+    const an = fv("animal", "");
+    if (w === "daily" || w === "ask") {
+      h += step(1, "🐲 ឆ្នាំសត្វរបស់អ្នក") + `<div class="grid g3" data-name="animal">${c.animals.map(a => `<button type="button" class="opt${a[0] === an ? " on" : ""}" data-v="${a[0]}">${a[1]} ${a[2]}</button>`).join("")}</div>`;
+      if (w === "daily") h += `<div class="note">មិនដឹងឆ្នាំសត្វ? វាយឆ្នាំកំណើត៖</div><input type="number" id="f_year" data-f="year" inputmode="numeric" min="1900" max="2100" placeholder="ឧ. 1995" value="${esc(fv("year", ""))}">`;
+      if (w === "ask") h += step(2, "🙋 សំណួររបស់អ្នក") + area("q", "ឧ. ឆ្នាំនេះការងាររបស់ខ្ញុំយ៉ាងម៉េច?", 300, 80);
+    } else if (w === "number") {
+      h += step(1, "🎂 ថ្ងៃខែឆ្នាំកំណើត") + `<input type="text" id="f_date" data-f="date" inputmode="numeric" placeholder="15/08/1995" value="${esc(fv("date", ""))}">`;
+    } else if (w === "dream") {
+      h += step(1, "💭 រៀបរាប់សុបិន") + area("q", "ឧ. យប់មិញសុបិនឃើញពស់ធំពណ៌មាស…", 300, 90);
+    } else {
+      h += `<div class="note" style="margin-top:12px">🙏 អធិស្ឋាន… ចុចប៊ូតុងខាងក្រោម ដើម្បីអង្រួនបំពង់ឆ្នោត (១ ឆ្នោត/ថ្ងៃ)</div>`;
+    }
+    h += goBtn({ daily: "🔮 មើលទស្សន៍ទាយ", stick: "🎋 ចាប់ឆ្នោត", number: "🔢 គណនា", dream: "💭 ទាយសុបិន", ask: "🔮 សួរគ្រូទាយ" }[w]);
+    h += `<div class="note" style="text-align:center">✨ សម្រាប់កម្សាន្ត — ជោគវាសនាពិតនៅក្នុងដៃអ្នក 💪</div>`;
+  }
+  $("form").innerHTML = h;
+  $("form").querySelectorAll("[data-count]").forEach(el => updCount(el.dataset.count));
+}
+function updCount(name) {
+  const t = $("f_" + name), c = $("form").querySelector(`[data-count="${name}"]`);
+  if (t && c) c.textContent = `${t.value.length} / ${t.maxLength}`;
+}
+$("form").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const grp = b.closest("[data-name]"), ex = b.closest("[data-ex]");
+  if (b.id === "go") { run(); return; }
+  if (ex) { const t = $("f_" + ex.dataset.ex); if (t) { t.value = b.textContent; setF(ex.dataset.ex, t.value); updCount(ex.dataset.ex); t.focus(); haptic(); } return; }
+  if (grp) {
+    const name = grp.dataset.name; setF(name, b.dataset.v);
+    if (S.tool === "fortune" && name === "animal") store.set("animal", b.dataset.v);
+    haptic(); renderForm();
+  }
+});
+$("form").addEventListener("input", e => {
+  const f = e.target.dataset.f; if (f) { setF(f, e.target.value); updCount(f); }
+  if (e.target.id === "f_bpm") { const v = +e.target.value; setF("bpm", v < 60 ? 0 : v); const s = e.target.closest(".card").querySelectorAll(".step small"); const sm = s[s.length - 1]; if (sm) sm.textContent = v < 60 ? "ស្វ័យប្រវត្តិ" : `${v} BPM`; }
+});
+$("form").addEventListener("change", async e => {
+  if (e.target.id !== "pfile" || !e.target.files[0]) return;
+  try { const url = await shrink(e.target.files[0]); S.photo[S.tool] = url; S.photo.any = url; renderForm(); haptic(); }
+  catch (err) { setStatus("📷 បើករូបមិនបាន — សាករូបផ្សេង", true); }
+});
+function shrink(file) {   // phone photos are big — send a 1536 px JPEG
+  return new Promise((ok, bad) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const m = 1536, s = Math.min(1, m / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); ok(c.toDataURL("image/jpeg", 0.9)); };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(new Error("img")); };
+    img.src = url;
+  });
+}
+
+// ---------- run a tool ----------
+function request() {
+  const k = S.tool, v = n => fv(n, "");
+  if (k === "imagine") return { prompt: v("prompt"), style: fv("style", "auto"), aspect: fv("aspect", "1:1") };
+  if (k === "song") return fv("mode", "ai") === "own" ? { lyrics: v("lyrics"), topic: "Cooler Song", styleKey: fv("styleKey", "rap") } : { topic: v("topic"), styleKey: fv("styleKey", "rap") };
+  if (k === "beat") return { preset: fv("preset", "trap"), desc: v("desc"), bpm: fv("bpm", 0) };
+  if (k === "prompt") return { mode: fv("mode", "video"), idea: v("idea") };
+  if (k === "photo") return { photo: S.photo.photo || S.photo.any, styleKey: fv("styleKey", "realistic"), custom: v("custom") };
+  if (k === "style") {
+    const g = fv("group", "m"), kind = fv("kind", "hair"), items = S.cat.items.filter(i => i[1] === g && i[2] === kind);
+    let it = fv("item", ""); if (!items.some(i => i[0] === it)) it = items[0] && items[0][0];
+    return { photo: S.photo.style || S.photo.any, item: it };
+  }
+  if (k === "rap") return { words: v("words") };
+  if (k === "fortune") return { what: fv("what", "daily"), animal: fv("animal", ""), year: v("year"), date: v("date"), q: v("q") };
+}
+async function run(extra) {
+  if (!gate()) return;
+  if (S.job) { setStatus("⏳ កំពុងធ្វើមួយមុននៅឡើយ…"); return; }
+  const tool = S.tool, body = Object.assign({ tool }, request(), extra || {});
+  if ((tool === "photo" || tool === "style") && !body.photo) { setStatus("📷 សូមជ្រើសរូបថតជាមុនសិន", true); return; }
+  const go = $("go"); if (go) go.disabled = true; setStatus("");
+  try {
+    const j = await jsonOrErr(await post("/studio/run", body));
+    if (j.done) { showResult(tool, j.result); notify("success"); return; }
+    startProgress(tool, j.job);
+  } catch (err) { setStatus(String(err.message || err), true); notify("error"); }
+  finally { if (go) go.disabled = false; }
+}
+function startProgress(tool, job) {
+  S.job = { id: job, tool }; S.t0 = Date.now(); store.set("job", { id: job, tool, at: S.t0 });
+  $("progress").classList.add("show"); $("result").classList.remove("show");
+  $("pLabel").textContent = `${TOOLS[tool].i} កំពុងបង្កើត ${TOOLS[tool].t}…`;
+  $("progress").scrollIntoView({ behavior: "smooth", block: "center" });
+  const tips = TIPS[tool] || [""]; let ti = 0; $("pTip").textContent = tips[0];
+  clearInterval(S.poll);
+  let n = 0;
+  S.poll = setInterval(async () => {
+    const sec = (Date.now() - S.t0) / 1000, eta = TOOLS[tool].eta;
+    $("barI").style.width = Math.min(95, 100 * (1 - Math.exp(-sec / eta * 1.6))) + "%";
+    $("pTime").textContent = `${Math.round(sec)}s`;
+    if (++n % 3 === 0) { ti = (ti + 1) % tips.length; $("pTip").textContent = tips[ti]; }
+    if (n % 2) return;                             // ask the server every 2 s
+    try {
+      const j = await jsonOrErr(await post("/studio/job", { job }));
+      if (j.status === "done") { finish(); showResult(tool, j.result, job); notify("success"); }
+      else if (j.status === "error") { finish(); setStatus(j.msg, true); notify("error"); }
+    } catch (err) { if (/រកមិនឃើញ/.test(err.message) || sec > 600) { finish(); setStatus(err.message, true); } }
+  }, 1000);
+}
+function finish() {
+  clearInterval(S.poll); S.job = null; store.set("job", null);
+  $("barI").style.width = "100%"; setTimeout(() => $("progress").classList.remove("show"), 400);
+  refreshLeft();
+}
+
+// ---------- results ----------
+const fileUrl = id => `${API}/studio/file/${id}`;
+function renderPrompt(text) {
+  const re = /<<<\s*\n?([\s\S]*?)\n?\s*>>>|```[ \t]*[\w+.-]*[ \t]*\n([\s\S]*?)```/g;
+  let out = "", last = 0, m, n = 0;
+  while ((m = re.exec(text))) {
+    const before = text.slice(last, m.index).replace(/\*\*/g, "").trim();
+    const lines = before.split("\n"); const label = (lines.length ? lines[lines.length - 1] : "").trim();
+    const rest = lines.slice(0, -1).join("\n").trim();
+    if (rest) out += `<div class="para">${esc(rest)}</div>`;
+    const body = (m[1] || m[2] || "").trim(); n++;
+    out += `<div class="pblock"><div class="bh"><span>${esc(label.slice(0, 60) || "Prompt " + n)}</span><button type="button" class="copy" data-copy="${n}">📋 Copy</button></div><pre id="pb${n}">${esc(body)}</pre></div>`;
+    last = re.lastIndex;
+  }
+  const tail = text.slice(last).replace(/\*\*/g, "").trim();
+  if (tail) out += `<div class="para">${esc(tail)}</div>`;
+  return out;
+}
+const safeHtml = s => esc(s).replace(/&lt;(\/?)(b|i)&gt;/g, "<$1$2>").replace(/\n/g, "<br>");
+function showResult(tool, r, job) {
+  S.res = { tool, r, job };
+  let h = `<h3>${TOOLS[tool].i} លទ្ធផល — ${TOOLS[tool].t}</h3>`;
+  const acts = [];
+  if (r.kind === "image") {
+    const src = fileUrl(r.files[0]); const before = (tool === "photo" || tool === "style") && (S.photo[tool] || S.photo.any);
+    h += before ? `<div class="cmp" id="cmp"><img src="${src}" alt="លទ្ធផល"><div class="before"><img src="${before}" alt="រូបដើម"></div><div class="knob"></div><span class="lb" style="left:10px">មុន</span><span class="lb" style="right:10px">ក្រោយ</span></div><div class="note" style="text-align:center">↔ អូសដើម្បីប្រៀបធៀប មុន/ក្រោយ</div>`
+                : `<div class="media"><img src="${src}" alt="${esc(r.caption || "")}"></div>`;
+    acts.push(["main", "send", "📤 ផ្ញើចូល Telegram"], ["", "dl", "📥 ទាញយក"], ["", "again", "🔁 ម្ដងទៀត"]);
+  } else if (r.kind === "audio") {
+    h += `<div class="note" style="margin:0 0 6px">🎵 ${esc(r.title || "")}</div><audio controls preload="auto" src="${fileUrl(r.files[0])}"></audio>`;
+    if (r.text) h += `<details class="lyr" open><summary>📝 ទំនុកច្រៀង</summary><div class="txt" style="margin-top:8px">${esc(r.text)}</div></details>`;
+    acts.push(["main", "send", "📤 ផ្ញើចូល Telegram (ទាញយកបាន)"], ["", "dl", "📥 ទាញយក"], ["", "again", "🔁 ធ្វើថ្មី"]);
+  } else if (r.kind === "prompt") {
+    h += renderPrompt(r.text);
+    acts.push(["main", "send", "📤 ផ្ញើចូល Telegram"], ["", "copyall", "📋 Copy ទាំងអស់"]);
+    acts.push(r.mode === "story" ? ["", "cont", "▶️ បន្តភាគបន្ទាប់"] : ["", "again", "🔁 សរសេរថ្មី"]);
+  } else if (r.kind === "text") {
+    h += `<div class="txt" id="rtext">${esc(r.text)}</div>`;
+    acts.push(["main", "tosong", "🎧 ធ្វើជាបទមាន Beat"], ["", "copyall", "📋 Copy"], ["", "send", "📤 ផ្ញើចូល Telegram"]);
+  } else {
+    h += `<div class="txt" style="white-space:normal">${safeHtml(r.text)}</div>`;
+    acts.push(["main", "send", "📤 ផ្ញើចូល Telegram"], ["", "again", "🔁 ម្ដងទៀត"]);
+  }
+  h += `<div class="acts">${acts.map(([c, a, l]) => `<button type="button" class="${c}" data-a="${a}">${l}</button>`).join("")}</div>`;
+  $("result").innerHTML = h; $("result").classList.add("show");
+  if (!job) { const b = $("result").querySelector('[data-a="send"]'); if (b && r.kind === "html") b.remove(); }   // instant readings: nothing to fetch later
+  setTimeout(() => $("result").scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  const cmp = $("cmp"); if (cmp) compare(cmp);
+}
+function compare(el) {
+  const before = el.querySelector(".before"), knob = el.querySelector(".knob"), bimg = before.querySelector("img"), main = el.querySelector("img");
+  const fit = () => { bimg.style.width = main.clientWidth + "px"; bimg.style.height = main.clientHeight + "px"; bimg.style.objectFit = "cover"; };
+  main.onload = fit; window.addEventListener("resize", fit); fit();
+  const set = x => { const r = el.getBoundingClientRect(); const p = Math.max(0, Math.min(1, (x - r.left) / r.width)) * 100; before.style.width = p + "%"; knob.style.left = p + "%"; };
+  let on = false;
+  el.addEventListener("pointerdown", e => { on = true; el.setPointerCapture(e.pointerId); set(e.clientX); });
+  el.addEventListener("pointermove", e => { if (on) set(e.clientX); });
+  el.addEventListener("pointerup", () => { on = false; });
+}
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) { const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); } catch (x) {} a.remove(); }
+  if (btn) { const o = btn.textContent; btn.textContent = "✅ Copied"; btn.classList.add("ok"); setTimeout(() => { btn.textContent = o; btn.classList.remove("ok"); }, 1600); }
+  haptic();
+}
+$("result").addEventListener("click", async e => {
+  const c = e.target.closest("[data-copy]"); if (c) { copyText($("pb" + c.dataset.copy).textContent, c); return; }
+  const b = e.target.closest("[data-a]"); if (!b || !S.res) return;
+  const { tool, r, job } = S.res, a = b.dataset.a;
+  if (a === "send") {
+    b.disabled = true; const o = b.textContent; b.textContent = "កំពុងផ្ញើ…";
+    try { await jsonOrErr(await post("/studio/send", { job })); b.textContent = "✅ ផ្ញើរួច — មើលក្នុង Chat Bot"; notify("success"); setTimeout(() => { b.textContent = o; b.disabled = false; }, 3500); }
+    catch (err) { b.textContent = o; b.disabled = false; setStatus(err.message, true); }
+  } else if (a === "dl") {
+    const id = r.files[0], name = `cooler-ai-${tool}.${r.kind === "image" ? (tool === "imagine" ? "png" : "jpg") : "mp3"}`;
+    try { if (tg && tg.downloadFile && tg.isVersionAtLeast && tg.isVersionAtLeast("8.0")) { tg.downloadFile({ url: fileUrl(id), file_name: name }); return; } } catch (x) {}
+    if (tg && tg.openLink) tg.openLink(fileUrl(id)); else window.open(fileUrl(id), "_blank");
+  } else if (a === "again") { $("form").scrollIntoView({ behavior: "smooth" }); run(); }
+  else if (a === "cont") { run({ cont: true }); }
+  else if (a === "copyall") { copyText(r.kind === "prompt" ? r.text.replace(/<<<|>>>/g, "") : r.text, b); }
+  else if (a === "tosong") {
+    F.song = Object.assign(F.song || {}, { mode: "own", lyrics: r.text, styleKey: "rap" }); saveF();
+    selectTool("song", true); $("form").scrollIntoView({ behavior: "smooth" }); setStatus("✅ ដាក់ Rap ជាទំនុករួច — ចុច 🎧 ធ្វើបទ");
+  }
+});
+
+// ---------- start ----------
+async function refreshLeft() {
+  if (!INIT) return;
+  try { const j = await jsonOrErr(await post("/studio/me", {})); S.left = j.left || {}; showQuota(); } catch (e) {}
+}
+async function boot() {
+  const start = params.get("app") || store.get("tool", "imagine");
+  F.fortune = Object.assign({ animal: store.get("animal", "") }, F.fortune || {});
+  selectTool(start, false);
+  if (!INIT) { gate(); }
+  try {
+    if (!INIT) throw new Error("no tg");
+    const j = await jsonOrErr(await post("/studio/me", {}));
+    S.cat = j.catalog; S.member = !!j.member; S.left = j.left || {}; S.owner = !!j.owner;
+    if (!j.member) banner("🔒 AI Studio សម្រាប់សមាជិក", "ចូលរួមជាសមាជិក ដើម្បីប្រើ គូររូប ច្រៀង កែរូប Prompt និងច្រើនទៀត។", "💳 ចូលរួមឥឡូវ", `https://t.me/${BOT}?start=go_pay`);
+    renderForm(); showQuota();
+    const pending = store.get("job", null);   // came back while a song was still being made
+    if (pending && Date.now() - pending.at < 3600e3 && j.member) { selectTool(pending.tool, false); startProgress(pending.tool, pending.id); S.t0 = pending.at; }
+  } catch (err) {
+    if (INIT) { $("form").innerHTML = head() + `<div class="status err">⚠️ មិនអាចភ្ជាប់ Server — ${esc(err.message || err)}</div><button class="go" type="button" onclick="location.reload()">🔄 សាកម្ដងទៀត</button>`; }
+    else { $("form").innerHTML = head() + `<div class="status err">📱 សូមបើកពី Cooler Hub ក្នុង Telegram</div>`; }
+  }
+}
+boot();
+</script>
+</body>
+</html>
