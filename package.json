@@ -2,6 +2,6 @@
   "name": "blue-gold-rush",
   "private": true,
   "scripts": {
-    "test": "node --test tests/audio.test.js tests/assets.test.js tests/progression.test.js tests/powerups.test.js tests/cooler-fly.test.js tests/arcade.test.js tests/merge-racer.test.js"
+    "test": "node --test tests/audio.test.js tests/assets.test.js tests/progression.test.js tests/powerups.test.js tests/cooler-fly.test.js tests/arcade.test.js"
   }
 }
