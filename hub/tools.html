@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c12">
+<title>Cooler Daily Tools</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b0c12;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#f4f3ff;--mist:#a7a6c6;
+  --cyan:#7cf3ff;--violet:#b48cff;--gold:#ffd166;--pink:#ff8ad8;--ok:#4cd17a;--bad:#ff9aaa;--acc:#ff7a8a;--acc2:#ffb36b;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  background:radial-gradient(520px 360px at 90% -10%,color-mix(in srgb,var(--acc) 28%,transparent),transparent 60%),
+             radial-gradient(520px 380px at -15% 40%,color-mix(in srgb,var(--acc2) 14%,transparent),transparent 60%),var(--bg)}
+.wrap{max-width:620px;margin:0 auto}
+button,a,input,textarea,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:12px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;flex:none;border-radius:14px;background:var(--glass);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.top h1{flex:1;min-width:0;margin:0;font-family:var(--dsp);font-weight:700;font-size:18px;letter-spacing:.3px}
+.top small{display:block;font-family:var(--kh);font-weight:400;font-size:12.5px;color:var(--mist);letter-spacing:0}
+.quota{flex:none;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;width:76px;padding:9px 4px;border-radius:20px;font-size:12px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);line-height:1.25;text-align:center}
+.tab i{font-style:normal;font-size:24px}
+.tab.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 40%,transparent),color-mix(in srgb,var(--acc2) 26%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc),0 10px 22px -12px var(--acc)}
+.banner{display:none;margin-top:14px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,138,216,.14));box-shadow:inset 0 0 0 1px rgba(255,209,102,.35)}
+.banner.show{display:block}
+.banner b{display:block;font-size:15px}
+.banner p{margin:4px 0 10px;font-size:13.5px;color:#e9e6ff}
+.banner a{display:inline-block;padding:9px 14px;border-radius:14px;font-weight:700;color:#14122e;text-decoration:none;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.card{position:relative;margin-top:14px;padding:16px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--line),0 20px 40px -24px #000}
+.hero{display:flex;gap:12px;align-items:center}
+.hero .ic{width:52px;height:52px;flex:none;border-radius:16px;display:grid;place-items:center;font-size:28px;background:linear-gradient(145deg,color-mix(in srgb,var(--acc) 55%,#fff0),color-mix(in srgb,var(--acc2) 40%,#fff0));box-shadow:0 10px 24px -12px var(--acc)}
+.hero h2{margin:0;font-size:17px}
+.hero p{margin:2px 0 0;font-size:13px;color:var(--mist)}
+.step{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:14px;font-weight:700}
+.step .n{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 11px var(--dsp);background:#ffffff1c}
+.step small{margin-left:auto;font-weight:400;font-size:12px;color:var(--mist)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;padding:4px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{padding:10px 4px;border-radius:12px;font-weight:700;font-size:14px;color:var(--mist)}
+.seg button.on{color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.chip.on{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#14122e}
+.chip.ex{background:rgba(124,243,255,.07);box-shadow:inset 0 0 0 1px rgba(124,243,255,.22);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opt{padding:10px 6px;border-radius:16px;font-size:13px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);text-align:center;line-height:1.35}
+.opt.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 34%,transparent),color-mix(in srgb,var(--acc2) 22%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc2)}
+textarea,input[type=text],input[type=number]{width:100%;padding:12px 14px;border-radius:16px;border:0;font-size:15px;line-height:1.65;background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px var(--line);color-scheme:dark}
+textarea{min-height:100px;resize:vertical}
+textarea:focus,input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--acc2)}
+::placeholder{color:#7c7b98}
+.amount{font:700 28px/1.2 var(--dsp);text-align:center;padding:14px}
+.drop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:rgba(0,0,0,.25);border:1.5px dashed rgba(255,255,255,.18);cursor:pointer}
+.drop img{width:64px;height:64px;flex:none;border-radius:14px;object-fit:cover}
+.drop .ph{width:64px;height:64px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:28px;background:#ffffff10}
+.drop b{display:block}
+.drop small{color:var(--mist)}
+.drop .x{margin-left:auto;padding:6px 10px;border-radius:10px;background:#ffffff14;font-size:12px}
+.note{margin-top:8px;font-size:12.5px;color:var(--mist)}
+.go{width:100%;margin-top:16px;padding:16px;border-radius:20px;font-weight:700;font-size:16px;color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc) 70%,var(--pink));box-shadow:0 14px 30px -14px var(--acc)}
+.go.busy{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.go.busy,.rec.on{animation:none}}
+.status{min-height:20px;margin-top:8px;font-size:13px;color:var(--mist);text-align:center}
+.status.err{color:var(--bad)}
+.result{display:none}
+.result.show{display:block}
+.result h3{margin:0 0 10px;font-size:15.5px}
+.txt{white-space:pre-wrap;font-size:14.5px;line-height:1.8;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line);word-break:break-word}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:12px 8px;border-radius:16px;font-weight:700;font-size:14px;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.acts .main{grid-column:1/-1;color:#14122e;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line)}
+.row .ic{font-size:20px;flex:none}
+.row .b{flex:1;min-width:0}
+.row .b b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .b small{color:var(--mist);font-size:12px}
+.row .v{font-weight:700;white-space:nowrap}
+.row .v.in{color:var(--ok)}.row .v.out{color:var(--bad)}
+.row .del{flex:none;width:34px;height:34px;border-radius:10px;background:#ffffff10;font-size:14px}
+.empty{padding:14px;text-align:center;color:var(--mist);font-size:13px}
+.rec{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;margin:6px auto 4px;font-size:34px;color:#fff;background:radial-gradient(circle at 35% 30%,#ff8aa0,#ff3b5c 60%,#b0102c);box-shadow:0 0 0 6px rgba(255,59,92,.18),0 14px 34px -10px #ff3b5c}
+.rec.on{animation:ring 1.2s ease-in-out infinite}
+.rec.on span{display:block;width:30px;height:30px;border-radius:8px;background:#fff}
+@keyframes ring{50%{box-shadow:0 0 0 16px rgba(255,59,92,.08),0 14px 34px -10px #ff3b5c}}
+.timer{text-align:center;font:700 24px var(--dsp)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kpi{padding:12px 8px;border-radius:18px;text-align:center;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line)}
+.kpi small{display:block;color:var(--mist);font-size:12px}
+.kpi b{display:block;font:700 16px var(--dsp);margin-top:2px}
+.kpi.in b{color:var(--ok)}.kpi.out b{color:var(--bad)}
+.month{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.month button{width:42px;height:42px;border-radius:14px;background:#ffffff12;font-size:18px}
+.month b{font:700 16px var(--dsp)}
+.bars{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.bar .l{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.bar .t{height:10px;border-radius:99px;background:#ffffff10;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.days{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:8px;padding:6px;border-radius:14px;background:rgba(0,0,0,.2)}
+.days i{flex:1;min-height:2px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+.foot{margin-top:16px;text-align:center;font-size:11.5px;color:#7c7b98}
+@media (max-width:360px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>🧰 ជំនួយប្រចាំថ្ងៃ <small>ប្រើរាល់ថ្ងៃ · ចុចប្រើភ្លាម</small></h1>
+    <span class="quota" id="quota" hidden></span>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="មុខងារ"></nav>
+  <div class="banner" id="banner" role="alert"><b id="bTitle"></b><p id="bText"></p><a id="bLink" href="#"></a></div>
+  <section class="card" id="form"></section>
+  <section class="card result" id="out" aria-live="polite"></section>
+  <div class="foot">Cooler Daily Tools · ទិន្នន័យដូចគ្នានឹង Chat Bot · @TeamSmosSneabot</div>
+</div>
+
+<script>
+"use strict";
+const API = "https://bot-smos-smea-production.up.railway.app";
+const BOT = "TeamSmosSneabot";
+const tg = window.Telegram && window.Telegram.WebApp;
+const INIT = (tg && tg.initData) || (() => { const m = location.hash.match(/[#&]tg=([^&]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get(k, d) { try { const v = localStorage.getItem("cdt:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("cdt:" + k, JSON.stringify(v)); } catch (e) {} } };
+const haptic = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t || "light"); } catch (e) {} };
+const notify = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t); } catch (e) {} };
+if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#0b0c12"); tg.BackButton.show(); tg.BackButton.onClick(() => { location.href = "./"; }); } catch (e) {} }
+
+const TOOLS = {
+  scam: { i: "🚨", t: "ឆែក Scam", a: ["#ff5a6e", "#ff9f5a"], d: "Link · សារ · Screenshot → AI ប្រាប់ថាគួរប្រយ័ត្នឬអត់", ai: 1 },
+  money: { i: "💵", t: "ពិនិត្យលុយ", a: ["#4cd17a", "#ffd166"], d: "ថតរូបក្រដាសប្រាក់ → ចំណុចសង្ស័យ + របៀបពិនិត្យដោយដៃ", ai: 1 },
+  totext: { i: "📝", t: "Voice→អក្សរ", a: ["#7cc4ff", "#b48cff"], d: "ថតសំឡេង ឬជ្រើស File → AI សរសេរជាអក្សរ Copy បាន", ai: 1 },
+  translate: { i: "🌐", t: "បកប្រែ", a: ["#4cd1c0", "#7cc4ff"], d: "អក្សរ ឬរូប (ម៉ឺនុយ ផ្លាក ឯកសារ) → ៨ ភាសា", ai: 1 },
+  homework: { i: "📚", t: "លំហាត់", a: ["#ffb36b", "#ff8ad8"], d: "ថតរូបលំហាត់ → ពន្យល់មួយជំហានៗជាខ្មែរ", ai: 1 },
+  remind: { i: "⏰", t: "រំលឹក", a: ["#b48cff", "#ff8ad8"], d: "សរសេរធម្មតា → Bot ផ្ញើសាររំលឹកដល់ពេល" },
+  cash: { i: "💸", t: "កត់លុយ", a: ["#ffd166", "#4cd17a"], d: "កត់ចាយ/ចូលក្នុង ៣ វិនាទី" },
+  report: { i: "📊", t: "របាយការណ៍", a: ["#7cf3ff", "#b48cff"], d: "សរុបខែ · ចំណាយតាមប្រភេទ · រាល់ថ្ងៃ" },
+  kb: { i: "🗂️", t: "AI ឯកសារ", a: ["#8fa2ff", "#7cf3ff"], d: "បញ្ចូលឯកសារ (តម្លៃ ម៉ោង ច្បាប់) → សួរ AI ឆ្លើយតាមឯកសារ" },
+};
+const SCAM_DEMO = "អបអរសាទរ! លោកអ្នកឈ្នះរង្វាន់ $500 ពី ABA 🎉 ចុច https://aba-bonus.xyz ហើយបញ្ចូលលេខកាត និង OTP ដើម្បីទទួលលុយក្នុង ២៤ ម៉ោង";
+const REMIND_EX = ["ស្អែកម៉ោង ២ រសៀល ណាត់ជួបភ្ញៀវ", "៣០ នាទីទៀត លេបថ្នាំ", "ថ្ងៃទី ៥ រៀងរាល់ខែ បង់ថ្លៃភ្លើង", "រាល់ថ្ងៃ ម៉ោង ៦ ព្រឹក ហាត់ប្រាណ"];
+const HW_EX = ["2x + 5 = 15", "រកក្រឡាផ្ទៃរង្វង់កាំ 7 cm", "Present simple vs present continuous"];
+const S = { tool: null, member: null, left: null, limit: 40, cats: [], langs: [], photo: null, audio: null, res: null, month: null };
+let F = store.get("f", {});
+const fv = (k, d) => (F[S.tool] && F[S.tool][k] !== undefined) ? F[S.tool][k] : d;
+const setF = (k, v) => { (F[S.tool] = F[S.tool] || {})[k] = v; store.set("f", F); };
+
+async function post(path, data) {
+  const r = await fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ initData: INIT }, data || {})) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.msg || `😔 មានបញ្ហា (${r.status})`);
+  if (j.left !== undefined) { S.left = j.left; quota(); }
+  return j;
+}
+function status(t, bad) { const s = $("status"); if (s) { s.textContent = t || ""; s.classList.toggle("err", !!bad); } }
+function banner(title, text, link, href) { $("bTitle").textContent = title; $("bText").textContent = text; $("bLink").textContent = link; $("bLink").href = href; $("banner").classList.add("show"); }
+function gate() {
+  if (!INIT) { banner("📱 បើកពី Telegram", "ជំនួយប្រចាំថ្ងៃ ដំណើរការក្នុង Cooler Hub លើ Telegram។", "🚀 បើក Cooler Bot", `https://t.me/${BOT}?start=hub`); status("📱 សូមបើកពី Cooler Hub ក្នុង Telegram", true); return false; }
+  if (S.member === false) { status("🔒 សម្រាប់សមាជិក — ចុចប៊ូតុងខាងលើដើម្បីចូលរួម", true); return false; }
+  return true;
+}
+function quota() {
+  const q = $("quota");
+  if (!S.member || !TOOLS[S.tool].ai) { q.hidden = true; return; }
+  q.hidden = false; q.textContent = S.left === null ? "♾️ មិនកំណត់" : `🎟️ AI នៅសល់ ${S.left}`;
+}
+
+// ---------- tabs ----------
+$("tabs").innerHTML = Object.entries(TOOLS).map(([k, t]) => `<button type="button" class="tab" role="tab" data-k="${k}"><i>${t.i}</i>${t.t}</button>`).join("");
+$("tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) select(b.dataset.k, true); });
+function select(k, user) {
+  if (!TOOLS[k]) k = "scam";
+  S.tool = k; S.photo = null; S.audio = null; store.set("tool", k); stopRec();
+  const t = TOOLS[k];
+  document.documentElement.style.setProperty("--acc", t.a[0]); document.documentElement.style.setProperty("--acc2", t.a[1]);
+  [...$("tabs").children].forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); if (on) b.scrollIntoView({ inline: "center", block: "nearest", behavior: user ? "smooth" : "auto" }); });
+  try { history.replaceState(null, "", "?app=" + k + location.hash); } catch (e) {}
+  $("out").classList.remove("show"); render(); quota(); if (user) haptic();
+}
+
+// ---------- helpers ----------
+const head = () => { const t = TOOLS[S.tool]; return `<div class="hero"><span class="ic">${t.i}</span><div><h2>${t.t}</h2><p>${t.d}</p></div></div>`; };
+const step = (n, t, small) => `<div class="step"><span class="n">${n}</span>${t}${small ? `<small>${small}</small>` : ""}</div>`;
+const area = (name, ph, max, h) => `<textarea id="f_${name}" data-f="${name}" maxlength="${max}" placeholder="${esc(ph)}" ${h ? `style="min-height:${h}px"` : ""}>${esc(fv(name, ""))}</textarea>`;
+const ex = (target, list) => `<div class="chips scroll" data-ex="${target}" style="margin-top:8px">${list.map(x => `<button type="button" class="chip ex">${esc(x)}</button>`).join("")}</div>`;
+const photoPick = (label, cam) => `<label class="drop" for="pfile">${S.photo ? `<img src="${S.photo}" alt="">` : `<span class="ph">📷</span>`}<span><b>${S.photo ? "✅ បានជ្រើសរូប" : label}</b><small>${S.photo ? "ចុចដើម្បីប្ដូរ" : "ថតភ្លាម ឬជ្រើសពី Gallery"}</small></span>${S.photo ? `<button type="button" class="x" data-act="nophoto">✕</button>` : ""}</label><input type="file" id="pfile" accept="image/*" ${cam ? 'capture="environment"' : ""} hidden>`;
+const go = label => `<button class="go" id="go" type="button">${label}</button><div class="status" id="status" role="status"></div>`;
+const kh = n => String(n).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+const money = (v, cur) => cur === "USD" ? "$" + (+v).toLocaleString("en", { maximumFractionDigits: 2 }) : (+v).toLocaleString("en", { maximumFractionDigits: 0 }) + " ៛";
+const when = ts => { const d = new Date(ts * 1000); return d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); };
+const REP = { none: "", daily: " · 🔁 រាល់ថ្ងៃ", weekly: " · 🔁 រាល់សប្ដាហ៍", monthly: " · 🔁 រាល់ខែ" };
+
+// ---------- forms ----------
+function render() {
+  const k = S.tool; let h = head();
+  if (k === "scam") {
+    h += step(1, "🔗 Link ឬសារ") + area("text", "Paste Link ឬសារដែលគេផ្ញើមក…", 3000) + `<div class="chips" style="margin-top:8px"><button type="button" class="chip ex" data-act="demo">🧪 មើលឧទាហរណ៍សារបោក</button></div>`;
+    h += step(2, "📸 Screenshot", "ស្រេចចិត្ត") + photoPick("ជ្រើស Screenshot") + go("🚨 ឆែកឥឡូវ");
+  } else if (k === "money") {
+    h += step(1, "📸 ថតក្រដាសប្រាក់") + photoPick("ថតមុខ ឬក្រោយ ឲ្យច្បាស់", true);
+    h += step(2, "✏️ ចំណាំ", "ស្រេចចិត្ត") + `<input type="text" id="f_text" data-f="text" maxlength="200" placeholder="ឧ. ទទួលពីអតិថិជនម្នាក់" value="${esc(fv("text", ""))}">`;
+    h += `<div class="note">⚠️ រូបថតមិនអាចបញ្ជាក់ថាពិត ១០០% ទេ — AI ប្រាប់ចំណុចសង្ស័យ + របៀបពិនិត្យដោយដៃ</div>` + go("💵 ពិនិត្យ");
+  } else if (k === "totext") {
+    h += step(1, "🎤 ថតសំឡេង", "អតិបរមា ៣ នាទី") + `<button type="button" class="rec" id="rec" aria-label="ថត">🎙️</button><div class="timer" id="timer">${S.audio ? "✅ រួចរាល់" : "00:00"}</div>`;
+    h += `<div class="chips" style="justify-content:center;margin-top:8px"><label class="chip" for="afile">📂 ឬជ្រើសឯកសារសំឡេង</label><input type="file" id="afile" accept="audio/*" hidden></div>` + go("📝 បម្លែងជាអក្សរ");
+  } else if (k === "translate") {
+    h += step(1, "🎯 បកប្រែទៅ") + `<div class="chips scroll" data-name="lang">${S.langs.map(([v, l]) => `<button type="button" class="chip${v === fv("lang", "auto") ? " on" : ""}" data-v="${v}">${l}</button>`).join("")}</div>`;
+    h += step(2, "✍️ អក្សរ") + area("text", "Hello, how much is this?", 4000) + step(3, "📸 ឬរូបដែលមានអក្សរ", "ស្រេចចិត្ត") + photoPick("ថតម៉ឺនុយ ផ្លាក ឯកសារ", true) + go("🌐 បកប្រែ");
+  } else if (k === "homework") {
+    h += step(1, "📸 រូបលំហាត់") + photoPick("ថតលំហាត់ឲ្យច្បាស់", true) + step(2, "✍️ ឬសរសេរលំហាត់") + area("text", "2x + 5 = 15", 3000, 80) + ex("text", HW_EX) + go("📚 ពន្យល់");
+  } else if (k === "remind") {
+    h += step(1, "⏰ ពេល + រឿង (សរសេរធម្មតា)") + `<input type="text" id="f_text" data-f="text" maxlength="300" placeholder="ស្អែកម៉ោង ២ រសៀល ណាត់ជួបភ្ញៀវ" value="${esc(fv("text", ""))}">` + ex("text", REMIND_EX) + go("⏰ កំណត់រំលឹក");
+    h += step(2, "📋 ការរំលឹករបស់ខ្ញុំ") + `<div class="list" id="list"><div class="empty">⏳</div></div>`;
+  } else if (k === "cash") {
+    const kind = fv("kind", "out"), cur = fv("currency", "KHR");
+    h += `<div style="margin-top:14px">${seg("kind", [["out", "➖ ចាយ"], ["in", "➕ ចូល"]], kind)}</div>`;
+    h += step(1, "💵 ចំនួន") + `<input type="number" class="amount" id="f_amount" data-f="amount" inputmode="decimal" min="0" placeholder="0" value="${esc(fv("amount", ""))}">`;
+    h += `<div style="margin-top:8px">${seg("currency", [["KHR", "៛ រៀល"], ["USD", "$ ដុល្លារ"]], cur)}</div>`;
+    const quick = cur === "USD" ? [1, 2, 5, 10, 20, 50] : [1000, 2000, 5000, 10000, 20000, 50000];
+    h += `<div class="chips scroll" data-quick style="margin-top:8px">${quick.map(q => `<button type="button" class="chip" data-v="${q}">${money(q, cur)}</button>`).join("")}</div>`;
+    if (kind === "out") h += step(2, "🏷️ ប្រភេទ") + `<div class="grid" data-name="category">${S.cats.filter(c => c !== "💰 ចំណូល").map(c => `<button type="button" class="opt${c === fv("category", "🍜 អាហារ") ? " on" : ""}" data-v="${esc(c)}">${esc(c)}</button>`).join("")}</div>`;
+    h += step(kind === "out" ? 3 : 2, "📝 ចំណាំ", "ស្រេចចិត្ត") + `<input type="text" id="f_note" data-f="note" maxlength="60" placeholder="${kind === "out" ? "កាហ្វេ · សាំង · ថ្លៃភ្លើង" : "លក់អាវ · ប្រាក់ខែ"}" value="">` + go("💾 កត់ទុក");
+    h += step("📋", "ខែនេះ") + `<div class="list" id="list"><div class="empty">⏳</div></div>`;
+  } else if (k === "report") {
+    h += `<div class="month" style="margin-top:14px"><button type="button" data-act="prev" aria-label="ខែមុន">‹</button><b id="mlabel">…</b><button type="button" data-act="next" aria-label="ខែក្រោយ">›</button></div><div id="rep"><div class="empty">⏳</div></div><div class="status" id="status"></div>`;
+  } else if (k === "kb") {
+    h += step(1, "❓ សួរ AI តាមឯកសាររបស់អ្នក") + `<input type="text" id="f_q" data-f="q" maxlength="500" placeholder="ឧ. ហាងបើកម៉ោងប៉ុន្មាន?" value="${esc(fv("q", ""))}">` + go("🤖 សួរ");
+    h += step(2, "➕ បញ្ចូលឯកសារ") + `<input type="text" id="f_title" maxlength="80" placeholder="ចំណងជើង ឧ. តារាងតម្លៃ">` + `<div style="margin-top:8px">${area("body", "សរសេរព័ត៌មាន ឧ. ម៉ោងបើក ៧ ព្រឹក–៩ យប់ · កាហ្វេ 5000 រៀល …", 60000, 90)}</div>`;
+    h += `<div class="chips" style="margin-top:8px"><label class="chip" for="kfile">📎 ឬជ្រើស PDF / រូប / .txt</label><input type="file" id="kfile" accept=".pdf,.txt,.md,.csv,image/*,application/pdf" hidden><button type="button" class="chip on" data-act="kbadd">💾 រក្សាទុក</button></div>`;
+    h += step(3, "📚 ឯកសាររបស់ខ្ញុំ") + `<div class="list" id="list"><div class="empty">⏳</div></div><div class="note">💡 ឯកសារនេះដូចគ្នានឹង /kb ក្នុង Chat ផ្ទាល់ជាមួយ Bot · សម្រាប់ Group ប្រើ /learn ក្នុង Group</div>`;
+  }
+  $("form").innerHTML = h;
+  if (k === "remind") loadReminders();
+  if (k === "cash") loadCash();
+  if (k === "report") loadReport();
+  if (k === "kb") loadDocs();
+}
+const seg = (name, list, cur) => `<div class="seg" data-name="${name}" role="radiogroup">${list.map(([v, l]) => `<button type="button" role="radio" aria-checked="${v === cur}" class="${v === cur ? "on" : ""}" data-v="${v}">${l}</button>`).join("")}</div>`;
+
+$("form").addEventListener("input", e => { const f = e.target.dataset.f; if (f) setF(f, e.target.value); });
+$("form").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "go") { run(); return; }
+  if (b.id === "rec") { toggleRec(); return; }
+  const act = b.dataset.act;
+  if (act === "demo") { setF("text", SCAM_DEMO); render(); haptic(); return; }
+  if (act === "nophoto") { e.preventDefault(); S.photo = null; render(); return; }
+  if (act === "prev" || act === "next") { shiftMonth(act === "prev" ? -1 : 1); return; }
+  if (act === "kbadd") { kbAdd(); return; }
+  if (act === "del") { del(b.dataset.id); return; }
+  const exb = b.closest("[data-ex]"); if (exb) { setF(exb.dataset.ex, b.textContent); render(); haptic(); return; }
+  if (b.closest("[data-quick]")) { setF("amount", b.dataset.v); render(); haptic(); return; }
+  const grp = b.closest("[data-name]"); if (grp) { setF(grp.dataset.name, b.dataset.v); render(); haptic(); }
+});
+$("form").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (e.target.id === "pfile") { try { S.photo = await shrink(f); render(); } catch (x) { status("📷 បើករូបមិនបាន", true); } }
+  if (e.target.id === "afile") { try { status("⏳ កំពុងរៀបចំសំឡេង…"); S.audio = await toWav(await f.arrayBuffer()); render(); status("✅ រួចរាល់ — ចុច បម្លែងជាអក្សរ"); } catch (x) { status("🎧 បើកឯកសារសំឡេងមិនបាន — សាក MP3/M4A/WAV", true); } }
+  if (e.target.id === "kfile") { S.kfile = f; status(`📎 ${f.name} — ចុច 💾 រក្សាទុក`); }
+});
+function shrink(file) {
+  return new Promise((ok, bad) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const s = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL("image/jpeg", 0.9)); };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(new Error("img")); }; img.src = url;
+  });
+}
+const readAsData = f => new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(f); });
+
+// ---------- voice recording → 16 kHz mono WAV ----------
+let mr = null, chunks = [], t0 = 0, tick = null, stream = null;
+async function toggleRec() {
+  if (mr && mr.state === "recording") { mr.stop(); return; }
+  if (!gate()) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: true, echoCancellation: true } });
+  } catch (e) { status("🎤 មិនអាចប្រើ Microphone — អនុញ្ញាតក្នុង Settings", true); return; }
+  chunks = []; mr = new MediaRecorder(stream);
+  mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+  mr.onstop = async () => {
+    clearInterval(tick); stream.getTracks().forEach(t => t.stop());
+    const btn = $("rec"); if (btn) { btn.classList.remove("on"); btn.innerHTML = "🎙️"; }
+    try { S.audio = await toWav(await new Blob(chunks).arrayBuffer()); if ($("timer")) $("timer").textContent = "✅ រួចរាល់"; status("ចុច 📝 បម្លែងជាអក្សរ"); haptic("medium"); }
+    catch (e) { status("😔 ថតមិនបាន — សាកម្ដងទៀត", true); }
+  };
+  mr.start(); t0 = Date.now(); const btn = $("rec"); btn.classList.add("on"); btn.innerHTML = "<span></span>";
+  tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); if ($("timer")) $("timer").textContent = `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; if (s >= 180) mr.stop(); }, 250);
+  haptic("medium");
+}
+function stopRec() { try { if (mr && mr.state === "recording") mr.stop(); } catch (e) {} }
+async function toWav(buf) {
+  const Ctx = window.AudioContext || window.webkitAudioContext; const ctx = new Ctx();
+  const dec = await new Promise((ok, bad) => { const p = ctx.decodeAudioData(buf, ok, bad); if (p && p.then) p.then(ok, bad); });
+  const sr = 16000, len = Math.min(Math.ceil(dec.duration * sr), sr * 180);
+  const off = new OfflineAudioContext(1, len, sr); const src = off.createBufferSource(); src.buffer = dec; src.connect(off.destination); src.start();
+  const out = (await off.startRendering()).getChannelData(0); ctx.close && ctx.close();
+  const b = new ArrayBuffer(44 + out.length * 2), v = new DataView(b), w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, 36 + out.length * 2, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, out.length * 2, true);
+  for (let i = 0; i < out.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, out[i])) * 0x7fff, true);
+  let bin = ""; const u8 = new Uint8Array(b); for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return "data:audio/wav;base64," + btoa(bin);
+}
+
+// ---------- actions ----------
+async function run() {
+  if (!gate()) return;
+  const k = S.tool, btn = $("go"); btn.disabled = true; btn.classList.add("busy"); const label = btn.textContent; status("");
+  try {
+    if (TOOLS[k].ai) {
+      btn.textContent = "⏳ AI កំពុងគិត…";
+      const body = { tool: k, text: fv("text", ""), lang: fv("lang", "auto") };
+      if (S.photo) body.photo = S.photo;
+      if (k === "totext") body.audio = S.audio;
+      const j = await post("/tools/ai", body);
+      show(j.title, j.text); notify("success");
+    } else if (k === "remind") {
+      btn.textContent = "⏳ កំពុងកំណត់…";
+      const j = await post("/tools/remind/add", { text: fv("text", "") });
+      setF("text", ""); renderReminders(j.items); status(`✅ នឹងរំលឹក ${when(j.item.due)}${REP[j.item.repeat] || ""} — ${j.item.what}`); notify("success");
+      $("f_text").value = "";
+    } else if (k === "cash") {
+      const amount = fv("amount", ""); if (!(+amount > 0)) { status("💵 វាយចំនួនលុយ", true); return; }
+      const kind = fv("kind", "out");
+      const j = await post("/tools/cash/add", { kind, amount, currency: fv("currency", "KHR"), category: kind === "in" ? "💰 ចំណូល" : fv("category", "🍜 អាហារ"), note: ($("f_note") || {}).value || "" });
+      setF("amount", ""); render(); status(`${kind === "in" ? "➕" : "➖"} ${money(j.item.amount, j.item.currency)} · ${j.item.category} ✅`); notify("success");
+    } else if (k === "kb") {
+      btn.textContent = "⏳ AI កំពុងអាន…";
+      const j = await post("/tools/kb/ask", { q: fv("q", "") });
+      show(j.found ? "🤖 ចម្លើយពីឯកសារ" : "🤷 រកមិនឃើញ", j.text);
+    }
+  } catch (err) { status(String(err.message || err), true); notify("error"); }
+  finally { btn.disabled = false; btn.classList.remove("busy"); btn.textContent = label; }
+}
+function show(title, text) {
+  S.res = { title, text };
+  $("out").innerHTML = `<h3>${esc(title)}</h3><div class="txt">${esc(text)}</div><div class="acts"><button type="button" class="main" data-a="copy">📋 Copy</button><button type="button" data-a="send">📤 ផ្ញើចូល Telegram</button><button type="button" data-a="again">🔁 ម្ដងទៀត</button></div>`;
+  $("out").classList.add("show"); setTimeout(() => $("out").scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+}
+$("out").addEventListener("click", async e => {
+  const b = e.target.closest("[data-a]"); if (!b || !S.res) return;
+  if (b.dataset.a === "copy") {
+    try { await navigator.clipboard.writeText(S.res.text); } catch (x) { const a = document.createElement("textarea"); a.value = S.res.text; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); } catch (y) {} a.remove(); }
+    b.textContent = "✅ Copied"; setTimeout(() => { b.textContent = "📋 Copy"; }, 1500); haptic();
+  } else if (b.dataset.a === "send") {
+    b.disabled = true; try { await post("/tools/send", S.res); b.textContent = "✅ ផ្ញើរួច"; notify("success"); } catch (err) { b.textContent = "😔 ផ្ញើមិនបាន"; } setTimeout(() => { b.textContent = "📤 ផ្ញើចូល Telegram"; b.disabled = false; }, 2500);
+  } else { $("form").scrollIntoView({ behavior: "smooth" }); }
+});
+
+// lists
+async function loadReminders() { if (!INIT || S.member === false) return renderReminders([]); try { renderReminders((await post("/tools/remind/list")).items); } catch (e) { renderReminders([]); } }
+function renderReminders(items) {
+  const l = $("list"); if (!l) return;
+  l.innerHTML = items.length ? items.map(r => `<div class="row"><span class="ic">⏰</span><span class="b"><b>${esc(r.what)}</b><small>${when(r.due)}${REP[r.repeat] || ""}</small></span><button type="button" class="del" data-act="del" data-id="${r.id}" aria-label="លុប">🗑️</button></div>`).join("")
+    : `<div class="empty">មិនទាន់មានការរំលឹកទេ</div>`;
+}
+async function loadCash() { if (!INIT || S.member === false) return renderCash([]); try { renderCash((await post("/tools/cash/list")).items); } catch (e) { renderCash([]); } }
+function renderCash(items) {
+  const l = $("list"); if (!l) return;
+  l.innerHTML = items.length ? items.slice(0, 30).map(r => `<div class="row"><span class="ic">${esc((r.category || "📦").split(" ")[0])}</span><span class="b"><b>${esc(r.note || (r.category || "").split(" ").slice(1).join(" "))}</b><small>${when(r.at)}</small></span><span class="v ${r.kind}">${r.kind === "in" ? "+" : "−"}${money(r.amount, r.currency)}</span><button type="button" class="del" data-act="del" data-id="${r.id}" aria-label="លុប">🗑️</button></div>`).join("")
+    : `<div class="empty">ខែនេះមិនទាន់កត់អ្វីទេ</div>`;
+}
+async function loadDocs() { if (!INIT || S.member === false) return renderDocs([]); try { renderDocs((await post("/tools/kb/list")).items); } catch (e) { renderDocs([]); } }
+function renderDocs(items) {
+  const l = $("list"); if (!l) return;
+  l.innerHTML = items.length ? items.map(d => `<div class="row"><span class="ic">📄</span><span class="b"><b>${esc(d.title)}</b><small>${d.chars.toLocaleString()} តួអក្សរ</small></span><button type="button" class="del" data-act="del" data-id="${d.id}" aria-label="លុប">🗑️</button></div>`).join("")
+    : `<div class="empty">មិនទាន់មានឯកសារ — បញ្ចូលខាងលើ</div>`;
+}
+async function del(id) {
+  try {
+    if (S.tool === "remind") renderReminders((await post("/tools/remind/del", { id })).items);
+    if (S.tool === "cash") renderCash((await post("/tools/cash/del", { id })).items);
+    if (S.tool === "kb") renderDocs((await post("/tools/kb/del", { id })).items);
+    haptic("medium");
+  } catch (err) { status(err.message, true); }
+}
+async function kbAdd() {
+  if (!gate()) return;
+  const body = { title: ($("f_title") || {}).value || "", body: fv("body", "") };
+  try {
+    if (S.kfile) { status("⏳ AI កំពុងអានឯកសារ…"); body.file = await readAsData(S.kfile); body.name = S.kfile.name; body.mime = S.kfile.type; }
+    const j = await post("/tools/kb/add", body);
+    S.kfile = null; setF("body", ""); render(); status(`✅ បានរៀន «${j.item.title}» (${j.item.chars.toLocaleString()} តួអក្សរ)`); notify("success");
+  } catch (err) { status(err.message, true); }
+}
+
+// report
+function monthStr(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+function shiftMonth(n) { const [y, m] = S.month.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); if (d > new Date()) return; S.month = monthStr(d); loadReport(); }
+async function loadReport() {
+  S.month = S.month || monthStr(new Date());
+  const [y, m] = S.month.split("-"); $("mlabel").textContent = `ខែ ${kh(+m)} / ${kh(y)}`;
+  if (!INIT || S.member === false) { $("rep").innerHTML = `<div class="empty">📱 សូមបើកពី Cooler Hub</div>`; return; }
+  try {
+    const r = await post("/tools/report", { month: S.month });
+    if (!r.count) { $("rep").innerHTML = `<div class="empty">ខែនេះមិនទាន់មានកំណត់ត្រា — ទៅ 💸 កត់លុយ</div>`; return; }
+    const usd = v => "$" + v.toLocaleString("en", { maximumFractionDigits: 2 });
+    const maxDay = Math.max(...r.days.map(d => d[1]), 0.01), dim = new Date(+y, +m, 0).getDate(), dm = Object.fromEntries(r.days);
+    let h = `<div class="kpis"><div class="kpi in"><small>➕ ចំណូល</small><b>${usd(r.income)}</b></div><div class="kpi out"><small>➖ ចំណាយ</small><b>${usd(r.spent)}</b></div><div class="kpi"><small>${r.balance >= 0 ? "💚" : "❤️"} សល់</small><b>${usd(r.balance)}</b></div></div>`;
+    h += `<div class="note" style="text-align:center">≈ ${Math.round(r.balance * r.khr).toLocaleString()} ៛ · 1$ ≈ ${Math.round(r.khr).toLocaleString()} ៛ · ${r.count} កំណត់ត្រា</div>`;
+    if (r.cats.length) h += step("🏷️", "ចំណាយតាមប្រភេទ") + `<div class="bars">${r.cats.map(([c, v, p]) => `<div class="bar"><div class="l"><span>${esc(c)}</span><b>${usd(v)} · ${p}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`).join("")}</div>`;
+    h += step("📅", "ចំណាយរាល់ថ្ងៃ") + `<div class="days" aria-label="ចំណាយរាល់ថ្ងៃ">${Array.from({ length: dim }, (_, i) => `<i title="${i + 1}: ${usd(dm[i + 1] || 0)}" style="height:${Math.max(2, 100 * (dm[i + 1] || 0) / maxDay)}%"></i>`).join("")}</div>`;
+    h += `<div class="acts"><button type="button" class="main" id="repSend">📤 ផ្ញើរបាយការណ៍ចូល Telegram</button></div>`;
+    $("rep").innerHTML = h;
+    $("repSend").onclick = async () => {
+      const text = [`ចំណូល៖ ${usd(r.income)}`, `ចំណាយ៖ ${usd(r.spent)}`, `សល់៖ ${usd(r.balance)}`, "", ...r.cats.map(([c, v, p]) => `${c}៖ ${usd(v)} (${p}%)`)].join("\n");
+      try { await post("/tools/send", { title: `📊 របាយការណ៍ខែ ${m}/${y}`, text }); $("repSend").textContent = "✅ ផ្ញើរួច"; } catch (e) { status(e.message, true); }
+    };
+  } catch (err) { $("rep").innerHTML = ""; status(err.message, true); }
+}
+
+// ---------- start ----------
+(async function boot() {
+  select(new URLSearchParams(location.search).get("app") || store.get("tool", "scam"));
+  if (!INIT) { gate(); return; }
+  try {
+    const j = await post("/tools/me");
+    S.member = !!j.member; S.cats = j.categories || []; S.langs = j.langs || []; S.limit = j.limit;
+    if (!j.member) banner("🔒 ជំនួយប្រចាំថ្ងៃ សម្រាប់សមាជិក", "ចូលរួមជាសមាជិក ដើម្បីប្រើ ឆែក Scam កត់លុយ រំលឹក បកប្រែ និងច្រើនទៀត។", "💳 ចូលរួមឥឡូវ", `https://t.me/${BOT}?start=go_pay`);
+    render(); quota();
+  } catch (err) { status("⚠️ មិនអាចភ្ជាប់ Server — " + err.message, true); }
+})();
+</script>
+</body>
+</html>
