@@ -63,6 +63,12 @@
     "transform-origin:var(--ox,90%) 100%;transform:translateX(-50%) perspective(900px) rotateX(14deg) rotateY(var(--ry,-14deg)) scale(.55);" +
     "opacity:0;visibility:hidden;transition:transform .32s cubic-bezier(.2,1.25,.4,1),opacity .2s,visibility 0s .32s}" +
     ".cbm-chat.open{transform:translateX(-50%) perspective(900px) rotateX(0) rotateY(0) scale(1);opacity:1;visibility:visible;transition:transform .32s cubic-bezier(.2,1.25,.4,1),opacity .2s}" +
+    ".cbm-chat.open.set{transform:translateX(-50%);transition:none}" +
+    ".cbm-chat .av{isolation:isolate;contain:layout paint;will-change:transform}" +
+    ".cbm-chat .cbf .ln,.cbm-chat .cbf .ray,.cbm-chat .cbf .gl{mix-blend-mode:normal}" +
+    ".cbm-chat .cbf .ray{opacity:.5}" +
+    ".cbm.away{visibility:hidden}.cbm.away *{animation-play-state:paused!important}" +
+    "html.cbm-lock body>:not(.cbm-chat),html.cbm-lock body>:not(.cbm-chat) *,html.cbm-lock body>:not(.cbm-chat) *::before,html.cbm-lock body>:not(.cbm-chat) *::after{animation-play-state:paused!important}" +
     ".cbm-chat .top{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-bottom:1px solid rgba(95,212,255,.25);" +
     "background:linear-gradient(180deg,rgba(47,140,255,.28),rgba(47,140,255,0))}" +
     ".cbm-chat .av{position:relative;width:52px;height:52px;flex:none}" +
@@ -90,12 +96,12 @@
     ".cbm-chat .mic{position:relative;width:46px;height:46px;flex:none;border-radius:50%;border:1.5px solid rgba(95,212,255,.7);background:rgba(4,12,48,.7);color:#9fe7ff;" +
     "cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}" +
     ".cbm-chat .mic.rec{background:#ff3b5c;border-color:#ff9fb0;color:#fff;box-shadow:0 0 0 0 rgba(255,59,92,.6);animation:cbmRec 1.2s ease-out infinite}" +
-    ".cbm-chat .recbar{display:none;flex:1;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:23px;background:rgba(255,59,92,.14);border:1.5px solid rgba(255,59,92,.6);" +
+    ".cbm-chat .recbar{display:none;flex:1;min-width:0;contain:layout paint;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:23px;background:rgba(255,59,92,.14);border:1.5px solid rgba(255,59,92,.6);" +
     "color:#ffd0d8;font-size:14px;font-weight:700}" +
     ".cbm-chat.recording textarea{display:none}.cbm-chat.recording .recbar{display:flex}" +
     ".cbm-chat .recbar i{width:10px;height:10px;border-radius:50%;background:#ff3b5c;animation:cbmLive .8s ease-in-out infinite}" +
     ".cbm-chat .recbar .lv{flex:1;height:18px;display:flex;align-items:center;gap:2px}" +
-    ".cbm-chat .recbar .lv b{flex:1;min-width:2px;border-radius:2px;background:#ff8fa3;height:20%;transition:height .08s}" +
+    ".cbm-chat .recbar .lv b{flex:1;min-width:2px;border-radius:2px;background:#ff8fa3;height:100%;transform:scaleY(.15);will-change:transform}" +
     ".cbm-chat .recbar .cx{border:0;background:none;color:#ffd0d8;font-size:18px;padding:4px;cursor:pointer}" +
     "@keyframes cbmRec{to{box-shadow:0 0 0 14px rgba(255,59,92,0)}}" +
     ".cbm-chat .send:disabled{opacity:.5}" +
@@ -257,7 +263,10 @@
       document.documentElement.classList.add("cbm-lock");
       try { tg && tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
       fit();
+      chat.classList.remove("set");
       chat.classList.add("open");
+      setTimeout(function () { if (isOpen) chat.classList.add("set"); }, 360);
+      try { document.dispatchEvent(new CustomEvent("coolerchat", { detail: { open: true } })); } catch (e) {}
       haptic("medium");
       try { if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeChat); } } catch (e) {}
       msgs.scrollTop = msgs.scrollHeight;
@@ -265,9 +274,11 @@
     }
     function closeChat() {
       if (!isOpen) return;
-      if (recording) stopRec(false);
+      stopRec(false);
       isOpen = false;
+      chat.classList.remove("set");
       chat.classList.remove("open");
+      try { document.dispatchEvent(new CustomEvent("coolerchat", { detail: { open: false } })); } catch (e) {}
       cb.classList.remove("away");
       ta.blur();
       document.documentElement.classList.remove("cbm-lock");
@@ -342,37 +353,58 @@
     var recording = false, mr = null, chunks = [], stream = null, t0 = 0, tick = null, actx = null, analyser = null, keepRec = false;
     for (var bi = 0; bi < 18; bi++) lvEl.appendChild(document.createElement("b"));
     var bars = lvEl.querySelectorAll("b");
+    var raf = 0, lastSec = -1;
+    function meter() {
+      if (!recording) return;
+      var sec = Math.floor((Date.now() - t0) / 1000);
+      if (sec !== lastSec) {
+        lastSec = sec;
+        tmEl.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+        if (sec >= 60) { stopRec(true); return; }
+      }
+      if (analyser) {
+        analyser.getByteFrequencyData(lvData);
+        for (var i = 0; i < bars.length; i++) {
+          var v = Math.max(.15, Math.min(1, lvData[i + 1] / 220));
+          bars[i].style.transform = "scaleY(" + v.toFixed(2) + ")";
+        }
+      }
+      raf = requestAnimationFrame(meter);
+    }
+    var lvData = null;
     function startRec() {
       if (sending || recording) return;
       if (!navigator.mediaDevices || !window.MediaRecorder) { add("b", "🎤 ទូរស័ព្ទនេះមិនទាន់គាំទ្រការថតក្នុង Hub — សាកផ្ញើ Voice ក្នុង Telegram ណា", false); return; }
+      try {                                   // created inside the tap, otherwise iPhone keeps it silent
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        actx = new Ctx();
+        if (actx.resume) actx.resume();
+      } catch (e) { actx = null; }
+      ta.blur();
+      chat.classList.add("recording"); micBtn.classList.add("rec"); micBtn.setAttribute("aria-label", "ឈប់ ហើយផ្ញើ");
+      haptic("medium");
       navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: true, echoCancellation: true } }).then(function (st) {
+        if (!chat.classList.contains("recording")) { st.getTracks().forEach(function (t) { t.stop(); }); return; }
         stream = st; chunks = []; recording = true; keepRec = false;
         mr = new MediaRecorder(st);
         mr.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
         mr.onstop = finishRec;
         mr.start();
-        t0 = Date.now();
-        chat.classList.add("recording"); micBtn.classList.add("rec"); micBtn.setAttribute("aria-label", "ឈប់ ហើយផ្ញើ");
-        av.classList.add("busy"); haptic("medium");
+        t0 = Date.now(); lastSec = -1;
         try {
-          var Ctx = window.AudioContext || window.webkitAudioContext; actx = new Ctx();
-          analyser = actx.createAnalyser(); analyser.fftSize = 64; actx.createMediaStreamSource(st).connect(analyser);
+          if (actx) { analyser = actx.createAnalyser(); analyser.fftSize = 64; analyser.smoothingTimeConstant = .6; actx.createMediaStreamSource(st).connect(analyser); }
         } catch (e) { analyser = null; }
-        var data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
-        tick = setInterval(function () {
-          var sec = Math.floor((Date.now() - t0) / 1000);
-          tmEl.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
-          if (analyser) { analyser.getByteFrequencyData(data); for (var i = 0; i < bars.length; i++) bars[i].style.height = Math.max(15, Math.min(100, data[i + 1] / 2.2)) + "%"; }
-          if (sec >= 60) stopRec(true);
-        }, 90);
+        lvData = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+        cancelAnimationFrame(raf); raf = requestAnimationFrame(meter);
       }).catch(function () {
+        cleanupRec();
         add("b", "🎤 សូមអនុញ្ញាតឲ្យប្រើ Microphone សិន ទើបនិយាយជាមួយខ្ញុំបាន 🙏", false);
       });
     }
     function stopRec(send) {
-      if (!recording) return;
+      if (!recording) { if (chat.classList.contains("recording")) cleanupRec(); return; }
       keepRec = !!send; recording = false;
-      clearInterval(tick);
+      cancelAnimationFrame(raf);
       try { mr.state !== "inactive" && mr.stop(); } catch (e) { finishRec(); }
     }
     function cleanupRec() {
@@ -380,7 +412,8 @@
       try { actx && actx.close(); } catch (e) {}
       actx = analyser = null;
       chat.classList.remove("recording"); micBtn.classList.remove("rec"); micBtn.setAttribute("aria-label", "ថតសំឡេង");
-      av.classList.remove("busy"); tmEl.textContent = "0:00";
+      tmEl.textContent = "0:00";
+      for (var i = 0; i < bars.length; i++) bars[i].style.transform = "";
     }
     function finishRec() {
       cleanupRec();
