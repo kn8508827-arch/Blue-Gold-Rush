@@ -190,6 +190,12 @@ body.btn-soft .app .t{color:#d9d4f5}
 .cbot .acts button{flex:1;padding:10px 8px;border-radius:14px;font-weight:700;font-size:14px;background:#ffffff1f;box-shadow:inset 0 0 0 1px #ffffff33;transition:transform .15s}
 .cbot .acts button.add{background:linear-gradient(135deg,#7cf3ff,#b48cff);color:#15132e;box-shadow:0 6px 16px -6px #7cf3ffaa}
 .cbot .acts button:active{transform:scale(.96)}
+/* 🎤 VidCooler's own Telegram account — the creator first */
+.cbot.vc{background:linear-gradient(135deg,#3a2a08cc,#5b1f4acc);box-shadow:inset 0 0 0 1px #f2c14e66,0 14px 30px -18px #f2c14e}
+.cbot.vc .av{width:58px;height:58px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-size:30px;
+  background:radial-gradient(circle at 35% 30%,#ffe08a,#f2a33a 55%,#b4521f);box-shadow:0 0 0 2px #fff4d6,0 0 18px #f2c14e99}
+.cbot.vc .tt small{color:#ffe9b8}
+.cbot.vc .acts button.add{background:linear-gradient(135deg,#ffd166,#ff8ad8);box-shadow:0 6px 16px -6px #ffd166aa}
 /* 🎙️ ICOM quick-join */
 .icom{display:flex;align-items:center;gap:14px;width:100%;margin:12px 0 0;padding:12px 14px 12px 12px;border-radius:var(--r-md);text-align:left;
   background:linear-gradient(120deg,rgba(255,176,48,.55),rgba(255,92,140,.42));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -522,6 +528,14 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
     <div class="chip" id="holChip" hidden><div class="k">ថ្ងៃឈប់បន្ទាប់</div><div class="v kh" id="hol">—</div></div>
   </div>
 
+  <section class="cbot vc" aria-label="VidCooler Telegram">
+    <span class="av" aria-hidden="true">🎤</span>
+    <div class="tt"><b>VidCooler 👑</b><small>@VidCooler52 · Rapper 🇰🇭 · អ្នកបង្កើត Cooler Hub</small></div>
+    <div class="acts">
+      <button type="button" id="vcChat" class="add">💬 Telegram VidCooler</button>
+      <button type="button" data-go="follow">📲 Follow ទាំងអស់</button>
+    </div>
+  </section>
   <section class="cbot" aria-label="Cooler Bot">
     <img src="../cooler-fly/cooler.png" alt="" width="58" height="58">
     <div class="tt"><b>Cooler Bot 🤖</b><small id="botHandle">@TeamSmosSneabot · AI ជំនួយការរបស់ក្រុម</small></div>
@@ -682,7 +696,7 @@ const SECTIONS = [
   ], more: [
   ]},
   { t: "👥 Group & សមាជិក", s: "សម្រាប់ Group និងគណនី", items: [
-    ["follow", "📲", "Vid Cooler", "c6", "follow tiktok youtube"],
+    ["follow", "📲", "Vid Cooler", "c6", "follow tiktok youtube telegram vidcooler52 vidcooler ទាក់ទង"],
     ["web:https://team-smos-snea.lovable.app/", "img:team-logo.png", "Team App", "c5", "team app ស្មោះស្នេហ៍ web"],
     ["pay", "💳", "បង់ប្រាក់", "c8", "pay បង់ vip"],
     ["myplan", "🎟️", "កាត VIP", "c3", "plan vip"],
@@ -868,6 +882,7 @@ function nearMe(what) {
 }
 $("botHandle").textContent = "@" + BOT + " · AI ជំនួយការរបស់ក្រុម";
 const tgOpen = link => { if (tg && tg.openTelegramLink) tg.openTelegramLink(link); else location.href = link; };
+$("vcChat").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/VidCooler52"); });
 $("botChat").addEventListener("click", () => { haptic("light"); tgOpen("https://t.me/" + BOT); });
 // Opens Telegram's group picker; the bot then asks the group to pay with /pay (5$ / 30 days)
 $("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?start=go_addgroup"); });  // members only: pay 5$ first, then pick a group
