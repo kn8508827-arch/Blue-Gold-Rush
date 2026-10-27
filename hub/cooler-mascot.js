@@ -56,7 +56,7 @@
     "box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .3s;pointer-events:none;font-family:inherit}" +
     ".cbm-bb.on{opacity:1}" +
     /* chat window */
-    ".cbm-chat{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(390px,calc(100vw - 20px));height:min(560px,calc(100vh - 90px));" +
+    ".cbm-chat{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(600px,calc(100vw - 14px));height:max(320px,calc(100vh - 100px));" +
     "z-index:45;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;font-family:inherit;color:#fff;" +
     "background:linear-gradient(180deg,rgba(14,34,110,.98),rgba(6,16,58,.98));will-change:transform,opacity;contain:layout paint;" +
     "border:1.5px solid rgba(95,212,255,.55);box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,200,61,.25),0 0 40px rgba(47,140,255,.45),inset 0 1px 0 rgba(255,255,255,.18);" +
@@ -86,7 +86,18 @@
     ".cbm-chat textarea:focus{border-color:#FFC83D}" +
     ".cbm-chat .send{width:46px;height:46px;flex:none;border-radius:50%;border:0;background:#FFC83D;color:#2A1A00;cursor:pointer;display:flex;align-items:center;justify-content:center;" +
     "box-shadow:0 0 18px rgba(255,200,61,.55);transition:transform .15s}" +
-    ".cbm-chat .send:active{transform:scale(.9)}" +
+    ".cbm-chat .send:active,.cbm-chat .mic:active{transform:scale(.9)}" +
+    ".cbm-chat .mic{position:relative;width:46px;height:46px;flex:none;border-radius:50%;border:1.5px solid rgba(95,212,255,.7);background:rgba(4,12,48,.7);color:#9fe7ff;" +
+    "cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}" +
+    ".cbm-chat .mic.rec{background:#ff3b5c;border-color:#ff9fb0;color:#fff;box-shadow:0 0 0 0 rgba(255,59,92,.6);animation:cbmRec 1.2s ease-out infinite}" +
+    ".cbm-chat .recbar{display:none;flex:1;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:23px;background:rgba(255,59,92,.14);border:1.5px solid rgba(255,59,92,.6);" +
+    "color:#ffd0d8;font-size:14px;font-weight:700}" +
+    ".cbm-chat.recording textarea{display:none}.cbm-chat.recording .recbar{display:flex}" +
+    ".cbm-chat .recbar i{width:10px;height:10px;border-radius:50%;background:#ff3b5c;animation:cbmLive .8s ease-in-out infinite}" +
+    ".cbm-chat .recbar .lv{flex:1;height:18px;display:flex;align-items:center;gap:2px}" +
+    ".cbm-chat .recbar .lv b{flex:1;min-width:2px;border-radius:2px;background:#ff8fa3;height:20%;transition:height .08s}" +
+    ".cbm-chat .recbar .cx{border:0;background:none;color:#ffd0d8;font-size:18px;padding:4px;cursor:pointer}" +
+    "@keyframes cbmRec{to{box-shadow:0 0 0 14px rgba(255,59,92,0)}}" +
     ".cbm-chat .send:disabled{opacity:.5}" +
     "@keyframes cbmFloat{0%,100%{transform:translateY(0) rotateZ(-2deg)}50%{transform:translateY(-6px) rotateZ(2deg)}}" +
     "@keyframes cbmSway{0%,100%{transform:rotateY(-10deg) rotateX(3deg)}50%{transform:rotateY(12deg) rotateX(-3deg)}}" +
@@ -141,7 +152,10 @@
       '<div class="nm"><b>Cooler <span>Bot</span></b><small><i></i>កំពុងនៅជាមួយអ្នក</small></div>' +
       '<button type="button" class="x" aria-label="បិទ">×</button></div>' +
       '<div class="msgs" aria-live="polite"></div>' +
-      '<form><textarea rows="1" maxlength="1500" aria-label="សរសេរសារ" placeholder="សរសេរទៅ Cooler Bot..."></textarea>' +
+      '<form><textarea rows="1" maxlength="1500" aria-label="សរសេរសារ" placeholder="សរសេរ ឬចុច 🎤 និយាយ..."></textarea>' +
+      '<div class="recbar" role="status"><i></i><span class="tm">0:00</span><span class="lv"></span><button type="button" class="cx" aria-label="បោះបង់">✕</button></div>' +
+      '<button type="button" class="mic" aria-label="ថតសំឡេង"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+      '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' +
       '<button type="submit" class="send" aria-label="ផ្ញើ"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
       '<path d="M21.6 3.2L2.9 10.4c-1 .4-1 1.7 0 2l4.7 1.5 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.4 4.8 3.5c.6.4 1.4.1 1.6-.6L23 4.5c.2-.9-.6-1.6-1.4-1.3zM9.6 14.3l-.4 3.6-1.3-4.2 10.6-7.1z"/></svg></button></form>';
 
@@ -239,6 +253,7 @@
     }
     function closeChat() {
       if (!isOpen) return;
+      if (recording) stopRec(false);
       isOpen = false;
       chat.classList.remove("open");
       cb.classList.remove("away");
@@ -257,17 +272,23 @@
     form.addEventListener("submit", function (e) { e.preventDefault(); send(); });
 
     function send() {
+      if (recording) { stopRec(true); return; }
       var text = ta.value.trim();
       if (!text || sending) return;
       ta.value = "";
       grow();
       add("u", text, true);
       haptic();
+      post({ text: text }, null);
+    }
+
+    function post(payload, voiceBubble) {
       var initData = tg && tg.initData;
       if (!initData) {
         add("b", "🙏 សូមបើក Cooler Hub ពីក្នុង Telegram ដើម្បីជជែកជាមួយខ្ញុំ", false);
         return;
       }
+      payload.initData = initData;
       sending = true;
       sendBtn.disabled = true;
       av.classList.add("busy");
@@ -279,11 +300,16 @@
       fetch(API + "/hub/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: initData, text: text })
+        body: JSON.stringify(payload)
       }).then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
       }).then(function (res) {
         typing.remove();
+        if (voiceBubble) {
+          var said = res.j.heard ? "🎤 " + res.j.heard : "🎤 សារសំឡេង";
+          voiceBubble.innerHTML = fmt(said);
+          if (res.j.reply) { log.push({ r: "u", t: said }); keep(); }
+        }
         add("b", res.j.reply || res.j.msg || "😅 ខ្ញុំរវល់បន្តិច — សាកម្ដងទៀតណា", !!res.j.reply);
         haptic("soft");
       }).catch(function () {
@@ -296,13 +322,91 @@
       });
     }
 
+    /* ---------- voice: tap 🎤 to talk, tap again (or ➤) to send ---------- */
+    var micBtn = chat.querySelector(".mic"), recbar = chat.querySelector(".recbar"), tmEl = recbar.querySelector(".tm"), lvEl = recbar.querySelector(".lv");
+    var recording = false, mr = null, chunks = [], stream = null, t0 = 0, tick = null, actx = null, analyser = null, keepRec = false;
+    for (var bi = 0; bi < 18; bi++) lvEl.appendChild(document.createElement("b"));
+    var bars = lvEl.querySelectorAll("b");
+    function startRec() {
+      if (sending || recording) return;
+      if (!navigator.mediaDevices || !window.MediaRecorder) { add("b", "🎤 ទូរស័ព្ទនេះមិនទាន់គាំទ្រការថតក្នុង Hub — សាកផ្ញើ Voice ក្នុង Telegram ណា", false); return; }
+      navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: true, echoCancellation: true } }).then(function (st) {
+        stream = st; chunks = []; recording = true; keepRec = false;
+        mr = new MediaRecorder(st);
+        mr.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+        mr.onstop = finishRec;
+        mr.start();
+        t0 = Date.now();
+        chat.classList.add("recording"); micBtn.classList.add("rec"); micBtn.setAttribute("aria-label", "ឈប់ ហើយផ្ញើ");
+        av.classList.add("busy"); haptic("medium");
+        try {
+          var Ctx = window.AudioContext || window.webkitAudioContext; actx = new Ctx();
+          analyser = actx.createAnalyser(); analyser.fftSize = 64; actx.createMediaStreamSource(st).connect(analyser);
+        } catch (e) { analyser = null; }
+        var data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+        tick = setInterval(function () {
+          var sec = Math.floor((Date.now() - t0) / 1000);
+          tmEl.textContent = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+          if (analyser) { analyser.getByteFrequencyData(data); for (var i = 0; i < bars.length; i++) bars[i].style.height = Math.max(15, Math.min(100, data[i + 1] / 2.2)) + "%"; }
+          if (sec >= 60) stopRec(true);
+        }, 90);
+      }).catch(function () {
+        add("b", "🎤 សូមអនុញ្ញាតឲ្យប្រើ Microphone សិន ទើបនិយាយជាមួយខ្ញុំបាន 🙏", false);
+      });
+    }
+    function stopRec(send) {
+      if (!recording) return;
+      keepRec = !!send; recording = false;
+      clearInterval(tick);
+      try { mr.state !== "inactive" && mr.stop(); } catch (e) { finishRec(); }
+    }
+    function cleanupRec() {
+      try { stream && stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+      try { actx && actx.close(); } catch (e) {}
+      actx = analyser = null;
+      chat.classList.remove("recording"); micBtn.classList.remove("rec"); micBtn.setAttribute("aria-label", "ថតសំឡេង");
+      av.classList.remove("busy"); tmEl.textContent = "0:00";
+    }
+    function finishRec() {
+      cleanupRec();
+      if (!keepRec || !chunks.length || Date.now() - t0 < 700) { if (keepRec) add("b", "🎤 ខ្លីពេក — ចុច 🎤 ហើយនិយាយម្ដងទៀត", false); return; }
+      var bubble = add("u", "🎤 កំពុងផ្ញើសំឡេង...", false);
+      haptic();
+      new Blob(chunks).arrayBuffer().then(toWav).then(function (wav) {
+        post({ audio: wav }, bubble);
+      }).catch(function () {
+        bubble.innerHTML = fmt("🎤 ថតមិនបាន — សាកម្ដងទៀត");
+      });
+    }
+    function toWav(buf) {
+      var Ctx = window.AudioContext || window.webkitAudioContext, ctx = new Ctx();
+      return new Promise(function (ok, bad) { var p = ctx.decodeAudioData(buf, ok, bad); if (p && p.then) p.then(ok, bad); }).then(function (dec) {
+        var sr = 16000, len = Math.max(1, Math.min(Math.ceil(dec.duration * sr), sr * 60));
+        var off = new OfflineAudioContext(1, len, sr), src = off.createBufferSource();
+        src.buffer = dec; src.connect(off.destination); src.start();
+        return off.startRendering();
+      }).then(function (rendered) {
+        try { ctx.close(); } catch (e) {}
+        var out = rendered.getChannelData(0), b = new ArrayBuffer(44 + out.length * 2), v = new DataView(b);
+        function w(o, str) { for (var i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); }
+        w(0, "RIFF"); v.setUint32(4, 36 + out.length * 2, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+        v.setUint32(24, 16000, true); v.setUint32(28, 32000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, out.length * 2, true);
+        for (var i = 0; i < out.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, out[i])) * 0x7fff, true);
+        var bin = "", u8 = new Uint8Array(b);
+        for (var j = 0; j < u8.length; j += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(j, j + 0x8000));
+        return "data:audio/wav;base64," + btoa(bin);
+      });
+    }
+    micBtn.addEventListener("click", function () { if (recording) stopRec(true); else startRec(); });
+    recbar.querySelector(".cx").addEventListener("click", function () { stopRec(false); haptic(); });
+
     /* keep the window above the phone keyboard */
     if (window.visualViewport) {
       var fit = function () {
         var vv = window.visualViewport;
         var kb = Math.max(0, H() - vv.height - vv.offsetTop);
         chat.style.bottom = "calc(env(safe-area-inset-bottom,0px) + " + (12 + kb) + "px)";
-        chat.style.height = "min(560px," + Math.max(260, vv.height - 90) + "px)";
+        chat.style.height = Math.max(260, vv.height - 100) + "px";
       };
       window.visualViewport.addEventListener("resize", fit);
       window.visualViewport.addEventListener("scroll", fit);
