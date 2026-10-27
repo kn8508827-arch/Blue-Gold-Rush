@@ -8,7 +8,7 @@
 <link rel="icon" href="../cooler-fly/cooler.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&family=Cinzel:wght@700;900&family=Moul&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
@@ -81,6 +81,53 @@ button.clock:active{background:#ffffff14}
              radial-gradient(circle at var(--hx,30%) var(--hy,40%),rgba(255,255,255,.55),transparent 45%);
   mix-blend-mode:soft-light}
 .holo.off::before{filter:saturate(.25) brightness(.75)}
+/* 👑 VIP · BLACK GOLD — VIP (and Owner) get a black card with live gold foil, special letters and sparkles */
+.cardflip.vip .side[data-face="a"]{background:#0b0a14;box-shadow:0 22px 60px -18px rgba(242,193,78,.7),0 0 0 1px rgba(255,224,138,.35) inset}
+.cardflip.vip .side[data-face="a"]::before{opacity:1;background:
+  radial-gradient(120% 90% at var(--hx,30%) var(--hy,40%),rgba(255,214,120,.28),transparent 55%),
+  linear-gradient(150deg,#1a1508 0%,#07060d 45%,#140f22 100%);background-size:auto}
+.cardflip.vip .side[data-face="a"]::after{mix-blend-mode:screen;opacity:.55;background:
+  repeating-linear-gradient(-55deg,transparent 0 11px,rgba(255,224,138,.07) 11px 12px),
+  linear-gradient(105deg,transparent 35%,rgba(255,236,170,.55) 48%,rgba(255,255,255,.85) 50%,rgba(255,236,170,.55) 52%,transparent 65%);
+  background-size:auto,250% 100%;animation:vipSheen 4.5s ease-in-out infinite}
+@keyframes vipSheen{0%{background-position:0 0,140% 0}55%,100%{background-position:0 0,-60% 0}}
+.vipRim{position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;z-index:2;
+  background:conic-gradient(from var(--va,0deg),#7a5a12,#ffe9a8,#f2c14e,#8a6514,#fff3c9,#c9971f,#7a5a12);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:vipSpin 6s linear infinite}
+@property --va{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes vipSpin{to{--va:360deg}}
+.gold-ink{background:linear-gradient(100deg,#9c7414 0%,#ffe9a8 22%,#f2c14e 40%,#fff6d6 52%,#c9971f 70%,#ffe08a 100%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;
+  animation:goldFlow 3.2s linear infinite;filter:drop-shadow(0 1px 0 rgba(0,0,0,.45))}
+@keyframes goldFlow{to{background-position:-220% 0}}
+.cardflip.vip .brand{font-family:"Cinzel",var(--dsp);font-weight:900;font-size:27px;letter-spacing:2px}
+.cardflip.vip .brand span{font-family:"Cinzel",var(--dsp);font-weight:700;font-size:11.5px;letter-spacing:3.5px;color:#f2c14e;
+  -webkit-text-fill-color:#f2c14e;margin-top:8px}
+.cardflip.vip .days{font-family:"Cinzel",var(--dsp)}
+.cardflip.vip .days small{color:#e9d9a6}
+.cardflip.vip .who b{font-family:"Cinzel","Moul",var(--kh);font-size:25px;font-weight:900;letter-spacing:1px;line-height:1.35}
+.cardflip.vip .who span{color:#e9d9a6;opacity:1}
+.cardflip.vip .bar{background:rgba(255,224,138,.16)}
+.cardflip.vip .bar i{background:linear-gradient(90deg,#9c7414,#ffe9a8,#f2c14e);box-shadow:0 0 12px #f2c14e}
+.cardflip.vip .pts span{background:rgba(255,224,138,.12);color:#ffe9a8;box-shadow:0 0 0 1px rgba(255,224,138,.35) inset}
+.cardflip.vip .who{position:relative;padding-right:84px}
+.vipSeal{position:absolute;right:0;top:6px;z-index:3;display:flex;align-items:center;gap:6px;padding:5px 11px 5px 8px;border-radius:99px;
+  font:700 12px/1 "Cinzel",var(--dsp);letter-spacing:1.5px;color:#2a1d02;background:linear-gradient(135deg,#fff3c9,#f2c14e 55%,#b8860b);
+  box-shadow:0 6px 18px -6px #f2c14e}
+.cardflip.vip .who .vipSeal{color:#2a1d02;opacity:1;font-size:12px}
+.vipSpark{position:absolute;z-index:2;width:6px;height:6px;pointer-events:none;
+  background:radial-gradient(circle,#fff 0 20%,#ffe08a 35%,transparent 70%);border-radius:50%;animation:spark 2.6s ease-in-out infinite}
+.vipSpark::before,.vipSpark::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:1.5px;background:linear-gradient(90deg,transparent,#fff6d6,transparent);transform:translate(-50%,-50%)}
+.vipSpark::after{transform:translate(-50%,-50%) rotate(90deg)}
+@keyframes spark{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1)}}
+.cardflip.vip .side[data-face="b"],.cardflip.vip .side[data-face="c"]{--holo:linear-gradient(115deg,#fff3c9 0%,#f2c14e 35%,#e8a93a 60%,#fff3c9 100%)}
+.name.vipName{font-family:"Cinzel","Moul",var(--kh);font-weight:900;letter-spacing:1px}
+.vipBadge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:99px;
+  font:700 11px/1.4 "Cinzel",var(--dsp);letter-spacing:1.5px;color:#2a1d02;background:linear-gradient(135deg,#fff3c9,#f2c14e 55%,#b8860b)}
+.kp.vipKp .kring{background:radial-gradient(circle,#3a2a08,#120d02);box-shadow:0 0 0 2px #f2c14e,0 0 18px -2px #f2c14e}
+.kp.vipKp b{color:#ffe08a}
+@media (prefers-reduced-motion:reduce){.vipRim,.gold-ink,.vipSpark,.cardflip.vip .side::after{animation:none!important}}
 @keyframes deal{from{transform:translateY(24px) rotateX(18deg) scale(.96);opacity:0}}
 .holo .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .brand{font-family:var(--dsp);font-weight:900;font-size:24px;line-height:1;color:#15132e}
@@ -816,9 +863,9 @@ if (M.o) {
   $("cardSub").textContent = "👑 Owner · ប្រើគ្រប់មុខងារ";
   $("bar").style.setProperty("--p", "100%");
 } else if (M.a) {
-  $("tier").textContent = "VIP PASS";
+  $("tier").textContent = M.v ? "VIP · BLACK GOLD" : "MEMBER";
   $("days").firstChild.nodeValue = M.l;
-  $("cardSub").textContent = "សមាជិកសកម្ម · ដល់ " + M.u;
+  $("cardSub").textContent = (M.v ? "👑 សមាជិក VIP · ដល់ " : "សមាជិកសកម្ម · ដល់ ") + M.u;
   requestAnimationFrame(() => $("bar").style.setProperty("--p", Math.min(100, Math.round(100 * M.l / (M.t || 30))) + "%"));
 } else if (!D.m) {
   // opened from the chat menu button: no personal data, so don't claim anything
@@ -833,6 +880,22 @@ if (M.o) {
   $("join").hidden = false;
 }
 $("join").addEventListener("click", () => go("pay"));
+// 👑 VIP (and Owner): black-gold card, gold letters, sparkles, golden name in the greeting
+const VIP = !!(M.o || (M.a && M.v));
+if (VIP) {
+  $("cardflip").classList.add("vip");
+  [document.querySelector("#faceA .brand"), $("days"), $("cardName")].forEach(el => el.classList.add("gold-ink"));
+  const deco = document.createElement("div");
+  deco.innerHTML = `<span class="vipRim"></span>` +
+    [[12, 18, 0], [78, 12, .9], [88, 58, 1.7], [42, 78, .5], [25, 52, 2.1]].map(([x, y, d]) =>
+      `<i class="vipSpark" style="left:${x}%;top:${y}%;animation-delay:${d}s"></i>`).join("");
+  $("faceA").append(...deco.childNodes);
+  const seal = document.createElement("span"); seal.className = "vipSeal"; seal.textContent = "👑 " + (M.o ? "OWNER" : "VIP");
+  document.querySelector("#faceA .who").append(seal);
+  $("name").classList.add("vipName", "gold-ink");
+  const b = document.createElement("div"); b.className = "vipBadge"; b.textContent = M.o ? "👑 OWNER" : "👑 VIP MEMBER";
+  $("name").after(b);
+}
 // points & level (sent by the bot with /hub)
 if (D.p) { $("pts").hidden = false; $("pts").innerHTML = `<span>⭐ ${KH(D.p[0])} ពិន្ទុ</span><span>${D.p[1]}</span>` + (D.p[2] ? `<span>🔥 ${KH(D.p[2])} ថ្ងៃ</span>` : ""); }
 
@@ -978,7 +1041,7 @@ function faceC() {
     rows.push(`<li><i>🎉</i><span>${name.split(" · ")[0].slice(0, 34)}</span><em>${inWords(i)}</em></li>`); }
   const M = D.m || {};
   if (M.o) rows.push(`<li><i>👑</i><span>Owner · ប្រើគ្រប់មុខងារ</span></li>`);
-  else if (M.a) rows.push(`<li><i>🎟️</i><span>VIP ដល់ ${M.u}</span><em>${KH(M.l)} ថ្ងៃ</em></li>`);
+  else if (M.a) rows.push(`<li><i>${M.v ? "👑" : "🎟️"}</i><span>${M.v ? "VIP" : "សមាជិក"} ដល់ ${M.u}</span><em>${KH(M.l)} ថ្ងៃ</em></li>`);
   else if (D.m) rows.push(`<li><i>💳</i><span>ចូលជាសមាជិក 1$ / ខែ — /pay</span></li>`);
   if (D.x) rows.push(`<li><i>💰</i><span>ចំណូលខែនេះ $${D.x.r} · រង់ចាំ ${KH(D.x.p)}</span><em>${KH(D.x.u)} នាក់</em></li>`);
   else if (D.c) rows.push(`<li><i>📒</i><span>ខែនេះ ចំណូល $${D.c.i.toFixed(0)} · ចំណាយ $${D.c.o.toFixed(0)}</span></li>`);
@@ -1024,7 +1087,7 @@ fetch("https://api.gold-api.com/price/XAU").then(r => r.json())
 function fillKpis() {
   const M2 = D.m || {}, k = [];
   if (D.p) k.push(["⭐", KH(D.p[0]), "ពិន្ទុ · " + D.p[1].replace(/^\S+\s/, "")]);
-  if (M2.o) k.push(["👑", "∞", "Owner"]); else if (M2.a) k.push(["🎟️", KH(M2.l), "ថ្ងៃ VIP នៅសល់"]);
+  if (M2.o) k.push(["👑", "∞", "Owner"]); else if (M2.a) k.push(M2.v ? ["👑", KH(M2.l), "ថ្ងៃ VIP នៅសល់"] : ["🎟️", KH(M2.l), "ថ្ងៃសមាជិកនៅសល់"]);
   if (D.r) k.push(["🏆", "#" + KH(D.r), "ចំណាត់ថ្នាក់"]);
   if (k.length < 3 && typeof CAL !== "undefined" && CAL && CAL.sila) k.push(["🙏", CAL.sila[0] === 0 ? "ថ្ងៃនេះ" : KH(CAL.sila[0]) + " ថ្ងៃ", "ដល់ថ្ងៃសីល"]);
   const wx = $("wx") && $("wx").textContent.trim(), usd = $("usd") && $("usd").textContent.trim();
@@ -1032,7 +1095,7 @@ function fillKpis() {
   if (k.length < 3 && usd && usd !== "—") k.push(["💵", usd.replace(" ៛", ""), "៛ / ១ ដុល្លារ"]);
   if (!k.length) return;
   $("kpis3").hidden = false;
-  $("kpis3").innerHTML = k.slice(0, 3).map(([i, v, l]) => `<div class="kp"><span class="kring">${i}</span><span><b>${v}</b><small>${l}</small></span></div>`).join("");
+  $("kpis3").innerHTML = k.slice(0, 3).map(([i, v, l]) => `<div class="kp${i === "👑" ? " vipKp" : ""}"><span class="kring">${i}</span><span><b>${v}</b><small>${l}</small></span></div>`).join("");
 }
 fillKpis(); setTimeout(fillKpis, 1500); setTimeout(fillKpis, 4000);
 
