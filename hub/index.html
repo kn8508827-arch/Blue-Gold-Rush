@@ -868,7 +868,7 @@ function nearMe(what) {
 }
 $("botHandle").textContent = "@" + BOT + " · AI ជំនួយការរបស់ក្រុម";
 const tgOpen = link => { if (tg && tg.openTelegramLink) tg.openTelegramLink(link); else location.href = link; };
-$("botChat").addEventListener("click", () => { haptic("light"); tgOpen("https://t.me/" + BOT); });
+$("botChat").addEventListener("click", () => { haptic("light"); if (window.CoolerChat) window.CoolerChat.open(); else tgOpen("https://t.me/" + BOT); });   // 💬 chat right here in the Hub
 // Opens Telegram's group picker; the bot then asks the group to pay with /pay (5$ / 30 days)
 $("botAdd").addEventListener("click", () => { haptic("medium"); tgOpen("https://t.me/" + BOT + "?start=go_addgroup"); });  // members only: pay 5$ first, then pick a group
 $("icomGo").addEventListener("click", () => { haptic("heavy");
@@ -1409,5 +1409,6 @@ if (D.x) {
 })();
 </script>
 <script src="cooler-mascot.js" defer></script>
+<script src="hub-fx.js" defer></script>
 </body>
 </html>

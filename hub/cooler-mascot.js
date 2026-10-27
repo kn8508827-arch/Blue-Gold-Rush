@@ -58,11 +58,11 @@
     /* chat window */
     ".cbm-chat{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(390px,calc(100vw - 20px));height:min(560px,calc(100vh - 90px));" +
     "z-index:45;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;font-family:inherit;color:#fff;" +
-    "background:rgba(8,22,78,.86);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);" +
+    "background:linear-gradient(180deg,rgba(14,34,110,.98),rgba(6,16,58,.98));will-change:transform,opacity;contain:layout paint;" +
     "border:1.5px solid rgba(95,212,255,.55);box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,200,61,.25),0 0 40px rgba(47,140,255,.45),inset 0 1px 0 rgba(255,255,255,.18);" +
-    "transform-origin:var(--ox,90%) 100%;transform:translateX(-50%) perspective(900px) rotateX(22deg) rotateY(var(--ry,-20deg)) scale(.35);" +
-    "opacity:0;visibility:hidden;transition:transform .6s cubic-bezier(.2,1.3,.35,1),opacity .3s,visibility 0s .6s}" +
-    ".cbm-chat.open{transform:translateX(-50%) perspective(900px) rotateX(0) rotateY(0) scale(1);opacity:1;visibility:visible;transition:transform .6s cubic-bezier(.2,1.3,.35,1),opacity .3s}" +
+    "transform-origin:var(--ox,90%) 100%;transform:translateX(-50%) perspective(900px) rotateX(14deg) rotateY(var(--ry,-14deg)) scale(.55);" +
+    "opacity:0;visibility:hidden;transition:transform .32s cubic-bezier(.2,1.25,.4,1),opacity .2s,visibility 0s .32s}" +
+    ".cbm-chat.open{transform:translateX(-50%) perspective(900px) rotateX(0) rotateY(0) scale(1);opacity:1;visibility:visible;transition:transform .32s cubic-bezier(.2,1.25,.4,1),opacity .2s}" +
     ".cbm-chat .top{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-bottom:1px solid rgba(95,212,255,.25);" +
     "background:linear-gradient(180deg,rgba(47,140,255,.28),rgba(47,140,255,0))}" +
     ".cbm-chat .av{position:relative;width:52px;height:52px;flex:none}" +
@@ -234,7 +234,8 @@
       chat.classList.add("open");
       haptic("medium");
       try { if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeChat); } } catch (e) {}
-      setTimeout(function () { msgs.scrollTop = msgs.scrollHeight; }, 50);
+      msgs.scrollTop = msgs.scrollHeight;
+      try { ta.focus({ preventScroll: true }); } catch (e) { ta.focus(); }   // keyboard opens at once (same tap)
     }
     function closeChat() {
       if (!isOpen) return;
@@ -245,6 +246,7 @@
       try { if (tg && tg.BackButton) { tg.BackButton.offClick(closeChat); tg.BackButton.hide(); } } catch (e) {}
     }
     chat.querySelector(".x").addEventListener("click", closeChat);
+    window.CoolerChat = { open: openChat, close: closeChat };
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && isOpen) closeChat(); });
 
     function grow() { ta.style.height = "44px"; ta.style.height = Math.min(110, ta.scrollHeight) + "px"; }
@@ -318,7 +320,7 @@
     });
     cb.addEventListener("pointermove", function (e) {
       if (!drag) return;
-      if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 6) moved = true;
+      if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 12) moved = true;
       if (moved) place(e.clientX - drag.dx, e.clientY - drag.dy, false);
     });
     function release() {
