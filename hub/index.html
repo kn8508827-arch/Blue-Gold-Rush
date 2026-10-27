@@ -345,6 +345,7 @@ body.btn-soft .app .t{color:#d9d4f5}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
 .sw.on{background:#2fd3a0} .sw.on::after{left:23px}
 .done{width:100%;margin-top:14px;padding:13px;border-radius:16px;font-weight:700;background:linear-gradient(135deg,#7cf3ff,#b48cff);color:#15132e}
+.app.more .ic{background:#ffffff14;box-shadow:inset 0 0 0 1.5px #ffffff38;font:700 17px var(--dsp);color:#d9d3ff}
 .app .t{font-size:12.5px;line-height:1.3;color:#e9e5ff}
 .app.lock .ic{filter:grayscale(.55) brightness(.8)}
 .app .lk{position:absolute;transform:translate(-24px,-8px);font-size:13px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
@@ -555,7 +556,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
   </section>
   <label class="search">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5f2ff" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="search" placeholder="រកមុខងារ… ឧ. ច្រៀង, លុយ, ហ្គេម" autocomplete="off" aria-label="រកមុខងារ">
+    <input id="q" type="search" placeholder="រកមុខងារ… ឬវាយ / មើលទាំងអស់" autocomplete="off" aria-label="រកមុខងារ">
   </label>
 
   <nav class="pillnav" id="pillnav" aria-label="ផ្នែក"></nav>
@@ -613,56 +614,64 @@ const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
 const NAME = D.n || (tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") : "Cooler Fan");
 
 const GAME = "https://kn8508827-arch.github.io/Blue-Gold-Rush/";
+// 👑 VidCooler first: his own games & Cooler-branded tiles lead every box; less-used tools live in `more`
+// (hidden from the Hub, still found by search — type / to list them all).
 const SECTIONS = [
-  { t: "✨ AI Studio", s: "បង្កើតរបស់ថ្មីដោយ AI", items: [
-    ["page:ai.html?app=imagine", "🎨", "គូររូប", "c2", "គូររូប imagine draw រូបភាព AI"],
-    ["page:ai.html?app=song", "🎧", "ច្រៀង & Rap", "c5", "ច្រៀង song music rap beat បទ"],
-    ["page:voice.html", "🎙️", "Voice Studio", "c1", "សំឡេង voice say voice-over tts អាន ៣០ សំឡេង ប្រុស ស្រី ផ្សាយពាណិជ្ជកម្ម ព័ត៌មាន និទានរឿង", "៣០ សំឡេង"],
-    ["page:record.html", "🎚️", "Record Studio", "c4", "record ថត សំឡេង voice clean noise effect reverb echo robot studio vocal ទាញយក", "ថ្មី"],
-    ["page:ai.html?app=prompt", "✍️", "Prompt", "c7", "prompt video image song story suno veo midjourney"],
-    ["page:ai.html?app=photo", "🖼️", "កែរូប", "c6", "កែរូប photo studio k-drama luxury anime"],
-    ["page:ai.html?app=style", "💇", "ម៉ូដសក់ & Pose", "c3", "style hair សក់ កាត់សក់ ម៉ូដ pose ស្ទាយ ថតរូប selfie ប្រុស ស្រី ចាស់ ក្មេង", "ថ្មី"],
-    ["page:ai.html?app=rap", "🎤", "សរសេរ Rap", "c3", "rap verse lyrics ទំនុក"],
-    ["page:ai.html?app=fortune", "🔮", "ទស្សន៍ទាយ", "c5", "ទាយ fortune dream ឆ្នោត លេខជីវិត ឆ្នាំសត្វ"],
-    ["page:ai.html?app=beat", "🥁", "Beat", "c4", "beat ភ្លេង trap boom bap lofi"],
-  ]},
-  { t: "🎮 លេងកម្សាន្ត", s: "ហ្គេម និងពិន្ទុ", items: [
+  { t: "🎮 លេងកម្សាន្ត", s: "ហ្គេមរបស់ VidCooler & ពិន្ទុ", items: [
     ["url:" + GAME + "cooler-fly/", "🚀", "Cooler Fly", "c1", "game ហ្គេម fly"],
     ["url:" + GAME, "⚡", "Cooler Rush", "c8", "game ហ្គេម run blue gold rush"],
+    ["url:https://logo-crush-3d-production.up.railway.app/", "🧩", "Cooler Crush", "c7", "game ហ្គេម crush logo match 3d vidcooler"],
+    ["url:https://spin-and-drink-production.up.railway.app/", "🎡", "Cooler Drink", "c6", "game ហ្គេម spin drink party ផឹក វិល vidcooler"],
+    ["page:music.html", "🎵", "Vid Cooler Music", "c5", "music ចម្រៀង song vid cooler youtube tiktok rap ស្ដាប់", "ថ្មី"],
     ["url:" + GAME + "arcade/", "🕹️", "Arcade ១៦", "c5", "game ហ្គេម arcade sudoku"],
     ["url:" + GAME + "arcade/?g=khla", "🎲", "ខ្លាឃ្លោក", "c6", "game ហ្គេម khla"],
-    ["play", "🎯", "Game Center", "c4", "dice play"],
     ["quiz", "🧠", "Quiz", "c7", "quiz សំណួរ"],
-    ["page:dramas.html", "🎬", "រឿងភាគចិន", "c6", "drama movie រឿង ភាគ ចិន chinese series film", "ថ្មី"],
     ["checkin", "🎁", "Check-in", "c2", "checkin ពិន្ទុ"],
     ["redeem", "🎟️", "ប្ដូរពិន្ទុ", "c8", "redeem rewards ពិន្ទុ vip រង្វាន់ ប្ដូរ", "ថ្មី"],
     ["top", "🏆", "Top 10", "c3", "leaderboard top ពិន្ទុ ចំណាត់ថ្នាក់"],
-    ["page:music.html", "🎵", "Vid Cooler Music", "c5", "music ចម្រៀង song vid cooler youtube tiktok rap ស្ដាប់", "ថ្មី"],
+    ["page:dramas.html", "🎬", "រឿងភាគចិន", "c6", "drama movie រឿង ភាគ ចិន chinese series film", "ថ្មី"],
+  ], more: [
+    ["play", "🎯", "Game Center", "c4", "dice play"],
+  ]},
+  { t: "✨ AI Studio", s: "បង្កើតរបស់ថ្មីដោយ AI", items: [
+    ["page:voice.html", "🎙️", "Voice Studio", "c1", "សំឡេង voice say voice-over tts អាន ៣០ សំឡេង ប្រុស ស្រី ផ្សាយពាណិជ្ជកម្ម ព័ត៌មាន និទានរឿង", "៣០ សំឡេង"],
+    ["page:record.html", "🎚️", "Record Studio", "c4", "record ថត សំឡេង voice clean noise effect reverb echo robot studio vocal ទាញយក", "ថ្មី"],
+    ["page:ai.html?app=song", "🎧", "ច្រៀង & Rap", "c5", "ច្រៀង song music rap beat បទ"],
+    ["page:ai.html?app=rap", "🎤", "សរសេរ Rap", "c3", "rap verse lyrics ទំនុក"],
+    ["page:ai.html?app=beat", "🥁", "Beat", "c4", "beat ភ្លេង trap boom bap lofi"],
+    ["page:ai.html?app=imagine", "🎨", "គូររូប", "c2", "គូររូប imagine draw រូបភាព AI"],
+    ["page:ai.html?app=photo", "🖼️", "កែរូប", "c6", "កែរូប photo studio k-drama luxury anime"],
+    ["page:ai.html?app=style", "💇", "ម៉ូដសក់ & Pose", "c3", "style hair សក់ កាត់សក់ ម៉ូដ pose ស្ទាយ ថតរូប selfie ប្រុស ស្រី ចាស់ ក្មេង", "ថ្មី"],
+  ], more: [
+    ["page:ai.html?app=prompt", "✍️", "Prompt", "c7", "prompt video image song story suno veo midjourney"],
+    ["page:ai.html?app=fortune", "🔮", "ទស្សន៍ទាយ", "c5", "ទាយ fortune dream ឆ្នោត លេខជីវិត ឆ្នាំសត្វ"],
   ]},
   { t: "🧰 ជំនួយប្រចាំថ្ងៃ", s: "ប្រើរាល់ថ្ងៃ", items: [
     ["page:tools.html?app=scam", "🚨", "ឆែក Scam", "c6", "scam បោក link សារ", "ថ្មី"],
-    ["page:tools.html?app=money", "💵", "ពិនិត្យលុយ", "c8", "money លុយ ក្លែងក្លាយ ពិត ក្រដាសប្រាក់ counterfeit fake note"],
-    ["page:tools.html?app=totext", "📝", "Voice→អក្សរ", "c1", "voice text អក្សរ ថតសំឡេង"],
-    ["page:tools.html?app=translate", "🌐", "បកប្រែ", "c4", "translate បកប្រែ english chinese thai"],
-    ["page:tools.html?app=homework", "📚", "លំហាត់", "c3", "homework លំហាត់ គណិត"],
-    ["page:tools.html?app=remind", "⏰", "រំលឹក", "c2", "remind រំលឹក ណាត់"],
     ["page:tools.html?app=cash", "💸", "កត់លុយ", "c8", "cash លុយ money ចាយ ចូល"],
     ["page:tools.html?app=report", "📊", "របាយការណ៍", "c5", "report លុយ ខែ"],
+    ["page:tools.html?app=remind", "⏰", "រំលឹក", "c2", "remind រំលឹក ណាត់"],
+    ["page:tools.html?app=translate", "🌐", "បកប្រែ", "c4", "translate បកប្រែ english chinese thai"],
+    ["page:tools.html?app=totext", "📝", "Voice→អក្សរ", "c1", "voice text អក្សរ ថតសំឡេង"],
     ["page:tools.html?app=kb", "🗂️", "AI ឯកសារ", "c7", "kb ឯកសារ document pdf"],
+  ], more: [
+    ["page:tools.html?app=money", "💵", "ពិនិត្យលុយ", "c8", "money លុយ ក្លែងក្លាយ ពិត ក្រដាសប្រាក់ counterfeit fake note"],
+    ["page:tools.html?app=homework", "📚", "លំហាត់", "c3", "homework លំហាត់ គណិត"],
   ]},
   { t: "📅 ជីវិត & ព័ត៌មាន", s: "ព័ត៌មានសំខាន់ៗ", items: [
     ["page:calendar.html", "📅", "ប្រតិទិនខ្មែរ", "c3", "calendar ថ្ងៃ ប្រតិទិន សីល ចន្ទគតិ", "ថ្ងៃសីល"],
     ["page:today.html?app=sila", "🙏", "រំលឹកថ្ងៃសីល", "c8", "sila សីល រំលឹក ព្រះ វត្ត ធម៌", "ថ្មី"],
     ["page:today.html?app=anniv", "🕯️", "ខួប & បុណ្យ", "c5", "anniv ខួប កំណើត birthday បុណ្យ ចន្ទគតិ រំលឹក", "ថ្មី"],
-    ["page:today.html?app=today", "☀️", "ព័ត៌មានព្រឹក", "c8", "morning ព្រឹក"],
     ["page:today.html?app=rate", "💱", "ដុល្លារ", "c4", "rate dollar ដុល្លារ"],
     ["page:today.html?app=gold", "🪙", "មាស", "c8", "gold មាស"],
     ["page:today.html?app=news", "📰", "ព័ត៌មាន", "c7", "news ព័ត៌មាន"],
     ["sheet:kaSheet", "img:kanews-logo.png", "KA News", "c6", "ka news kanews kaka ព័ត៌មាន news telegram", "ដៃគូ"],
     ["sheet:tpSheet", "img:tpnews-logo.png", "TPNews", "c1", "tpnews tp news ព័ត៌មាន ទេព ប៉ុន", (D.tp && D.tp.length && Date.now() / 1000 - D.tp[0][2] < 48 * 3600) ? "ថ្មី" : "ដៃគូ"],
     ["page:today.html?app=weather", "🌤️", "អាកាសធាតុ", "c1", "weather អាកាសធាតុ"],
-    ["page:today.html?app=trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
     ["page:today.html?app=health", "🧓", "សុខភាព", "c6", "health សុខភាព"],
+  ], more: [
+    ["page:today.html?app=today", "☀️", "ព័ត៌មានព្រឹក", "c8", "morning ព្រឹក"],
+    ["page:today.html?app=trip", "🧭", "ដើរលេង", "c4", "trip ដើរលេង"],
   ]},
   // 🛠️ Services: partner businesses — add one = a tile here + a sheet (copy #e1Sheet) with its logo and buttons
   { t: "🛠️ Services", s: "សេវាកម្មពីដៃគូរបស់ក្រុម", items: [
@@ -670,19 +679,21 @@ const SECTIONS = [
     ["sheet:xcSheet", "img:xincheng-icon.png", "Xincheng", "c3", "xincheng ស៊ីនចេង ផ្ទះ រចនា តុបតែង design house decor furniture គ្រឿងសង្ហារឹម marco", "ដៃគូ"],
     ["sheet:vdSheet", "img:vdaudio-icon.png", "VD Audio", "c3", "vd audio ធុងបាស់ បាស់ សំឡេង ភ្លេង sound speaker music party ការ នី ចំណាន", "ដៃគូ"],
     ["sheet:btSheet", "img:betell-icon.png", "Digital", "c5", "digital marketing page ផេក ទីផ្សារ ផ្សព្វផ្សាយ ads boost facebook leng betell", "ដៃគូ"],
+  ], more: [
   ]},
   { t: "👥 Group & សមាជិក", s: "សម្រាប់ Group និងគណនី", items: [
+    ["follow", "📲", "Vid Cooler", "c6", "follow tiktok youtube"],
+    ["web:https://team-smos-snea.lovable.app/", "img:team-logo.png", "Team App", "c5", "team app ស្មោះស្នេហ៍ web"],
+    ["pay", "💳", "បង់ប្រាក់", "c8", "pay បង់ vip"],
+    ["myplan", "🎟️", "កាត VIP", "c3", "plan vip"],
+    ["invite", "🤝", "ណែនាំមិត្ត", "c4", "invite មិត្ត"],
+    ["work", "🕘", "វត្តមានការងារ", "c4", "work staff attendance បុគ្គលិក វត្តមាន ចូលធ្វើការ ចេញ ម៉ោង", "ថ្មី"],
+  ], more: [
     ["nearby", "📍", "មិត្តនៅឯណា", "c1", "nearby location ទីតាំង មិត្ត map", "ថ្មី"],
     ["guard", "🛡️", "ការពារ Group", "c7", "guard spam group"],
     ["summary", "🧾", "សង្ខេប Group", "c5", "summary សង្ខេប"],
     ["memory", "🧠", "Bot ចាំខ្ញុំ", "c2", "memory ចាំ"],
-    ["invite", "🤝", "ណែនាំមិត្ត", "c4", "invite មិត្ត"],
-    ["pay", "💳", "បង់ប្រាក់", "c8", "pay បង់ vip"],
-    ["myplan", "🎟️", "កាត VIP", "c3", "plan vip"],
-    ["follow", "📲", "Vid Cooler", "c6", "follow tiktok youtube"],
     ["sos", "🆘", "លេខបន្ទាន់", "c6", "sos"],
-    ["web:https://team-smos-snea.lovable.app/", "img:team-logo.png", "Team App", "c5", "team app ស្មោះស្នេហ៍ web"],
-    ["work", "🕘", "វត្តមានការងារ", "c4", "work staff attendance បុគ្គលិក វត្តមាន ចូលធ្វើការ ចេញ ម៉ោង", "ថ្មី"],
   ]},
 ];
 
@@ -727,8 +738,10 @@ function render(filter) {
   const host = $("sections");
   host.innerHTML = "";
   let shown = 0;
+  const all = q.startsWith("/"), qq = all ? q.slice(1).trim() : q;
   for (const sec of SECTIONS) {
-    const items = sec.items.filter(i => !q || (i[2] + " " + i[4]).toLowerCase().includes(q));
+    const pool = q ? sec.items.concat(sec.more || []) : sec.items;
+    const items = pool.filter(i => !qq || (i[2] + " " + i[4]).toLowerCase().includes(qq));
     if (!items.length) continue;
     shown += items.length;
     const wrap = document.createElement("section");
@@ -750,12 +763,20 @@ function render(filter) {
       b.addEventListener("click", () => go(key));
       g.appendChild(b);
     }
+    if (!q && sec.more && sec.more.length) {   // 🔎 the rest of this box: opens the search with "/"
+      const m = document.createElement("button");
+      m.className = "app more"; m.type = "button"; m.setAttribute("aria-label", "មុខងារផ្សេងទៀត");
+      m.innerHTML = `<span class="ic" aria-hidden="true">＋${KH(sec.more.length)}</span><span class="t">ផ្សេងទៀត</span>`;
+      m.addEventListener("click", () => { haptic("light"); $("q").value = "/"; render("/"); const el = $("sec" + SECTIONS.indexOf(sec)); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); });
+      g.appendChild(m);
+    }
     wrap.append(h, g);
     host.append(wrap);
   }
   if (!shown) host.innerHTML = `<p class="empty">រកមិនឃើញ «${q.replace(/[<>&]/g, "")}» — សាកពាក្យផ្សេង ឬវាយសួរ AI ផ្ទាល់ក្នុង Chat 🤖</p>`;
 }
 $("q").addEventListener("input", e => render(e.target.value));
+document.addEventListener("keydown", e => { if (e.key === "/" && document.activeElement !== $("q")) { e.preventDefault(); $("q").value = "/"; $("q").focus(); render("/"); } });
 render("");
 // 💎 pill nav: jump between sections; the pill of the section on screen lights up
 (() => {
