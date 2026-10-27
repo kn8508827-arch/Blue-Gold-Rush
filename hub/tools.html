@@ -115,6 +115,28 @@ textarea:focus,input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--acc2)
 .bar .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
 .days{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:8px;padding:6px;border-radius:14px;background:rgba(0,0,0,.2)}
 .days i{flex:1;min-height:2px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+.cmp{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.cmp span{padding:6px 10px;border-radius:999px;font-size:12.5px;font-weight:600;background:#ffffff0d;box-shadow:inset 0 0 0 1px var(--line)}
+.cmp .up{color:var(--bad)}.cmp .down{color:var(--ok)}
+.bud{margin-top:10px;padding:12px 14px;border-radius:18px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line)}
+.bud .l{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13.5px}
+.bud .t{height:14px;margin-top:8px;border-radius:99px;background:#ffffff10;overflow:hidden;position:relative}
+.bud .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--gold))}
+.bud .t i.warn{background:linear-gradient(90deg,var(--gold),var(--acc2))}.bud .t i.over{background:linear-gradient(90deg,var(--acc),var(--bad))}
+.bud .t u{position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.55}
+.bud small{display:block;margin-top:6px;color:var(--mist);font-size:12px}
+.bud .ed{display:flex;gap:6px;margin-top:8px}.bud .ed[hidden]{display:none}.bud .ed input{padding:9px 12px;font-size:15px}
+.mini{flex:none;padding:7px 11px;border-radius:12px;font-size:12.5px;font-weight:700;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.mini.on{color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.bar.inc .t i{background:linear-gradient(90deg,#4cd17a,#7cf3ff)}
+.year{display:flex;align-items:flex-end;gap:4px;height:150px;margin-top:8px;padding:8px 6px 0;border-radius:14px;background:rgba(0,0,0,.2)}
+.year .m{flex:1;display:flex;flex-direction:column;align-items:center;height:100%}
+.year .p{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:1px}
+.year .p i{width:45%;min-height:2px;border-radius:3px 3px 0 0}.year .p i.a{background:var(--ok)}.year .p i.b{background:var(--bad)}
+.year .m small{font-size:10.5px;color:var(--mist);padding:3px 0}
+.year .m.now small{color:var(--ink);font-weight:700}
+.legend{display:flex;gap:14px;justify-content:center;margin-top:6px;font-size:12px;color:var(--mist)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .foot{margin-top:16px;text-align:center;font-size:11.5px;color:#7c7b98}
 @media (max-width:360px){.grid{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -155,9 +177,10 @@ const TOOLS = {
   homework: { i: "📚", t: "លំហាត់", a: ["#ffb36b", "#ff8ad8"], d: "ថតរូបលំហាត់ → ពន្យល់មួយជំហានៗជាខ្មែរ", ai: 1 },
   remind: { i: "⏰", t: "រំលឹក", a: ["#b48cff", "#ff8ad8"], d: "សរសេរធម្មតា → Bot ផ្ញើសាររំលឹកដល់ពេល" },
   cash: { i: "💸", t: "កត់លុយ", a: ["#ffd166", "#4cd17a"], d: "កត់ចាយ/ចូលក្នុង ៣ វិនាទី" },
-  report: { i: "📊", t: "របាយការណ៍", a: ["#7cf3ff", "#b48cff"], d: "សរុបខែ · ចំណាយតាមប្រភេទ · រាល់ថ្ងៃ" },
+  report: { i: "📊", t: "របាយការណ៍", a: ["#7cf3ff", "#b48cff"], d: "ថវិកា · ធៀបខែមុន · សរុបឆ្នាំ · AI ណែនាំសន្សំ · Excel" },
   kb: { i: "🗂️", t: "AI ឯកសារ", a: ["#8fa2ff", "#7cf3ff"], d: "បញ្ចូលឯកសារ (តម្លៃ ម៉ោង ច្បាប់) → សួរ AI ឆ្លើយតាមឯកសារ" },
 };
+const INC = ["💼 ប្រាក់ខែ", "🛒 លក់ដូរ", "🎁 កាដូ / ផ្សេងៗ", "💰 ចំណូល"];
 const SCAM_DEMO = "អបអរសាទរ! លោកអ្នកឈ្នះរង្វាន់ $500 ពី ABA 🎉 ចុច https://aba-bonus.xyz ហើយបញ្ចូលលេខកាត និង OTP ដើម្បីទទួលលុយក្នុង ២៤ ម៉ោង";
 const REMIND_EX = ["ស្អែកម៉ោង ២ រសៀល ណាត់ជួបភ្ញៀវ", "៣០ នាទីទៀត លេបថ្នាំ", "ថ្ងៃទី ៥ រៀងរាល់ខែ បង់ថ្លៃភ្លើង", "រាល់ថ្ងៃ ម៉ោង ៦ ព្រឹក ហាត់ប្រាណ"];
 const HW_EX = ["2x + 5 = 15", "រកក្រឡាផ្ទៃរង្វង់កាំ 7 cm", "Present simple vs present continuous"];
@@ -239,11 +262,13 @@ function render() {
     h += `<div style="margin-top:8px">${seg("currency", [["KHR", "៛ រៀល"], ["USD", "$ ដុល្លារ"]], cur)}</div>`;
     const quick = cur === "USD" ? [1, 2, 5, 10, 20, 50] : [1000, 2000, 5000, 10000, 20000, 50000];
     h += `<div class="chips scroll" data-quick style="margin-top:8px">${quick.map(q => `<button type="button" class="chip" data-v="${q}">${money(q, cur)}</button>`).join("")}</div>`;
-    if (kind === "out") h += step(2, "🏷️ ប្រភេទ") + `<div class="grid" data-name="category">${S.cats.filter(c => c !== "💰 ចំណូល").map(c => `<button type="button" class="opt${c === fv("category", "🍜 អាហារ") ? " on" : ""}" data-v="${esc(c)}">${esc(c)}</button>`).join("")}</div>`;
-    h += step(kind === "out" ? 3 : 2, "📝 ចំណាំ", "ស្រេចចិត្ត") + `<input type="text" id="f_note" data-f="note" maxlength="60" placeholder="${kind === "out" ? "កាហ្វេ · សាំង · ថ្លៃភ្លើង" : "លក់អាវ · ប្រាក់ខែ"}" value="">` + go("💾 កត់ទុក");
+    if (kind === "in") h += step(2, "🏷️ ប្រភេទចំណូល") + `<div class="grid" data-name="icat">${INC.map(c => `<button type="button" class="opt${c === fv("icat", INC[0]) ? " on" : ""}" data-v="${esc(c)}">${esc(c)}</button>`).join("")}</div>`;
+    if (kind === "out") h += step(2, "🏷️ ប្រភេទ") + `<div class="grid" data-name="category">${S.cats.filter(c => !INC.includes(c)).map(c => `<button type="button" class="opt${c === fv("category", "🍜 អាហារ") ? " on" : ""}" data-v="${esc(c)}">${esc(c)}</button>`).join("")}</div>`;
+    h += step(3, "📝 ចំណាំ", "ស្រេចចិត្ត") + `<input type="text" id="f_note" data-f="note" maxlength="60" placeholder="${kind === "out" ? "កាហ្វេ · សាំង · ថ្លៃភ្លើង" : "លក់អាវ · ប្រាក់ខែ"}" value="">` + go("💾 កត់ទុក");
     h += step("📋", "ខែនេះ") + `<div class="list" id="list"><div class="empty">⏳</div></div>`;
   } else if (k === "report") {
-    h += `<div class="month" style="margin-top:14px"><button type="button" data-act="prev" aria-label="ខែមុន">‹</button><b id="mlabel">…</b><button type="button" data-act="next" aria-label="ខែក្រោយ">›</button></div><div id="rep"><div class="empty">⏳</div></div><div class="status" id="status"></div>`;
+    h += `<div style="margin-top:14px">${seg("rmode", [["month", "📅 ប្រចាំខែ"], ["year", "📆 ប្រចាំឆ្នាំ"]], fv("rmode", "month"))}</div>`;
+    h += `<div class="month" style="margin-top:10px"><button type="button" data-act="prev" aria-label="មុន">‹</button><b id="mlabel">…</b><button type="button" data-act="next" aria-label="ខែក្រោយ">›</button></div><div id="rep"><div class="empty">⏳</div></div><div class="status" id="status"></div>`;
   } else if (k === "kb") {
     h += step(1, "❓ សួរ AI តាមឯកសាររបស់អ្នក") + `<input type="text" id="f_q" data-f="q" maxlength="500" placeholder="ឧ. ហាងបើកម៉ោងប៉ុន្មាន?" value="${esc(fv("q", ""))}">` + go("🤖 សួរ");
     h += step(2, "➕ បញ្ចូលឯកសារ") + `<input type="text" id="f_title" maxlength="80" placeholder="ចំណងជើង ឧ. តារាងតម្លៃ">` + `<div style="margin-top:8px">${area("body", "សរសេរព័ត៌មាន ឧ. ម៉ោងបើក ៧ ព្រឹក–៩ យប់ · កាហ្វេ 5000 រៀល …", 60000, 90)}</div>`;
@@ -345,7 +370,7 @@ async function run() {
     } else if (k === "cash") {
       const amount = fv("amount", ""); if (!(+amount > 0)) { status("💵 វាយចំនួនលុយ", true); return; }
       const kind = fv("kind", "out");
-      const j = await post("/tools/cash/add", { kind, amount, currency: fv("currency", "KHR"), category: kind === "in" ? "💰 ចំណូល" : fv("category", "🍜 អាហារ"), note: ($("f_note") || {}).value || "" });
+      const j = await post("/tools/cash/add", { kind, amount, currency: fv("currency", "KHR"), category: kind === "in" ? fv("icat", INC[0]) : fv("category", "🍜 អាហារ"), note: ($("f_note") || {}).value || "" });
       setF("amount", ""); render(); status(`${kind === "in" ? "➕" : "➖"} ${money(j.item.amount, j.item.currency)} · ${j.item.category} ✅`); notify("success");
     } else if (k === "kb") {
       btn.textContent = "⏳ AI កំពុងអាន…";
@@ -408,28 +433,94 @@ async function kbAdd() {
 }
 
 // report
+const USD = v => (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en", { maximumFractionDigits: 2 });
+const MON = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"];
 function monthStr(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
-function shiftMonth(n) { const [y, m] = S.month.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); if (d > new Date()) return; S.month = monthStr(d); loadReport(); }
+function shiftMonth(n) {
+  S.month = S.month || monthStr(new Date());
+  const [y, m] = S.month.split("-").map(Number);
+  const d = fv("rmode", "month") === "year" ? new Date(y + n, m - 1, 1) : new Date(y, m - 1 + n, 1);
+  if (d > new Date()) return;
+  S.month = monthStr(d); haptic(); loadReport();
+}
+const pctChip = (p, label, goodDown) => p === null || p === undefined ? "" :
+  `<span class="${(p > 0) === goodDown ? "up" : "down"}">${p > 0 ? "▲" : p < 0 ? "▼" : "•"} ${Math.abs(p)}% ${label}</span>`;
 async function loadReport() {
   S.month = S.month || monthStr(new Date());
-  const [y, m] = S.month.split("-"); $("mlabel").textContent = `ខែ ${kh(+m)} / ${kh(y)}`;
+  const [y, m] = S.month.split("-"), year = fv("rmode", "month") === "year";
+  $("mlabel").textContent = year ? `ឆ្នាំ ${kh(y)}` : `${MON[+m - 1]} ${kh(y)}`;
   if (!INIT || S.member === false) { $("rep").innerHTML = `<div class="empty">📱 សូមបើកពី Cooler Hub</div>`; return; }
-  try {
-    const r = await post("/tools/report", { month: S.month });
-    if (!r.count) { $("rep").innerHTML = `<div class="empty">ខែនេះមិនទាន់មានកំណត់ត្រា — ទៅ 💸 កត់លុយ</div>`; return; }
-    const usd = v => "$" + v.toLocaleString("en", { maximumFractionDigits: 2 });
-    const maxDay = Math.max(...r.days.map(d => d[1]), 0.01), dim = new Date(+y, +m, 0).getDate(), dm = Object.fromEntries(r.days);
-    let h = `<div class="kpis"><div class="kpi in"><small>➕ ចំណូល</small><b>${usd(r.income)}</b></div><div class="kpi out"><small>➖ ចំណាយ</small><b>${usd(r.spent)}</b></div><div class="kpi"><small>${r.balance >= 0 ? "💚" : "❤️"} សល់</small><b>${usd(r.balance)}</b></div></div>`;
-    h += `<div class="note" style="text-align:center">≈ ${Math.round(r.balance * r.khr).toLocaleString()} ៛ · 1$ ≈ ${Math.round(r.khr).toLocaleString()} ៛ · ${r.count} កំណត់ត្រា</div>`;
-    if (r.cats.length) h += step("🏷️", "ចំណាយតាមប្រភេទ") + `<div class="bars">${r.cats.map(([c, v, p]) => `<div class="bar"><div class="l"><span>${esc(c)}</span><b>${usd(v)} · ${p}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`).join("")}</div>`;
-    h += step("📅", "ចំណាយរាល់ថ្ងៃ") + `<div class="days" aria-label="ចំណាយរាល់ថ្ងៃ">${Array.from({ length: dim }, (_, i) => `<i title="${i + 1}: ${usd(dm[i + 1] || 0)}" style="height:${Math.max(2, 100 * (dm[i + 1] || 0) / maxDay)}%"></i>`).join("")}</div>`;
-    h += `<div class="acts"><button type="button" class="main" id="repSend">📤 ផ្ញើរបាយការណ៍ចូល Telegram</button></div>`;
-    $("rep").innerHTML = h;
-    $("repSend").onclick = async () => {
-      const text = [`ចំណូល៖ ${usd(r.income)}`, `ចំណាយ៖ ${usd(r.spent)}`, `សល់៖ ${usd(r.balance)}`, "", ...r.cats.map(([c, v, p]) => `${c}៖ ${usd(v)} (${p}%)`)].join("\n");
-      try { await post("/tools/send", { title: `📊 របាយការណ៍ខែ ${m}/${y}`, text }); $("repSend").textContent = "✅ ផ្ញើរួច"; } catch (e) { status(e.message, true); }
-    };
-  } catch (err) { $("rep").innerHTML = ""; status(err.message, true); }
+  $("rep").innerHTML = `<div class="empty">⏳</div>`;
+  try { year ? yearReport(await post("/tools/report/year", { year: y }), +y) : monthReport(await post("/tools/report", { month: S.month }), y, m); }
+  catch (err) { $("rep").innerHTML = ""; status(err.message, true); }
+}
+function yearReport(r, y) {
+  const max = Math.max(...r.months.map(x => Math.max(x[1], x[2])), 0.01), now = new Date();
+  let h = `<div class="kpis"><div class="kpi in"><small>➕ ចំណូលឆ្នាំ</small><b>${USD(r.income)}</b></div><div class="kpi out"><small>➖ ចំណាយឆ្នាំ</small><b>${USD(r.spent)}</b></div><div class="kpi"><small>${r.balance >= 0 ? "💚" : "❤️"} សល់</small><b>${USD(r.balance)}</b></div></div>`;
+  const active = r.months.filter(x => x[1] || x[2]);
+  if (!active.length) { $("rep").innerHTML = h + `<div class="empty">ឆ្នាំនេះមិនទាន់មានកំណត់ត្រា</div>`; return; }
+  const best = active.reduce((a, x) => x[1] - x[2] > a[1] - a[2] ? x : a), worst = active.reduce((a, x) => x[2] > a[2] ? x : a);
+  h += `<div class="cmp"><span>📈 សន្សំល្អបំផុត៖ ${MON[best[0] - 1]} (${USD(best[1] - best[2])})</span><span class="up">💸 ចាយច្រើនបំផុត៖ ${MON[worst[0] - 1]} (${USD(worst[2])})</span><span>📊 មធ្យម/ខែ៖ ${USD(r.spent / active.length)}</span></div>`;
+  h += step("📆", "១២ ខែ", "ចុចខែដើម្បីមើលលម្អិត") + `<div class="year">${r.months.map(([mo, i, o]) => `<button type="button" class="m${y === now.getFullYear() && mo === now.getMonth() + 1 ? " now" : ""}" data-mo="${mo}" title="${MON[mo - 1]}: +${USD(i)} / −${USD(o)}"><span class="p"><i class="a" style="height:${100 * i / max}%"></i><i class="b" style="height:${100 * o / max}%"></i></span><small>${kh(mo)}</small></button>`).join("")}</div>`;
+  h += `<div class="legend"><span><i style="background:var(--ok)"></i>ចំណូល</span><span><i style="background:var(--bad)"></i>ចំណាយ</span></div>`;
+  $("rep").innerHTML = h;
+  $("rep").querySelectorAll("[data-mo]").forEach(b => b.onclick = e => { e.stopPropagation(); S.month = `${y}-${String(b.dataset.mo).padStart(2, "0")}`; setF("rmode", "month"); render(); });
+}
+function monthReport(r, y, m) {
+  S.rep = r;
+  let h = `<div class="kpis"><div class="kpi in"><small>➕ ចំណូល</small><b>${USD(r.income)}</b></div><div class="kpi out"><small>➖ ចំណាយ</small><b>${USD(r.spent)}</b></div><div class="kpi"><small>${r.balance >= 0 ? "💚" : "❤️"} សល់</small><b>${USD(r.balance)}</b></div></div>`;
+  h += `<div class="note" style="text-align:center">≈ ${Math.round(r.balance * r.khr).toLocaleString()} ៛ · 1$ ≈ ${Math.round(r.khr).toLocaleString()} ៛ · ${r.count} កំណត់ត្រា</div>`;
+  h += `<div class="cmp">${pctChip(r.prev.spentPct, "ចំណាយធៀបខែមុន", true)}${pctChip(r.prev.incomePct, "ចំណូលធៀបខែមុន", false)}${r.savingRate !== null ? `<span class="${r.savingRate >= 0 ? "down" : "up"}">🐷 សន្សំបាន ${r.savingRate}%</span>` : ""}<span>📅 មធ្យម ${USD(r.avgDay)}/ថ្ងៃ</span></div>`;
+  // budget
+  const bp = r.budgetPct, cls = bp === null ? "" : bp >= 100 ? "over" : bp >= 80 ? "warn" : "";
+  h += `<div class="bud" id="bud"><div class="l"><b>🎯 ថវិកាចាយប្រចាំខែ</b>${r.budget ? `<span>${USD(r.spent)} / ${USD(r.budget)}</span>` : ""}<button type="button" class="mini" id="budEdit">${r.budget ? "✏️ កែ" : "➕ កំណត់"}</button></div>`;
+  if (r.budget) {
+    const dayMark = r.current ? 100 * r.elapsed / r.monthDays : 100;
+    h += `<div class="t"><i class="${cls}" style="width:${Math.min(100, bp)}%"></i>${r.current ? `<u style="left:${dayMark}%" title="ថ្ងៃនេះ"></u>` : ""}</div>`;
+    const left = r.budget - r.spent;
+    h += `<small>${bp >= 100 ? `🚨 លើសថវិកា ${USD(-left)} ហើយ!` : bp >= 80 ? `⚠️ ជិតដល់ថវិកា — នៅសល់ ${USD(left)}` : `✅ នៅសល់ ${USD(left)}`}${r.current && left > 0 ? ` · អាចចាយបាន ~${USD(left / Math.max(1, r.monthDays - r.elapsed + 1))}/ថ្ងៃ` : ""}</small>`;
+  } else h += `<small>កំណត់ថវិកា ដើម្បីដឹងថាចាយលើសឬអត់ ✨</small>`;
+  h += `<div class="ed" id="budForm" hidden><input type="number" inputmode="decimal" id="budVal" min="0" placeholder="ឧ. 300 ($)" value="${r.budget || ""}"><button type="button" class="mini on" id="budSave">💾</button></div></div>`;
+  // forecast
+  if (r.current && r.spent) h += `<div class="note" style="text-align:center">🔮 បើចាយបែបនេះ ដល់ចុងខែនឹងចាយប្រហែល <b>${USD(r.projected)}</b>${r.budget ? (r.projected > r.budget ? ` — លើសថវិកា ${USD(r.projected - r.budget)} ⚠️` : " — ក្នុងថវិកា ✅") : ""}</div>`;
+  if (r.cats.length) h += step("🏷️", "ចំណាយតាមប្រភេទ") + `<div class="bars">${r.cats.map(([c, v, p]) => `<div class="bar"><div class="l"><span>${esc(c)}</span><b>${USD(v)} · ${p}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`).join("")}</div>`;
+  if (r.incomeCats.length) h += step("💰", "ចំណូលមកពី") + `<div class="bars">${r.incomeCats.map(([c, v, p]) => `<div class="bar inc"><div class="l"><span>${esc(c)}</span><b>${USD(v)} · ${p}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`).join("")}</div>`;
+  if (r.top.length) h += step("🔝", "ចាយធំៗ ៥") + `<div class="list">${r.top.map((t, i) => `<div class="row"><span class="ic">${["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]}</span><span class="b"><b>${esc(t.note)}</b><small>${esc(t.cat)} · ${when(t.at)}</small></span><span class="v out">−${money(t.amount, t.currency)}</span></div>`).join("")}</div>`;
+  const maxDay = Math.max(...r.days.map(d => d[1]), 0.01), dm = Object.fromEntries(r.days);
+  if (r.days.length) h += step("📅", "ចំណាយរាល់ថ្ងៃ") + `<div class="days" aria-label="ចំណាយរាល់ថ្ងៃ">${Array.from({ length: r.monthDays }, (_, i) => `<i title="${i + 1}: ${USD(dm[i + 1] || 0)}" style="height:${Math.max(2, 100 * (dm[i + 1] || 0) / maxDay)}%"></i>`).join("")}</div>`;
+  h += step("🤖", "AI ណែនាំការសន្សំ", "តាមលេខពិតរបស់អ្នក") + `<div id="tips"><button type="button" class="go" id="tipsGo" style="margin-top:6px">✨ សុំគន្លឹះសន្សំលុយពី AI</button></div>`;
+  h += `<div class="acts"><button type="button" class="main" id="repSend">📤 ផ្ញើរូបរបាយការណ៍ + Excel ចូល Telegram</button><button type="button" id="repText">💬 ផ្ញើជាអក្សរ</button><button type="button" id="repCsv">📄 ទាញ CSV</button></div>`;
+  if (!r.count) h = `<div class="empty">ខែនេះមិនទាន់មានកំណត់ត្រា — ទៅ 💸 កត់លុយ</div>` + h.slice(h.indexOf('<div class="bud"'), h.indexOf("</div></div>", h.indexOf('id="budForm"')) + 12);
+  $("rep").innerHTML = h;
+  const stop = f => e => { e.stopPropagation(); f(); };
+  $("budEdit").onclick = stop(() => { $("budForm").hidden = !$("budForm").hidden; $("budVal").focus(); });
+  $("budSave").onclick = stop(async () => {
+    try { await post("/tools/budget/set", { usd: $("budVal").value || "0" }); notify("success"); loadReport(); } catch (e) { status(e.message, true); }
+  });
+  if (!r.count) return;
+  $("tipsGo").onclick = stop(async () => {
+    const b = $("tipsGo"); b.disabled = true; b.textContent = "⏳ AI កំពុងគិត…";
+    try { const j = await post("/tools/report/tips", { month: S.month }); $("tips").innerHTML = `<div class="txt">${esc(j.text)}</div>`; notify("success"); quota(); }
+    catch (e) { b.disabled = false; b.textContent = "✨ សុំគន្លឹះសន្សំលុយពី AI"; status(e.message, true); }
+  });
+  $("repSend").onclick = stop(async () => {
+    const b = $("repSend"); b.disabled = true; b.textContent = "⏳ កំពុងផ្ញើ…";
+    try { await post("/tools/report/send", { month: S.month }); b.textContent = "✅ ផ្ញើរួច — មើលក្នុង Chat Bot"; notify("success"); }
+    catch (e) { b.disabled = false; b.textContent = "📤 ផ្ញើរូបរបាយការណ៍ + Excel ចូល Telegram"; status(e.message, true); }
+  });
+  $("repText").onclick = stop(async () => {
+    const text = [`ចំណូល៖ ${USD(r.income)}`, `ចំណាយ៖ ${USD(r.spent)}`, `សល់៖ ${USD(r.balance)}`, r.budget ? `ថវិកា៖ ${USD(r.budget)} (${r.budgetPct}%)` : "", "", ...r.cats.map(([c, v, p]) => `${c}៖ ${USD(v)} (${p}%)`)].filter((x, i, a) => x || a[i - 1]).join("\n");
+    try { await post("/tools/send", { title: `📊 របាយការណ៍ ${MON[+m - 1]} ${y}`, text }); $("repText").textContent = "✅ ផ្ញើរួច"; } catch (e) { status(e.message, true); }
+  });
+  $("repCsv").onclick = stop(async () => {
+    try {
+      const items = (await post("/tools/cash/list", { month: S.month, limit: 1000 })).items || [];
+      const rows = [["date", "type", "category", "note", "amount", "currency"], ...items.map(i => [new Date(i.at * 1000).toISOString().slice(0, 16).replace("T", " "), i.kind === "in" ? "income" : "expense", i.category, i.note || "", i.amount, i.currency])];
+      const csv = "﻿" + rows.map(row => row.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `cooler-cash-${S.month}.csv`; a.click();
+      status("📄 បើបើកក្នុង Telegram មិនបាន — ចុច 📤 ផ្ញើ ដើម្បីទទួល File ក្នុង Chat");
+    } catch (e) { status(e.message, true); }
+  });
 }
 
 // ---------- start ----------
