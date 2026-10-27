@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c12">
+<title>Cooler Voice Studio</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b0c12;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#f4f3ff;--mist:#a7a6c6;
+  --cyan:#7cf3ff;--violet:#b48cff;--gold:#ffd166;--pink:#ff8ad8;--ok:#4cd17a;--bad:#ff9aaa;--m:#7cc4ff;--f:#ff9ed8;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  background:radial-gradient(520px 360px at 90% -10%,rgba(180,140,255,.24),transparent 60%),
+             radial-gradient(520px 380px at -15% 40%,rgba(124,243,255,.12),transparent 60%),
+             radial-gradient(420px 320px at 70% 105%,rgba(255,138,216,.12),transparent 60%),var(--bg)}
+.wrap{max-width:600px;margin:0 auto}
+button,a,input,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:12px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;flex:none;border-radius:14px;background:var(--glass);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.top h1{flex:1;min-width:0;margin:0;font-family:var(--dsp);font-weight:700;font-size:18px;letter-spacing:.3px}
+.top small{display:block;font-family:var(--kh);font-weight:400;font-size:12.5px;color:var(--mist);letter-spacing:0}
+.quota{margin-left:auto;flex:none;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.banner{display:none;margin-top:14px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,138,216,.14));box-shadow:inset 0 0 0 1px rgba(255,209,102,.35)}
+.banner.show{display:block}
+.banner b{display:block;font-size:15px}
+.banner p{margin:4px 0 10px;font-size:13.5px;color:#e9e6ff}
+.banner a{display:inline-block;padding:9px 14px;border-radius:14px;font-weight:700;color:#14122e;text-decoration:none;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.card{position:relative;margin-top:14px;padding:16px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--line),0 20px 40px -24px #000}
+.card h2{margin:0 0 10px;font-size:15.5px;display:flex;align-items:center;gap:8px}
+.card h2 .n{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 12px var(--dsp);background:#ffffff1c}
+.card h2 .aside{margin-left:auto;font-size:12px;font-weight:400;color:var(--mist)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{padding:9px 6px;border-radius:12px;font-weight:700;font-size:13.5px;color:var(--mist)}
+.seg button.on{color:#14122e;background:linear-gradient(135deg,var(--cyan),var(--violet))}
+.row{display:flex;gap:7px;flex-wrap:wrap}
+.scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.pill{flex:none;padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.pill.on{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#14122e;box-shadow:0 6px 16px -8px var(--cyan)}
+.pill.tag{background:rgba(124,243,255,.08);box-shadow:inset 0 0 0 1px rgba(124,243,255,.25)}
+.lbl{margin:12px 0 6px;font-size:12.5px;color:var(--mist);font-weight:600}
+textarea{width:100%;min-height:150px;margin-top:10px;padding:13px 14px;border-radius:18px;border:0;resize:vertical;font-size:15.5px;line-height:1.7;
+  background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px var(--line)}
+textarea:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--cyan)}
+textarea::placeholder{color:#7c7b98}
+.count{display:flex;justify-content:space-between;font-size:12px;color:var(--mist);margin-top:4px}
+.count .over{color:var(--bad);font-weight:700}
+.who{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.who.show{display:grid}
+.who button{padding:10px;border-radius:16px;text-align:left;background:#ffffff0d;box-shadow:inset 0 0 0 1px var(--line);font-size:13px}
+.who button b{display:block;font-size:14.5px}
+.who button.on{box-shadow:inset 0 0 0 1.5px var(--gold),0 8px 18px -10px var(--gold);background:rgba(255,209,102,.1)}
+.search{width:100%;margin:10px 0 2px;padding:10px 13px;border-radius:14px;border:0;font-size:14px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px var(--line)}
+.search:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--cyan)}
+.voices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;max-height:470px;overflow-y:auto;padding:2px}
+.v{position:relative;display:flex;align-items:center;gap:9px;padding:10px;border-radius:18px;text-align:left;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.v.on{background:linear-gradient(160deg,rgba(124,243,255,.2),rgba(180,140,255,.18));box-shadow:inset 0 0 0 1.5px var(--cyan),0 8px 18px -10px var(--cyan)}
+.v.onB{background:linear-gradient(160deg,rgba(255,209,102,.18),rgba(255,138,216,.14));box-shadow:inset 0 0 0 1.5px var(--gold)}
+.v .av{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 14px var(--dsp);color:#14122e}
+.v .av.m{background:linear-gradient(135deg,#a9dcff,var(--m))}
+.v .av.f{background:linear-gradient(135deg,#ffd0ec,var(--f))}
+.v .av.x{background:linear-gradient(135deg,#d4ffd9,var(--ok))}
+.v .t{min-width:0;flex:1}
+.v .t b{display:block;font-size:13.5px;font-family:var(--dsp);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v .t span{display:block;font-size:12px;color:#d9d6f3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v .t b i{font:400 11px var(--kh);color:var(--mist)}
+.v .badge{position:absolute;top:-6px;right:8px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;color:#14122e;background:var(--gold)}
+.v .ab{position:absolute;top:-6px;left:8px;padding:1px 7px;border-radius:999px;font:700 10px var(--dsp);color:#14122e;background:var(--cyan)}
+.v .ab.B{background:var(--gold)}
+.play1{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:13px;background:#ffffff1a;box-shadow:inset 0 0 0 1px var(--line)}
+.play1.busy{animation:spin 1s linear infinite}
+.play1.on{background:var(--cyan);color:#14122e}
+@keyframes spin{to{transform:rotate(360deg)}}
+.styles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.styles button{padding:9px 4px;border-radius:15px;font-size:12.5px;font-weight:600;background:#ffffff0d;box-shadow:inset 0 0 0 1px var(--line);line-height:1.35}
+.styles button i{display:block;font-style:normal;font-size:19px}
+.styles button.on{background:linear-gradient(160deg,rgba(255,209,102,.24),rgba(255,138,216,.2));box-shadow:inset 0 0 0 1.5px var(--gold)}
+.custom{min-height:58px;margin-top:8px;font-size:14px}
+.go{width:100%;margin-top:16px;padding:16px;border-radius:20px;font-weight:700;font-size:16px;color:#14122e;
+  background:linear-gradient(135deg,var(--cyan),var(--violet) 55%,var(--pink));box-shadow:0 14px 30px -14px var(--violet)}
+.go .sp{display:none}
+.go.busy .sp{display:inline-flex;gap:3px;vertical-align:middle;margin-right:6px}
+.go.busy .sp i{width:4px;height:14px;border-radius:2px;background:#14122e;animation:eq .8s ease-in-out infinite}
+.go.busy .sp i:nth-child(2){animation-delay:.15s}.go.busy .sp i:nth-child(3){animation-delay:.3s}.go.busy .sp i:nth-child(4){animation-delay:.45s}
+@keyframes eq{50%{transform:scaleY(.35)}}
+@media (prefers-reduced-motion:reduce){.go.busy .sp i,.play1.busy{animation:none}}
+.status{min-height:20px;margin-top:8px;font-size:13px;color:var(--mist);text-align:center}
+.status.err{color:var(--bad)}
+.result{display:none}
+.result.show{display:block}
+.player{display:flex;align-items:center;gap:12px}
+.pp{width:56px;height:56px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:22px;color:#14122e;background:linear-gradient(135deg,var(--cyan),var(--violet));box-shadow:0 10px 22px -10px var(--cyan)}
+.pbody{flex:1;min-width:0}
+canvas#wave{display:block;width:100%;height:58px;border-radius:12px;background:rgba(0,0,0,.25);cursor:pointer}
+.ptime{display:flex;justify-content:space-between;font-size:12px;color:var(--mist);margin-top:4px}
+.meta{margin-top:8px;font-size:12.5px;color:var(--mist)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:12px 8px;border-radius:16px;font-weight:700;font-size:14px;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.acts .send{grid-column:1/-1;color:#14122e;background:linear-gradient(135deg,var(--gold),var(--pink));box-shadow:0 10px 24px -12px var(--pink)}
+.hist{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.hist button{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;text-align:left;font-size:13px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line)}
+.hist button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist button small{color:var(--mist)}
+.tips{margin:0;padding-left:18px;font-size:13px;color:#dcd9f5}
+.tips li{margin:3px 0}
+.foot{margin-top:16px;text-align:center;font-size:11.5px;color:#7c7b98}
+@media (max-width:520px){.voices{grid-template-columns:1fr;gap:7px}.v{padding:9px 10px}.v .t span{white-space:normal}}
+@media (max-width:360px){.styles{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" id="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>🎙️ Voice Studio <small>Voice-over AI · ៣០ សំឡេង · ខ្មែរ & ១៣០ ភាសា</small></h1>
+    <span class="quota" id="quota" hidden></span>
+  </header>
+
+  <div class="banner" id="banner" role="alert"><b id="bTitle"></b><p id="bText"></p><a id="bLink" href="#"></a></div>
+
+  <section class="card">
+    <h2><span class="n">1</span> សរសេរអត្ថបទ</h2>
+    <div class="seg" role="radiogroup" aria-label="របៀប">
+      <button type="button" id="mSingle" class="on" role="radio" aria-checked="true">👤 មួយសំឡេង</button>
+      <button type="button" id="mDuo" role="radio" aria-checked="false">👥 សន្ទនា ២ នាក់</button>
+    </div>
+    <div class="lbl">⚡ គំរូរហ័ស</div>
+    <div class="scroll" id="tpl"></div>
+    <textarea id="text" maxlength="2000" placeholder="សរសេរអ្វីដែលចង់ឲ្យ AI អាន… ឧ. សួស្ដីបងប្អូន! ថ្ងៃនេះខ្ញុំមានរបស់ល្អមកណែនាំ…"></textarea>
+    <div class="count"><span id="hintMode">💡 ដាក់សញ្ញាខណ្ឌ ។ , ! ? ដើម្បីឲ្យអានមានចង្វាក់</span><span id="count">0 / 1200</span></div>
+    <div class="lbl">🎭 បន្ថែមសំឡេងធម្មជាតិ (ចុចដើម្បីដាក់ត្រង់ Cursor)</div>
+    <div class="scroll" id="tags"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> ជ្រើសសំឡេង <span class="aside" id="vcount">៣០ សំឡេង</span></h2>
+    <div class="who" id="who">
+      <button type="button" id="whoA" class="on"><small>🅰️ អ្នកនិយាយ A</small><b id="whoAn">Puck</b></button>
+      <button type="button" id="whoB"><small>🅱️ អ្នកនិយាយ B</small><b id="whoBn">Kore</b></button>
+    </div>
+    <div class="scroll" id="filters"></div>
+    <input class="search" id="search" type="search" placeholder="🔎 ស្វែងរក៖ ឈ្មោះ ឬ ពាក្យ (ឧ. កក់ក្ដៅ, Warm)" aria-label="ស្វែងរកសំឡេង">
+    <div class="voices" id="voices" role="listbox" aria-label="សំឡេង"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> ស្ទីល & ល្បឿន</h2>
+    <div class="styles" id="styles" role="radiogroup" aria-label="ស្ទីល"></div>
+    <div class="lbl">⏱️ ល្បឿនអាន</div>
+    <div class="row" id="speeds"></div>
+    <div class="lbl">✏️ ឬសរសេរស្ទីលខ្លួនឯង (English ល្អបំផុត)</div>
+    <textarea class="custom" id="custom" maxlength="200" placeholder="ឧ. excited radio DJ, smiling, fast"></textarea>
+    <div class="lbl">💎 គុណភាព</div>
+    <div class="seg" role="radiogroup" aria-label="គុណភាព">
+      <button type="button" id="qHd" class="on" role="radio" aria-checked="true">💎 ច្បាស់បំផុត</button>
+      <button type="button" id="qFast" role="radio" aria-checked="false">⚡ លឿន</button>
+    </div>
+    <button class="go" id="go" type="button"><span class="sp" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="goT">✨ បង្កើតសំឡេង</span></button>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card result" id="result" aria-label="លទ្ធផល">
+    <h2><span class="n">4</span> ស្ដាប់ & យកទៅប្រើ</h2>
+    <div class="player">
+      <button class="pp" id="pp" type="button" aria-label="ចាក់">▶</button>
+      <div class="pbody">
+        <canvas id="wave" width="900" height="116" aria-label="Waveform — ចុចដើម្បីរំលង"></canvas>
+        <div class="ptime"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+      </div>
+    </div>
+    <div class="meta" id="meta"></div>
+    <div class="acts">
+      <button class="send" type="button" id="send">📤 ផ្ញើចូល Telegram (យកទៅ CapCut)</button>
+      <button type="button" id="dl">📥 ទាញយក WAV</button>
+      <button type="button" id="fav">⭐ ប្រើជាសំឡេង /say</button>
+    </div>
+    <div class="hist" id="hist"></div>
+  </section>
+
+  <section class="card">
+    <h2>💡 គន្លឹះឲ្យសំឡេងល្អ</h2>
+    <ul class="tips">
+      <li>ចុច ▶ ស្ដាប់គំរូសំឡេងមុនជ្រើស — គំរូមិនកាត់ចំនួនប្រើទេ</li>
+      <li>សរសេរខ្មែរឲ្យត្រូវអក្ខរាវិរុទ្ធ ហើយដាក់ ។ រវាងប្រយោគ</li>
+      <li>លេខ និងអក្សរកាត់ សរសេរជាពាក្យ (ឧ. "ម្ភៃប្រាំដុល្លារ") អានច្បាស់ជាង</li>
+      <li>សន្ទនា៖ ចាប់ផ្ដើមបន្ទាត់នីមួយៗដោយ <b>A:</b> ឬ <b>B:</b></li>
+      <li>អត្ថបទវែង? កាត់ជាផ្នែកៗ ១២០០ តួអក្សរ</li>
+    </ul>
+  </section>
+  <div class="foot">Cooler Voice Studio · Gemini 3.8 Flash TTS · @TeamSmosSneabot</div>
+</div>
+
+<script>
+"use strict";
+const API = "https://bot-smos-smea-production.up.railway.app";
+const BOT = "TeamSmosSneabot";
+const MAX = 1200;
+const tg = window.Telegram && window.Telegram.WebApp;
+const INIT = (tg && tg.initData) || (() => { const m = location.hash.match(/[#&]tg=([^&]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+const $ = id => document.getElementById(id);
+const store = { get(k, d) { try { const v = localStorage.getItem("cvs:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("cvs:" + k, JSON.stringify(v)); } catch (e) {} } };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const haptic = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t || "light"); } catch (e) {} };
+
+if (tg) {
+  try { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#0b0c12"); tg.setBackgroundColor && tg.setBackgroundColor("#0b0c12"); } catch (e) {}
+  try { tg.BackButton.show(); tg.BackButton.onClick(() => { location.href = "./"; }); } catch (e) {}
+}
+
+// name, gender, Google's trait, Khmer description
+const VOICES = [
+  ["Puck","m","Upbeat","ស្វាហាប់ រីករាយ"],["Charon","m","Informative","អានព័ត៌មាន ច្បាស់"],["Fenrir","m","Excitable","រំភើប ខ្លាំង"],
+  ["Orus","m","Firm","រឹងមាំ ម៉ឺងម៉ាត់"],["Enceladus","m","Breathy","ទន់ មានខ្យល់ដង្ហើម"],["Iapetus","m","Clear","ច្បាស់ល្អ"],
+  ["Umbriel","m","Easy-going","ស្រួលៗ សប្បាយ"],["Algieba","m","Smooth","រលូន ផ្អែម"],["Algenib","m","Gravelly","ស្អកៗ ក្រាស់"],
+  ["Rasalgethi","m","Informative","បែបអ្នកជំនាញ"],["Alnilam","m","Firm","ធ្ងន់ មានអំណាច"],["Schedar","m","Even","ស្មើៗ ស្ងប់"],
+  ["Achird","m","Friendly","រួសរាយ រាក់ទាក់"],["Zubenelgenubi","m","Casual","ធម្មតាៗ ដូចមិត្ត"],["Sadachbia","m","Lively","រស់រវើក"],
+  ["Sadaltager","m","Knowledgeable","ចេះដឹង គួរឲ្យទុកចិត្ត"],
+  ["Zephyr","f","Bright","ភ្លឺស្វាង"],["Kore","f","Firm","រឹងមាំ ច្បាស់"],["Leda","f","Youthful","ក្មេងស្រស់"],["Aoede","f","Breezy","ស្រាលៗ ស្រស់"],
+  ["Callirrhoe","f","Easy-going","ស្រួលៗ"],["Autonoe","f","Bright","ភ្លឺ ស្វាហាប់"],["Despina","f","Smooth","រលូន ផ្អែម"],
+  ["Erinome","f","Clear","ច្បាស់ល្អ"],["Laomedeia","f","Upbeat","រីករាយ ស្វាហាប់"],["Achernar","f","Soft","ទន់ភ្លន់"],
+  ["Gacrux","f","Mature","ចាស់ទុំ"],["Pulcherrima","f","Forward","ត្រង់ៗ មានទំនុកចិត្ត"],["Vindemiatrix","f","Gentle","ស្លូតបូត"],
+  ["Sulafat","f","Warm","កក់ក្ដៅ"]
+].map(([id, g, en, kh]) => ({ id, name: id, g, en, kh }));
+const BADGE = { Puck: "Cooler Bot", Charon: "ព័ត៌មាន", Laomedeia: "ផ្សាយពាណិជ្ជកម្ម", Sulafat: "និទានរឿង", Fenrir: "Hype" };
+
+const STYLES = [
+  ["🙂","ធម្មតា","natural, clear and friendly, normal pace"],
+  ["😄","រីករាយ","cheerful, warm and smiling"],
+  ["📢","ផ្សាយពាណិជ្ជកម្ម","energetic advertising announcer, exciting, persuasive and punchy"],
+  ["📰","អានព័ត៌មាន","professional TV news anchor, confident, clear and neutral"],
+  ["📖","និទានរឿង","expressive storyteller, warm, with dramatic pauses"],
+  ["🎤","Hype / Rap","hype MC, very energetic, rhythmic and bold"],
+  ["🧑‍🏫","បង្រៀន","patient teacher, very clear pronunciation"],
+  ["🤫","ខ្សឹប","whispering softly, intimate and close"],
+  ["🌙","ស្ងប់ / ASMR","calm, soothing and relaxed"],
+  ["😢","សោកសៅ","sad and emotional, soft voice"],
+  ["😠","ខឹង","angry, intense and forceful"],
+  ["🎙️","វិទ្យុ DJ","lively radio DJ, smiling and playful"]
+];
+const SPEEDS = [["🐢 យឺត", "speak slowly"], ["🚶 ធម្មតា", ""], ["🐇 លឿន", "speak fast"]];
+const TAGS = [["😂 សើច","<laugh>"],["⏸️ ឈប់ខ្លី","<short pause>"],["⏹️ ឈប់យូរ","<long pause>"],["😮‍💨 ដកដង្ហើមធំ","<sigh>"],
+              ["🌬️ ដកដង្ហើម","<breath>"],["🤫 ខ្សឹប","<whispering>"],["😲 ភ្ញាក់ផ្អើល","<gasp>"],["🥱 ងងុយ","<yawn>"]];
+const TEMPLATES = [
+  { k: "📢 លក់ទំនិញ", mode: 1, style: 2, voice: "Laomedeia",
+    t: "ស្រស់ៗ ថ្មីៗ! <short pause> ទំនិញល្អ តម្លៃពិសេស មានតែនៅហាងយើងប៉ុណ្ណោះ! ទិញមួយ ថែមមួយ ចាប់ពីថ្ងៃនេះតទៅ។ <short pause> កុំរង់ចាំ! ឆាតមកកុម្ម៉ង់ឥឡូវនេះ!" },
+  { k: "🎬 TikTok Intro", mode: 1, style: 1, voice: "Puck",
+    t: "សួស្ដីបងប្អូន! <laugh> ថ្ងៃនេះខ្ញុំមានរឿងថ្មីមួយ ដែលបងប្អូនមិនធ្លាប់ដឹងពីមុន។ <short pause> មើលឲ្យដល់ចប់ណា ហើយកុំភ្លេច Follow ផង!" },
+  { k: "📰 ព័ត៌មាន", mode: 1, style: 3, voice: "Charon",
+    t: "ជម្រាបសួរ ប្រិយមិត្តអ្នកស្ដាប់។ <short pause> ព័ត៌មានថ្ងៃនេះ៖ អាកាសធាតុនៅភ្នំពេញ មានពពកច្រើន និងអាចមានភ្លៀងធ្លាក់នៅពេលល្ងាច។ សូមប្រិយមិត្តប្រុងប្រយ័ត្នពេលធ្វើដំណើរ។" },
+  { k: "📖 និទានរឿង", mode: 1, style: 4, voice: "Sulafat",
+    t: "កាលពីព្រេងនាយ <short pause> មានក្មេងប្រុសម្នាក់ រស់នៅក្បែរព្រៃធំមួយ។ <breath> យប់មួយ គាត់ឮសំឡេងចម្លែក ចេញមកពីក្នុងព្រៃ… <long pause> តើវាជាអ្វី?" },
+  { k: "👥 សន្ទនា", mode: 2, style: 1, voice: "Puck", voiceB: "Kore",
+    t: "A: សួស្ដី! ថ្ងៃនេះទៅណាដែរ?\nB: ទៅផ្សារ ទិញកាហ្វេ។ <laugh> ចង់ទៅជាមួយទេ?\nA: ទៅ! តែបងចេញលុយណា!\nB: អូ៎… <sigh> យល់ព្រម!" },
+  { k: "🎤 Hype Rap", mode: 1, style: 5, voice: "Fenrir",
+    t: "Yo! Team ស្មោះស្នេហ៍ ក្រោកឡើង! <short pause> ថ្ងៃនេះយើងមកខ្លាំងជាងមុន ពេញដោយកម្លាំង ពេញដោយក្ដីស្រលាញ់! Let's go!" }
+];
+
+const S = {
+  mode: store.get("mode", 1), voiceA: store.get("voiceA", "Puck"), voiceB: store.get("voiceB", "Kore"), pick: 0,
+  style: store.get("style", 0), speed: store.get("speed", 1), quality: store.get("quality", "hd"),
+  filter: "all", q: "", member: null, extra: [], clip: null, wav: null, history: []
+};
+const ALL = () => VOICES.concat(S.extra);
+const vById = id => ALL().find(v => v.id === id);
+if (!vById(S.voiceA)) S.voiceA = "Puck";
+if (!vById(S.voiceB)) S.voiceB = "Kore";
+
+// ---------- step 1: text ----------
+const textEl = $("text");
+textEl.value = store.get("draft", "");
+function parseTurns() {
+  const raw = textEl.value;
+  if (S.mode === 1) return [{ speaker: 0, text: raw.trim() }].filter(t => t.text);
+  const turns = []; let cur = 0;
+  raw.split(/\n/).forEach(line => {
+    const m = line.match(/^\s*(A|B|ក|ខ)\s*[:：]\s*(.*)$/i);
+    let t = line.trim(), fresh = false;
+    if (m) { cur = /^(a|ក)$/i.test(m[1]) ? 0 : 1; t = m[2].trim(); fresh = true; }
+    if (!t) return;
+    const last = turns[turns.length - 1];
+    if (last && last.speaker === cur && !fresh) last.text += "\n" + t; else turns.push({ speaker: cur, text: t });
+  });
+  return turns;
+}
+function updateCount() {
+  const n = parseTurns().reduce((a, t) => a + t.text.length, 0);
+  $("count").innerHTML = n > MAX ? `<span class="over">${n} / ${MAX} — វែងពេក</span>` : `${n} / ${MAX}`;
+  store.set("draft", textEl.value);
+  return n;
+}
+textEl.addEventListener("input", updateCount);
+function insertAtCursor(s) {
+  const a = textEl.selectionStart ?? textEl.value.length, b = textEl.selectionEnd ?? a;
+  const pad = (a > 0 && !/\s$/.test(textEl.value.slice(0, a)) ? " " : "") + s + " ";
+  textEl.value = textEl.value.slice(0, a) + pad + textEl.value.slice(b);
+  textEl.focus(); const p = a + pad.length; textEl.setSelectionRange(p, p); updateCount(); haptic();
+}
+$("tags").innerHTML = TAGS.map((t, i) => `<button type="button" class="pill tag" data-i="${i}">${t[0]}</button>`).join("");
+$("tags").addEventListener("click", e => { const b = e.target.closest("button"); if (b) insertAtCursor(TAGS[+b.dataset.i][1]); });
+$("tpl").innerHTML = TEMPLATES.map((t, i) => `<button type="button" class="pill" data-i="${i}">${t.k}</button>`).join("");
+$("tpl").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return; const t = TEMPLATES[+b.dataset.i];
+  setMode(t.mode); textEl.value = t.t; S.style = t.style; S.voiceA = t.voice; if (t.voiceB) S.voiceB = t.voiceB;
+  S.pick = 0; renderAll(); updateCount(); haptic("medium");
+});
+
+function setMode(m) {
+  S.mode = m; store.set("mode", m);
+  $("mSingle").classList.toggle("on", m === 1); $("mSingle").setAttribute("aria-checked", m === 1);
+  $("mDuo").classList.toggle("on", m === 2); $("mDuo").setAttribute("aria-checked", m === 2);
+  $("who").classList.toggle("show", m === 2);
+  $("hintMode").textContent = m === 2 ? "💡 ចាប់ផ្ដើមបន្ទាត់ដោយ A: ឬ B:" : "💡 ដាក់សញ្ញាខណ្ឌ ។ , ! ? ដើម្បីឲ្យអានមានចង្វាក់";
+  textEl.placeholder = m === 2 ? "A: សួស្ដី! សុខសប្បាយទេ?\nB: សុខសប្បាយ! ចុះបងវិញ?" : "សរសេរអ្វីដែលចង់ឲ្យ AI អាន… ឧ. សួស្ដីបងប្អូន! ថ្ងៃនេះខ្ញុំមានរបស់ល្អមកណែនាំ…";
+  if (m === 1) S.pick = 0;
+  renderVoices(); updateCount();
+}
+$("mSingle").onclick = () => setMode(1);
+$("mDuo").onclick = () => setMode(2);
+$("whoA").onclick = () => { S.pick = 0; renderVoices(); };
+$("whoB").onclick = () => { S.pick = 1; renderVoices(); };
+
+// ---------- step 2: voices ----------
+function renderFilters() {
+  const f = [["all", `ទាំងអស់ ${ALL().length}`], ["m", "👨 ប្រុស"], ["f", "👩 ស្រី"], ["fav", "⭐ ពេញនិយម"]];
+  if (S.extra.length) f.push(["km", `🇰🇭 ខ្មែរបន្ថែម ${S.extra.length}`]);
+  $("filters").innerHTML = f.map(([k, l]) => `<button type="button" class="pill${S.filter === k ? " on" : ""}" data-k="${k}">${l}</button>`).join("");
+  $("vcount").textContent = `${ALL().length} សំឡេង`;
+}
+$("filters").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { S.filter = b.dataset.k; renderFilters(); renderVoices(); } });
+$("search").addEventListener("input", e => { S.q = e.target.value.trim().toLowerCase(); renderVoices(); });
+function renderVoices() {
+  let list = ALL();
+  if (S.filter === "m" || S.filter === "f") list = list.filter(v => v.g === S.filter);
+  if (S.filter === "fav") list = list.filter(v => BADGE[v.id]);
+  if (S.filter === "km") list = S.extra;
+  if (S.q) list = list.filter(v => (v.name + " " + v.en + " " + v.kh).toLowerCase().includes(S.q));
+  $("voices").innerHTML = list.map(v => {
+    const a = v.id === S.voiceA, b = S.mode === 2 && v.id === S.voiceB;
+    const cls = (S.pick === 1 ? b : a) ? " on" : (a || b) ? " onB" : "";
+    return `<div class="v${cls}" role="option" aria-selected="${a || b}" tabindex="0" data-id="${esc(v.id)}">
+      ${BADGE[v.id] ? `<span class="badge">⭐ ${BADGE[v.id]}</span>` : ""}
+      ${S.mode === 2 && a ? '<span class="ab">A</span>' : ""}${b ? '<span class="ab B">B</span>' : ""}
+      <span class="av ${v.g || "x"}">${esc(v.name.slice(0, 2))}</span>
+      <span class="t"><b>${esc(v.name)} <i>· ${esc(v.en)}</i></b><span>${v.g === "f" ? "👩 ស្រី" : v.g === "m" ? "👨 ប្រុស" : "🗣️"} · ${esc(v.kh)}</span></span>
+      <button type="button" class="play1${playing === v.id ? " on" : ""}" data-play="${esc(v.id)}" aria-label="ស្ដាប់គំរូ ${esc(v.name)}">${playing === v.id ? "■" : "▶"}</button>
+    </div>`;
+  }).join("") || `<div class="status">រកមិនឃើញ — សាកពាក្យផ្សេង</div>`;
+  $("whoAn").textContent = S.voiceA; $("whoBn").textContent = S.voiceB;
+  $("whoA").classList.toggle("on", S.pick === 0); $("whoB").classList.toggle("on", S.pick === 1);
+  store.set("voiceA", S.voiceA); store.set("voiceB", S.voiceB);
+  renderFav();
+}
+function chooseVoice(id) {
+  if (S.mode === 2 && S.pick === 1) S.voiceB = id; else S.voiceA = id;
+  if (S.mode === 2 && S.pick === 0) S.pick = 1;           // after A, pick B next
+  haptic(); renderVoices();
+}
+$("voices").addEventListener("click", e => {
+  const p = e.target.closest("[data-play]"); if (p) { e.stopPropagation(); sample(p.dataset.play, p); return; }
+  const v = e.target.closest(".v"); if (v) chooseVoice(v.dataset.id);
+});
+$("voices").addEventListener("keydown", e => { const v = e.target.closest(".v"); if (v && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); chooseVoice(v.dataset.id); } });
+
+// samples
+let playing = null; const sampleAudio = new Audio(); const sampleCache = {};
+sampleAudio.onended = () => { playing = null; renderVoices(); };
+async function sample(id, btn) {
+  if (playing === id) { sampleAudio.pause(); playing = null; renderVoices(); return; }
+  if (!gate()) return;
+  sampleAudio.pause(); mainAudio.pause();
+  try {
+    if (!sampleCache[id]) {
+      btn.classList.add("busy"); btn.textContent = "◌";
+      const r = await post("/voice/sample", { voice: id });
+      if (!r.ok) throw await errMsg(r);
+      sampleCache[id] = URL.createObjectURL(await r.blob());
+    }
+    sampleAudio.src = sampleCache[id]; playing = id; renderVoices(); await sampleAudio.play();
+  } catch (err) { playing = null; renderVoices(); setStatus(String(err.message || err), true); }
+}
+
+// ---------- step 3: style ----------
+$("styles").innerHTML = STYLES.map((s, i) => `<button type="button" role="radio" data-i="${i}"><i>${s[0]}</i>${s[1]}</button>`).join("");
+$("speeds").innerHTML = SPEEDS.map((s, i) => `<button type="button" class="pill" data-i="${i}">${s[0]}</button>`).join("");
+$("custom").value = store.get("custom", "");
+$("custom").addEventListener("input", () => { store.set("custom", $("custom").value); renderStyles(); });
+function renderStyles() {
+  const custom = $("custom").value.trim();
+  [...$("styles").children].forEach((b, i) => { const on = !custom && i === S.style; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); });
+  [...$("speeds").children].forEach((b, i) => b.classList.toggle("on", i === S.speed));
+  $("qHd").classList.toggle("on", S.quality === "hd"); $("qFast").classList.toggle("on", S.quality === "fast");
+  $("qHd").setAttribute("aria-checked", S.quality === "hd"); $("qFast").setAttribute("aria-checked", S.quality === "fast");
+  store.set("style", S.style); store.set("speed", S.speed); store.set("quality", S.quality);
+}
+$("styles").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.style = +b.dataset.i; $("custom").value = ""; store.set("custom", ""); renderStyles(); haptic(); });
+$("speeds").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { S.speed = +b.dataset.i; renderStyles(); } });
+$("qHd").onclick = () => { S.quality = "hd"; renderStyles(); };
+$("qFast").onclick = () => { S.quality = "fast"; renderStyles(); };
+function styleText() {
+  const base = $("custom").value.trim() || STYLES[S.style][2];
+  return [base, SPEEDS[S.speed][1]].filter(Boolean).join(", ");
+}
+function styleLabel() { return $("custom").value.trim() ? "✏️ ស្ទីលខ្លួនឯង" : STYLES[S.style][0] + " " + STYLES[S.style][1]; }
+
+// ---------- server ----------
+function post(path, data) {
+  return fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ initData: INIT }, data)) });
+}
+async function errMsg(r) {
+  try { const j = await r.json(); return new Error(j.msg || "😔 មានបញ្ហា (" + r.status + ")"); } catch (e) { return new Error("😔 មានបញ្ហា (" + r.status + ")"); }
+}
+function setStatus(t, bad) { $("status").textContent = t || ""; $("status").classList.toggle("err", !!bad); }
+function banner(title, text, link, href) {
+  $("bTitle").textContent = title; $("bText").textContent = text; $("bLink").textContent = link; $("bLink").href = href;
+  $("banner").classList.add("show");
+}
+function gate() {
+  if (!INIT) { banner("📱 បើកពី Telegram", "Voice Studio ដំណើរការក្នុង Cooler Hub លើ Telegram ប៉ុណ្ណោះ (ដើម្បីស្គាល់សមាជិក)។", "🚀 បើក Cooler Bot", `https://t.me/${BOT}?start=go_say`); setStatus("📱 សូមបើកពី Cooler Hub ក្នុង Telegram", true); return false; }
+  if (S.member === false) { setStatus("🔒 សម្រាប់សមាជិក — ចុចប៊ូតុងខាងលើដើម្បីចូលរួម", true); return false; }
+  return true;
+}
+function showQuota(left, limit) {
+  const q = $("quota");
+  if (left === null || left === undefined || !limit) { q.hidden = false; q.textContent = "♾️ មិនកំណត់"; return; }
+  q.hidden = false; q.textContent = `🎟️ ${left}/${limit} ថ្ងៃនេះ`;
+}
+async function loadMe() {
+  if (!INIT) { gate(); return; }
+  try {
+    const r = await post("/voice/me", {});
+    if (!r.ok) throw await errMsg(r);
+    const j = await r.json();
+    S.member = !!j.member;
+    if (!j.member) banner("🔒 Voice Studio សម្រាប់សមាជិក", "ចូលរួមជាសមាជិក ដើម្បីប្រើ ៣០ សំឡេង AI ធ្វើ Voice-over សម្រាប់ TikTok / YouTube / Facebook។", "💳 ចូលរួមឥឡូវ", `https://t.me/${BOT}?start=go_pay`);
+    else { S.limit = j.limit; showQuota(j.left, j.limit); }
+    S.extra = (j.extra || []).map(v => ({ id: v.id, name: v.name || v.id, g: v.g || "", en: v.desc || "Khmer", kh: "សំឡេងខ្មែរ" }));
+    S.fav = j.pref && j.pref.voice;
+    renderFilters(); renderVoices(); renderFav();
+  } catch (err) { setStatus("⚠️ មិនអាចភ្ជាប់ Server — " + (err.message || err), true); }
+}
+
+// ---------- generate ----------
+let tick = null;
+$("go").addEventListener("click", async () => {
+  if (!gate()) return;
+  const turns = parseTurns(); const n = updateCount();
+  if (!turns.length) { setStatus("✍️ សូមសរសេរអត្ថបទជាមុនសិន", true); textEl.focus(); return; }
+  if (n > MAX) { setStatus(`✂️ វែងពេក (${n}/${MAX}) — កាត់ជាផ្នែកៗ`, true); return; }
+  const duo = S.mode === 2;
+  if (duo && new Set(turns.map(t => t.speaker)).size < 2) setStatus("ℹ️ មានតែម្នាក់និយាយ — នឹងប្រើសំឡេងតែមួយ");
+  const voices = duo ? [S.voiceA, S.voiceB] : [S.voiceA];
+  const go = $("go"); go.disabled = true; go.classList.add("busy");
+  const t0 = Date.now();
+  const say = () => { $("goT").textContent = `កំពុងបង្កើត… ${Math.round((Date.now() - t0) / 1000)}s`; };
+  say(); tick = setInterval(say, 1000); setStatus(S.quality === "hd" ? "💎 គុណភាពខ្ពស់ ប្រហែល ១០–៤០ វិនាទី" : "⚡ ប្រហែល ៥–២០ វិនាទី");
+  try {
+    const r = await post("/voice/tts", { turns, voices, style: styleText(), quality: S.quality });
+    if (!r.ok) throw await errMsg(r);
+    const blob = await r.blob();
+    const clip = r.headers.get("X-Clip"), left = r.headers.get("X-Left");
+    if (left !== null && left !== "") showQuota(+left, S.limit);
+    const label = duo ? `${S.voiceA} + ${S.voiceB}` : S.voiceA;
+    const item = { clip, blob, url: URL.createObjectURL(blob), label, style: styleLabel(), text: turns.map(t => t.text).join(" ").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").slice(0, 60), at: new Date() };
+    S.history.unshift(item); S.history = S.history.slice(0, 6);
+    await showResult(item, true);
+    setStatus("✅ រួចរាល់! ស្ដាប់ខាងក្រោម"); haptic("heavy");
+    try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); } catch (e) {}
+  } catch (err) {
+    setStatus(String(err.message || err), true);
+    try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("error"); } catch (e) {}
+  } finally {
+    clearInterval(tick); go.disabled = false; go.classList.remove("busy"); $("goT").textContent = "✨ បង្កើតសំឡេង";
+  }
+});
+
+// ---------- result player ----------
+const mainAudio = new Audio(); let peaks = null; let cur = null;
+async function showResult(item, autoplay) {
+  cur = item; S.clip = item.clip;
+  $("result").classList.add("show");
+  $("meta").textContent = `🗣️ ${item.label} · ${item.style}`;
+  mainAudio.src = item.url; peaks = null; drawWave(0);
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = await ctx.decodeAudioData(await item.blob.arrayBuffer());
+    const d = buf.getChannelData(0), N = 150, step = Math.max(1, Math.floor(d.length / N)); peaks = [];
+    for (let i = 0; i < N; i++) { let m = 0; for (let j = i * step; j < Math.min(d.length, (i + 1) * step); j += 16) m = Math.max(m, Math.abs(d[j])); peaks.push(m); }
+    const top = Math.max(...peaks, 0.01); peaks = peaks.map(p => p / top);
+    $("dur").textContent = fmt(buf.duration); ctx.close && ctx.close();
+  } catch (e) {}
+  drawWave(0); renderHist();
+  if (autoplay) { $("result").scrollIntoView({ behavior: "smooth", block: "start" }); sampleAudio.pause(); try { await mainAudio.play(); } catch (e) {} }
+}
+const fmt = s => isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}` : "0:00";
+function drawWave(p) {
+  const c = $("wave"), g = c.getContext("2d"), W = c.width, H = c.height; g.clearRect(0, 0, W, H);
+  const N = peaks ? peaks.length : 150, bw = W / N;
+  for (let i = 0; i < N; i++) {
+    const v = peaks ? Math.max(0.04, peaks[i]) : 0.08 + 0.06 * Math.sin(i / 3);
+    const h = v * (H - 14), x = i * bw;
+    g.fillStyle = i / N <= p ? "#7cf3ff" : "rgba(180,140,255,.45)";
+    g.beginPath(); (g.roundRect ? g.roundRect(x + 1, (H - h) / 2, Math.max(2, bw - 3), h, 2) : g.rect(x + 1, (H - h) / 2, Math.max(2, bw - 3), h)); g.fill();
+  }
+}
+mainAudio.ontimeupdate = () => { const p = mainAudio.duration ? mainAudio.currentTime / mainAudio.duration : 0; drawWave(p); $("cur").textContent = fmt(mainAudio.currentTime); };
+mainAudio.onplay = () => { $("pp").textContent = "❚❚"; $("pp").setAttribute("aria-label", "ផ្អាក"); };
+mainAudio.onpause = mainAudio.onended = () => { $("pp").textContent = "▶"; $("pp").setAttribute("aria-label", "ចាក់"); };
+mainAudio.onloadedmetadata = () => { $("dur").textContent = fmt(mainAudio.duration); };
+$("pp").onclick = () => { if (mainAudio.paused) { sampleAudio.pause(); mainAudio.play(); } else mainAudio.pause(); };
+$("wave").addEventListener("click", e => { if (!mainAudio.duration) return; const r = e.currentTarget.getBoundingClientRect(); mainAudio.currentTime = mainAudio.duration * (e.clientX - r.left) / r.width; });
+
+$("send").onclick = async () => {
+  if (!cur) return; const b = $("send"); b.disabled = true; const old = b.textContent; b.textContent = "កំពុងផ្ញើ…";
+  try {
+    const r = await post("/voice/send", { clip: cur.clip, title: "Voice-over · " + cur.label });
+    if (!r.ok) throw await errMsg(r);
+    b.textContent = "✅ ផ្ញើរួច — មើលក្នុង Chat Bot"; haptic("medium");
+    setTimeout(() => { b.textContent = old; b.disabled = false; }, 3500);
+  } catch (err) { setStatus(String(err.message || err), true); b.textContent = old; b.disabled = false; }
+};
+$("dl").onclick = async () => {
+  if (!cur) return;
+  const name = `cooler-voiceover-${cur.label.replace(/\W+/g, "-").toLowerCase()}.wav`;
+  try {   // inside Telegram: its own downloader (works on phones)
+    if (tg && tg.downloadFile && tg.isVersionAtLeast && tg.isVersionAtLeast("8.0") && cur.clip) {
+      tg.downloadFile({ url: `${API}/voice/file/${cur.clip}.wav`, file_name: name }); return;
+    }
+  } catch (e) {}
+  try {
+    const f = new File([cur.blob], name, { type: "audio/wav" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: "Cooler Voice-over" }); return; }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = cur.url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+};
+function renderFav() {
+  const on = S.fav && S.fav === S.voiceA && S.mode === 1;
+  $("fav").textContent = on ? "✅ ជាសំឡេង /say ហើយ" : "⭐ ប្រើជាសំឡេង /say";
+}
+$("fav").onclick = async () => {
+  if (!gate()) return;
+  try {
+    const r = await post("/voice/pref", { voice: S.voiceA, style: styleText() });
+    if (!r.ok) throw await errMsg(r);
+    S.fav = S.voiceA; renderFav(); setStatus(`⭐ ពីឥឡូវ /say ក្នុង Bot និយាយដោយសំឡេង ${S.voiceA}`); haptic("medium");
+  } catch (err) { setStatus(String(err.message || err), true); }
+};
+function renderHist() {
+  $("hist").innerHTML = S.history.length > 1 ? S.history.map((h, i) =>
+    `<button type="button" data-i="${i}"${h === cur ? ' aria-current="true"' : ""}>${h === cur ? "🔊" : "▶"} <span>${esc(h.label)} — ${esc(h.text)}</span><small>${h.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small></button>`).join("") : "";
+}
+$("hist").addEventListener("click", e => { const b = e.target.closest("button"); if (b) showResult(S.history[+b.dataset.i], true); });
+
+function renderAll() { setMode(S.mode); renderFilters(); renderVoices(); renderStyles(); renderFav(); }
+renderAll(); updateCount(); loadMe();
+</script>
+</body>
+</html>

@@ -550,7 +550,7 @@ footer{text-align:center;color:#6f69a3;font-size:12.5px;margin-top:28px}
       <button type="button" class="f" data-go="totext"><svg viewBox="0 0 48 48" fill="none" stroke="#9fdcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="20"/><rect x="20" y="11" width="8" height="15" rx="4"/><path d="M15 23a9 9 0 0 0 18 0M24 32v5"/></svg><span>Voice<br>→ អក្សរ</span></button>
       <button type="button" class="f" data-go="health"><svg viewBox="0 0 48 48" fill="none" stroke="#9fdcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="20"/><path d="M24 34s-10-6-10-13a5.5 5.5 0 0 1 10-3 5.5 5.5 0 0 1 10 3c0 7-10 13-10 13z"/><path d="M15 24h5l2-4 3 7 2-3h6"/></svg><span>សុខភាព<br>AI</span></button>
       <button type="button" class="f" data-go="sleep"><svg viewBox="0 0 48 48" fill="none" stroke="#9fdcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="20"/><path d="M29 14a10 10 0 1 0 5 15 8 8 0 0 1-5-15z"/><path d="M31 12h4l-4 4h4"/></svg><span>គេង &amp;<br>សមាធិ</span></button>
-      <button type="button" class="f" data-go="say"><svg viewBox="0 0 48 48" fill="none" stroke="#9fdcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="20"/><path d="M13 21v6h5l6 5V16l-6 5h-5z"/><path d="M29 19a6 6 0 0 1 0 10M32 15a11 11 0 0 1 0 18"/></svg><span>Cooler<br>និយាយ</span></button>
+      <button type="button" class="f" data-go="page:voice.html"><svg viewBox="0 0 48 48" fill="none" stroke="#9fdcff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="20"/><path d="M13 21v6h5l6 5V16l-6 5h-5z"/><path d="M29 19a6 6 0 0 1 0 10M32 15a11 11 0 0 1 0 18"/></svg><span>Cooler<br>និយាយ</span></button>
     </div>
   </section>
   <label class="search">
@@ -617,7 +617,7 @@ const SECTIONS = [
   { t: "✨ AI Studio", s: "បង្កើតរបស់ថ្មីដោយ AI", items: [
     ["imagine", "🎨", "គូររូប", "c2", "គូររូប imagine draw"],
     ["song", "🎧", "ច្រៀង & Rap", "c5", "ច្រៀង song music rap beat"],
-    ["say", "🎙️", "Voice-over", "c1", "សំឡេង voice say"],
+    ["page:voice.html", "🎙️", "Voice Studio", "c1", "សំឡេង voice say voice-over tts អាន ៣០ សំឡេង ប្រុស ស្រី ផ្សាយពាណិជ្ជកម្ម ព័ត៌មាន និទានរឿង", "៣០ សំឡេង"],
     ["page:record.html", "🎚️", "Record Studio", "c4", "record ថត សំឡេង voice clean noise effect reverb echo robot studio vocal ទាញយក", "ថ្មី"],
     ["prompt", "✍️", "Prompt", "c7", "prompt video"],
     ["studio", "🖼️", "កែរូប", "c6", "កែរូប photo studio"],
@@ -712,7 +712,8 @@ function go(key) {
   if (key.startsWith("url:")) { location.href = key.slice(4); return; }
   if (key.startsWith("web:")) { const u = key.slice(4); if (tg && tg.openLink) tg.openLink(u); else window.open(u, "_blank"); return; }
   if (key.startsWith("sheet:")) { $(key.slice(6)).classList.add("on"); return; }   // partner card (TPNews ...)
-  if (key.startsWith("page:")) { location.href = key.slice(5); return; }   // hub pages open inside the mini app
+  if (key.startsWith("page:")) {   // hub pages open inside the mini app; Telegram's signed initData goes along
+    location.href = key.slice(5) + (tg && tg.initData ? "#tg=" + encodeURIComponent(tg.initData) : ""); return; }
   const link = "https://t.me/" + BOT + "?start=go_" + key;
   if (tg && tg.openTelegramLink) {
     tg.openTelegramLink(link);
