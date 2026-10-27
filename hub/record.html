@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c12">
+<title>Cooler Record Studio</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b0c12;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#f4f3ff;--mist:#a7a6c6;
+  --rec:#ff3b5c;--cyan:#7cf3ff;--violet:#b48cff;--gold:#ffd166;--ok:#4cd17a;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  background:radial-gradient(520px 360px at 85% -10%,rgba(255,59,92,.22),transparent 60%),
+             radial-gradient(520px 380px at -15% 45%,rgba(124,243,255,.12),transparent 60%),var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+button,a{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:12px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;border-radius:14px;background:var(--glass);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.top h1{margin:0;font-family:var(--dsp);font-weight:700;font-size:18px;letter-spacing:.3px}
+.top small{display:block;font-family:var(--kh);font-weight:400;font-size:12.5px;color:var(--mist);letter-spacing:0}
+.card{position:relative;margin-top:14px;padding:16px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--line),0 20px 40px -24px #000}
+.card h2{margin:0 0 10px;font-size:15.5px;display:flex;align-items:center;gap:8px}
+.card h2 .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--dsp);background:#ffffff1c}
+/* recorder */
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0 4px}
+canvas#wave{width:100%;height:84px;border-radius:16px;background:rgba(0,0,0,.25)}
+.time{font:700 30px/1 var(--dsp);letter-spacing:1px}
+.time small{font:500 12px var(--kh);color:var(--mist);margin-left:6px}
+.recbtn{position:relative;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:34px;color:#fff;
+  background:radial-gradient(circle at 35% 30%,#ff8aa0,var(--rec) 60%,#b0102c);box-shadow:0 0 0 6px rgba(255,59,92,.18),0 14px 34px -10px var(--rec);transition:transform .15s}
+.recbtn:active{transform:scale(.94)}
+.recbtn.on{animation:pulse 1.2s ease-in-out infinite}
+.recbtn.on .sq{width:30px;height:30px;border-radius:8px;background:#fff}
+@keyframes pulse{50%{box-shadow:0 0 0 16px rgba(255,59,92,.08),0 14px 34px -10px var(--rec)}}
+@media (prefers-reduced-motion:reduce){.recbtn.on{animation:none}}
+.hint{font-size:13px;color:var(--mist);text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:9px 14px;border-radius:999px;font-weight:600;font-size:13.5px;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line)}
+.pill.on{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#14122e;box-shadow:0 6px 16px -8px var(--cyan)}
+.fx{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.fx button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:16px;background:#ffffff0d;box-shadow:inset 0 0 0 1px var(--line);font-size:12px;font-weight:600}
+.fx button i{font-style:normal;font-size:22px}
+.fx button.on{background:linear-gradient(160deg,rgba(124,243,255,.28),rgba(180,140,255,.22));box-shadow:inset 0 0 0 1.5px var(--cyan),0 8px 18px -10px var(--cyan)}
+.sl{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13.5px}
+.sl input{flex:1;accent-color:var(--cyan)}
+.play{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.play button{padding:12px;border-radius:16px;font-weight:700;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.big{width:100%;margin-top:10px;padding:14px;border-radius:18px;font-weight:700;font-size:15px;color:#14122e;
+  background:linear-gradient(135deg,var(--gold),#ff8ad8);box-shadow:0 10px 24px -12px #ff8ad8}
+.sub{width:100%;margin-top:8px;padding:12px;border-radius:16px;font-weight:700;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line)}
+.status{min-height:20px;margin-top:8px;font-size:13px;color:var(--mist);text-align:center}
+.status.err{color:#ff9aaa}
+.ai{display:flex;gap:12px;align-items:center}
+.ai b{display:block}
+.ai small{color:var(--mist)}
+.ai button{margin-left:auto;padding:10px 14px;border-radius:14px;font-weight:700;color:#14122e;background:linear-gradient(135deg,var(--cyan),var(--violet));white-space:nowrap}
+.lock{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" id="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>🎚️ Record Studio <small>ថតសំឡេង · សម្អាត · Effect · ទាញយក</small></h1>
+  </header>
+
+  <section class="card">
+    <h2><span class="n">1</span> ថតសំឡេង</h2>
+    <div class="stage">
+      <canvas id="wave" width="1000" height="168" aria-hidden="true"></canvas>
+      <div class="time" id="time" aria-live="polite">00:00<small>/ 03:00</small></div>
+      <button class="recbtn" id="rec" type="button" aria-label="ចាប់ផ្ដើមថត"><span class="ic">🎙️</span></button>
+      <div class="hint" id="hint">ចុច 🎙️ ដើម្បីថត · ចុចម្ដងទៀតដើម្បីឈប់ (អតិបរមា ៣ នាទី)</div>
+      <div class="row" role="group" aria-label="ជម្រើសថត">
+        <button class="pill on" id="nsBtn" type="button" aria-pressed="true">🧼 កាត់សំឡេងរំខាន</button>
+        <button class="pill" id="fileBtn" type="button">📂 បើកឯកសារសំឡេង</button>
+        <input type="file" id="file" accept="audio/*" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> ជ្រើស Effect</h2>
+    <div class="fx" id="fx" role="radiogroup" aria-label="Effect"></div>
+    <div class="sl"><span>🔊 កម្រិត</span><input type="range" id="amt" min="0" max="100" value="60" aria-label="កម្រិត Effect"><b id="amtV">60%</b></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> ស្ដាប់ & ទាញយក</h2>
+    <div class="play">
+      <button type="button" id="playOrig" disabled>▶️ សំឡេងដើម</button>
+      <button type="button" id="playFx" disabled>✨ ជាមួយ Effect</button>
+    </div>
+    <button class="big" id="save" type="button" disabled>📥 ទាញយក / ចែករំលែក (WAV)</button>
+    <button class="sub" id="again" type="button" disabled>🔄 ថតថ្មី</button>
+    <div class="status" id="status" role="status"></div>
+  </section>
+
+  <section class="card ai">
+    <div><b>🤖 ប្ដូរជាសំឡេង AI</b><small>ប្រុស · ស្រី · ចាស់ · ក្មេង — ក្នុង Cooler Bot</small></div>
+    <button type="button" id="aiVoice">/record</button>
+  </section>
+</div>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+try { tg && tg.ready(); tg && tg.expand(); } catch (e) {}
+const $ = id => document.getElementById(id);
+const haptic = k => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(k || "light"); } catch (e) {} };
+const KH = s => String(s).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+const MAX_SEC = 180;
+const FX = [
+  ["clean", "🧼", "សម្អាត"], ["studio", "🎙️", "Studio"], ["reverb", "⛪", "Reverb"], ["echo", "🔁", "Echo"],
+  ["deep", "🐻", "សំឡេងធំ"], ["chip", "🐿️", "សំឡេងតូច"], ["robot", "🤖", "Robot"], ["radio", "📻", "វិទ្យុ"],
+];
+let fx = "studio", amt = 0.6, ns = true;
+let ctx = null, stream = null, recorder = null, chunks = [], t0 = 0, timer = 0, raf = 0, analyser = null;
+let original = null, processed = null, playing = null;
+
+const status = (t, err) => { $("status").textContent = t || ""; $("status").classList.toggle("err", !!err); };
+const AC = () => ctx || (ctx = new (window.AudioContext || window.webkitAudioContext)());
+
+// ---------- effect buttons ----------
+$("fx").innerHTML = FX.map(([k, i, l]) => `<button type="button" role="radio" data-k="${k}" aria-checked="${k === fx}" class="${k === fx ? "on" : ""}"><i>${i}</i>${l}</button>`).join("");
+$("fx").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  fx = b.dataset.k; haptic();
+  $("fx").querySelectorAll("button").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-checked", x === b); });
+  processed = null; if (original) render();
+}));
+$("amt").addEventListener("input", e => { amt = e.target.value / 100; $("amtV").textContent = e.target.value + "%"; });
+$("amt").addEventListener("change", () => { processed = null; if (original) render(); });
+$("nsBtn").addEventListener("click", () => { ns = !ns; $("nsBtn").classList.toggle("on", ns); $("nsBtn").setAttribute("aria-pressed", ns); haptic(); });
+
+// ---------- live waveform ----------
+const cv = $("wave"), g = cv.getContext("2d");
+function drawIdle(buf) {
+  g.clearRect(0, 0, cv.width, cv.height);
+  const mid = cv.height / 2;
+  if (!buf) { g.fillStyle = "rgba(255,255,255,.12)"; g.fillRect(0, mid - 1, cv.width, 2); return; }
+  const d = buf.getChannelData(0), step = Math.max(1, Math.floor(d.length / cv.width));
+  const grad = g.createLinearGradient(0, 0, cv.width, 0); grad.addColorStop(0, "#7cf3ff"); grad.addColorStop(1, "#ff8ad8");
+  g.fillStyle = grad;
+  for (let x = 0; x < cv.width; x += 3) {
+    let m = 0; for (let i = 0; i < step; i++) m = Math.max(m, Math.abs(d[x * step + i] || 0));
+    const h = Math.max(2, m * cv.height * .9); g.fillRect(x, mid - h / 2, 2, h);
+  }
+}
+function drawLive() {
+  if (!analyser) return;
+  const a = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(a);
+  g.clearRect(0, 0, cv.width, cv.height); g.lineWidth = 4; g.strokeStyle = "#ff6b85"; g.beginPath();
+  for (let i = 0; i < a.length; i++) { const x = i / a.length * cv.width, y = a[i] / 255 * cv.height; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+  g.stroke(); raf = requestAnimationFrame(drawLive);
+}
+drawIdle(null);
+
+// ---------- recording ----------
+function fmt(s) { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+async function start() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: ns, echoCancellation: ns, autoGainControl: true, channelCount: 1 } });
+  } catch (e) {
+    status("❌ មិនអាចប្រើ Microphone — សូមអនុញ្ញាត Microphone ក្នុង Settings ហើយសាកម្ដងទៀត", true); return;
+  }
+  const c = AC(); if (c.state === "suspended") await c.resume();
+  analyser = c.createAnalyser(); analyser.fftSize = 1024; c.createMediaStreamSource(stream).connect(analyser);
+  const type = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm", ""].find(t => !t || (window.MediaRecorder && MediaRecorder.isTypeSupported(t)));
+  recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+  chunks = []; recorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+  recorder.onstop = finish;
+  recorder.start(250); t0 = performance.now();
+  $("rec").classList.add("on"); $("rec").innerHTML = '<span class="sq"></span>'; $("rec").setAttribute("aria-label", "ឈប់ថត");
+  $("hint").textContent = "🔴 កំពុងថត… ចុចម្ដងទៀតដើម្បីឈប់"; status(""); haptic("heavy");
+  timer = setInterval(() => { const s = (performance.now() - t0) / 1000; $("time").firstChild.nodeValue = fmt(s); if (s >= MAX_SEC) stop(); }, 200);
+  drawLive();
+}
+function stop() {
+  clearInterval(timer); cancelAnimationFrame(raf);
+  if (recorder && recorder.state !== "inactive") recorder.stop();
+  stream && stream.getTracks().forEach(t => t.stop());
+  $("rec").classList.remove("on"); $("rec").innerHTML = '<span class="ic">🎙️</span>'; $("rec").setAttribute("aria-label", "ចាប់ផ្ដើមថត");
+  haptic("medium");
+}
+async function finish() {
+  status("⏳ កំពុងរៀបចំ…");
+  try { await load(await new Blob(chunks, { type: recorder.mimeType || "audio/webm" }).arrayBuffer()); }
+  catch (e) { status("❌ មិនអាចអានសំឡេងបាន — សាកថតម្ដងទៀត", true); }
+}
+async function load(arr) {
+  const c = AC();
+  original = await new Promise((ok, no) => { const p = c.decodeAudioData(arr, ok, no); if (p && p.then) p.then(ok, no); });
+  $("time").firstChild.nodeValue = fmt(original.duration);
+  $("hint").textContent = "✅ ថតរួច — ជ្រើស Effect ហើយចុច ✨ ស្ដាប់";
+  ["playOrig", "playFx", "save", "again"].forEach(id => $(id).disabled = false);
+  drawIdle(original); await render();
+}
+$("rec").addEventListener("click", () => (recorder && recorder.state === "recording") ? stop() : start());
+$("fileBtn").addEventListener("click", () => $("file").click());
+$("file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 25 * 1024 * 1024) { status("❌ ឯកសារធំពេក (អតិបរមា 25 MB)", true); return; }
+  status("⏳ កំពុងបើក…");
+  try { await load(await f.arrayBuffer()); } catch (err) { status("❌ មិនស្គាល់ទម្រង់ឯកសារនេះ", true); }
+});
+$("again").addEventListener("click", () => { stopPlay(); original = processed = null; drawIdle(null); $("time").firstChild.nodeValue = "00:00";
+  ["playOrig", "playFx", "save", "again"].forEach(id => $(id).disabled = true); status(""); $("hint").textContent = "ចុច 🎙️ ដើម្បីថត"; });
+
+// ---------- effects (offline render) ----------
+function impulse(c, sec, decay) {
+  const len = Math.floor(c.sampleRate * sec), b = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+  return b;
+}
+async function render() {
+  if (!original) return;
+  status("⏳ កំពុងដាក់ Effect…");
+  const rate = fx === "deep" ? 1 - .28 * amt : fx === "chip" ? 1 + .45 * amt : 1;
+  const tail = (fx === "reverb" || fx === "echo" || fx === "studio") ? 2.5 : 0.2;
+  const sr = original.sampleRate, len = Math.ceil((original.duration / rate + tail) * sr);
+  const oc = new OfflineAudioContext(2, len, sr);
+  const src = oc.createBufferSource(); src.buffer = original; src.playbackRate.value = rate;
+  // always: rumble cut + gentle de-harsh + compressor (clean, even voice)
+  const hp = oc.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 85;
+  const lp = oc.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 14000;
+  const comp = oc.createDynamicsCompressor(); comp.threshold.value = -24; comp.ratio.value = 3.5; comp.attack.value = .005; comp.release.value = .2;
+  src.connect(hp).connect(lp).connect(comp);
+  const out = oc.createGain(); out.connect(oc.destination);
+  let node = comp;
+  if (fx === "studio") {
+    const pres = oc.createBiquadFilter(); pres.type = "peaking"; pres.frequency.value = 3200; pres.gain.value = 3 * amt + 1; pres.Q.value = .9;
+    const warm = oc.createBiquadFilter(); warm.type = "lowshelf"; warm.frequency.value = 180; warm.gain.value = 2 * amt;
+    node.connect(pres).connect(warm); node = warm;
+    const conv = oc.createConvolver(); conv.buffer = impulse(oc, 1.2, 3.2); const wet = oc.createGain(); wet.gain.value = .12 * amt;
+    node.connect(conv).connect(wet).connect(out);
+  } else if (fx === "reverb") {
+    const conv = oc.createConvolver(); conv.buffer = impulse(oc, 2.6, 2.2); const wet = oc.createGain(); wet.gain.value = .55 * amt;
+    node.connect(conv).connect(wet).connect(out);
+  } else if (fx === "echo") {
+    const d = oc.createDelay(1); d.delayTime.value = .32; const fb = oc.createGain(); fb.gain.value = .25 + .3 * amt; const wet = oc.createGain(); wet.gain.value = .5 * amt + .1;
+    node.connect(d); d.connect(fb).connect(d); d.connect(wet).connect(out);
+  } else if (fx === "robot") {
+    const mod = oc.createGain(); mod.gain.value = 0; const osc = oc.createOscillator(); osc.frequency.value = 30 + 60 * amt; osc.connect(mod.gain); osc.start();
+    const dry = oc.createGain(); dry.gain.value = 1 - amt * .7; node.connect(dry).connect(out);
+    node.connect(mod); node = mod;
+  } else if (fx === "radio") {
+    const bp = oc.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1700; bp.Q.value = .9 + amt;
+    const ws = oc.createWaveShaper(); const k = 5 + 40 * amt, curve = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = (1 + k) * x / (1 + k * Math.abs(x)); } ws.curve = curve;
+    node.connect(bp).connect(ws); node = ws;
+  } else if (fx === "clean") {
+    const deEss = oc.createBiquadFilter(); deEss.type = "peaking"; deEss.frequency.value = 6500; deEss.gain.value = -4 * amt; deEss.Q.value = 2;
+    node.connect(deEss); node = deEss;
+  }
+  node.connect(out);
+  src.start();
+  let buf = await oc.startRendering();
+  // normalise to -1 dBFS
+  let peak = 0; for (let ch = 0; ch < buf.numberOfChannels; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i])); }
+  if (peak > 0) { const gn = .89 / peak; for (let ch = 0; ch < buf.numberOfChannels; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) d[i] *= gn; } }
+  processed = buf; status("✅ រួចរាល់ — ចុច ✨ ស្ដាប់ ឬ 📥 ទាញយក"); drawIdle(processed);
+}
+
+// ---------- playback ----------
+function stopPlay() { try { playing && playing.stop(); } catch (e) {} playing = null; }
+async function play(buf) {
+  stopPlay(); const c = AC(); if (c.state === "suspended") await c.resume();
+  const s = c.createBufferSource(); s.buffer = buf; s.connect(c.destination); s.start(); playing = s; haptic();
+}
+$("playOrig").addEventListener("click", () => original && play(original));
+$("playFx").addEventListener("click", async () => { if (!processed) await render(); processed && play(processed); });
+
+// ---------- export (16-bit WAV) ----------
+function wav(buf) {
+  const ch = buf.numberOfChannels, sr = buf.sampleRate, n = buf.length, bytes = 44 + n * ch * 2, v = new DataView(new ArrayBuffer(bytes));
+  const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, bytes - 8, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, ch, true); v.setUint32(24, sr, true); v.setUint32(28, sr * ch * 2, true); v.setUint16(32, ch * 2, true); v.setUint16(34, 16, true);
+  w(36, "data"); v.setUint32(40, n * ch * 2, true);
+  const data = [...Array(ch)].map((_, i) => buf.getChannelData(i)); let o = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const s = Math.max(-1, Math.min(1, data[c][i])); v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2; }
+  return new Blob([v], { type: "audio/wav" });
+}
+$("save").addEventListener("click", async () => {
+  if (!processed) await render(); if (!processed) return;
+  haptic("medium");
+  const name = "cooler-record-" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".wav";
+  const file = new File([wav(processed)], name, { type: "audio/wav" });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Cooler Record" }); status("✅ ចែករំលែករួច"); return; }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  status("📥 កំពុងទាញយក — បើមិនឃើញ សូមបើក Studio ក្នុង Safari/Chrome");
+});
+
+$("aiVoice").addEventListener("click", () => { haptic(); const u = "https://t.me/TeamSmosSneabot?start=go_record";
+  if (tg && tg.openTelegramLink) tg.openTelegramLink(u); else location.href = u; });
+$("back").addEventListener("click", e => { if (history.length > 1 && document.referrer) { e.preventDefault(); history.back(); } });
+</script>
+</body>
+</html>
