@@ -1412,13 +1412,13 @@ if (D.x) {
     glass:  (t) => { glassScene(t); },
   };
 
-  let last = performance.now(), raf = 0;
+  let last = performance.now(), raf = 0, chatOpen = false;
   function frame(now) {
     const dt = Math.min(60, now - last); last = now; const t = now - t0;
     px += (tx - px) * .05; py += (ty - py) * .05;
     (SCENES[S.bg] || SCENES.orbit)(t, dt);
     if (S.dim) { ctx.fillStyle = `rgba(0,0,0,${S.dim / 100})`; ctx.fillRect(0, 0, W, H); }
-    raf = reduce ? 0 : requestAnimationFrame(frame);
+    raf = (reduce || chatOpen) ? 0 : requestAnimationFrame(frame);
   }
   window.SPACE = {
     set(o) { Object.assign(S, o); if ("motion" in o) { reduce = !o.motion; }
@@ -1428,7 +1428,10 @@ if (D.x) {
   addEventListener("scroll", () => { scrollY = window.scrollY || 0; if (reduce) frame(performance.now()); }, { passive: true });
   addEventListener("pointermove", e => { tx = (e.clientX / W - .5) * 2; ty = (e.clientY / H - .5) * 2; }, { passive: true });
   addEventListener("deviceorientation", e => { if (e.gamma == null) return; tx = Math.max(-1, Math.min(1, e.gamma / 30)); ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); }, { passive: true });
-  document.addEventListener("visibilitychange", () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); } });
+  // Cooler Bot chat covers the screen → stop drawing behind it (smooth typing + voice)
+  document.addEventListener("coolerchat", e => { chatOpen = !!(e.detail && e.detail.open);
+    if (chatOpen) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce && !raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce && !raf && !chatOpen) { last = performance.now(); raf = requestAnimationFrame(frame); } });
   resize(); frame(performance.now());
 })();
 
@@ -1471,7 +1474,7 @@ if (D.x) {
   try { cloud && cloud.getItem(KEY, (err, v) => { if (!err && v) { try { Object.assign(st, JSON.parse(v)); apply(); } catch (e) {} } }); } catch (e) {}
 })();
 </script>
-<script src="cooler-mascot.js" defer></script>
-<script src="hub-fx.js" defer></script>
+<script src="cooler-mascot.js?v=20261027c" defer></script>
+<script src="hub-fx.js?v=20261027c" defer></script>
 </body>
 </html>
