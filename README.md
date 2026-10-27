@@ -66,16 +66,6 @@ A glowing Sky Bike (blue wheels, gold frame and wings, with a gold ring) sometim
 - swipe/tap controls plus arrow keys, sound effects, best score per game, Telegram haptics
 - rules in `arcade/logic.js`, tested by `tests/arcade.test.js`
 
-## Cooler Merge Racer (idle merge game)
-
-`merge-racer/` is an idle car-merge game served at
-`https://kn8508827-arch.github.io/Blue-Gold-Rush/merge-racer/`. All art is drawn in code (no copied assets).
-
-- buy cars, drag two of the same level together to get the next level (30 levels, tuk-tuk to "Cooler Legend")
-- tap a car (or drag it onto the track) to race it; each lap pays coins; up to 8 cars on the track
-- 🚀 x2 boost for 30 s, 🔀 auto-merge, half-rate offline earnings (capped at 2 h), progress saved on the device
-- economy and merge rules in `merge-racer/logic.js`, tested by `tests/merge-racer.test.js`
-
 ## Cooler Hub (Telegram Mini App home screen)
 
 `hub/` is the home screen the bot opens (`/hub`, the chat menu button, or 🚀 in /menu):
