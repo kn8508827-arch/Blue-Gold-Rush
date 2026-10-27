@@ -57,7 +57,7 @@
     ".cbm-bb.on{opacity:1}" +
     /* chat window */
     ".cbm-chat{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(600px,calc(100vw - 14px));height:max(320px,calc(100vh - 100px));" +
-    "z-index:45;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;font-family:inherit;color:#fff;" +
+    "z-index:45;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;font-family:inherit;color:#fff;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;" +
     "background:linear-gradient(180deg,rgba(14,34,110,.98),rgba(6,16,58,.98));will-change:transform,opacity;contain:layout paint;" +
     "border:1.5px solid rgba(95,212,255,.55);box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,200,61,.25),0 0 40px rgba(47,140,255,.45),inset 0 1px 0 rgba(255,255,255,.18);" +
     "transform-origin:var(--ox,90%) 100%;transform:translateX(-50%) perspective(900px) rotateX(14deg) rotateY(var(--ry,-14deg)) scale(.55);" +
@@ -72,16 +72,16 @@
     ".cbm-chat .nm small{display:flex;align-items:center;gap:6px;font-size:12px;color:#9FE1CB}" +
     ".cbm-chat .nm small i{width:8px;height:8px;border-radius:50%;background:#3EE08F;box-shadow:0 0 8px #3EE08F;animation:cbmLive 1.6s ease-in-out infinite}" +
     ".cbm-chat .x{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:20px;line-height:1;cursor:pointer}" +
-    ".cbm-chat .msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}" +
+    ".cbm-chat .msgs{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:14px 12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}" +
     ".cbm-chat .m{max-width:84%;padding:9px 13px;font-size:15px;line-height:1.55;word-wrap:break-word;white-space:normal;animation:cbmPop .35s cubic-bezier(.2,1.3,.35,1)}" +
     ".cbm-chat .m.b{align-self:flex-start;background:rgba(255,255,255,.1);border:1px solid rgba(95,212,255,.35);border-radius:18px 18px 18px 6px}" +
     ".cbm-chat .m.u{align-self:flex-end;background:#FFC83D;color:#2A1A00;border-radius:18px 18px 6px 18px;box-shadow:0 4px 14px rgba(255,200,61,.3)}" +
     ".cbm-chat .dots{display:inline-flex;gap:5px;padding:4px 2px}" +
     ".cbm-chat .dots i{width:8px;height:8px;border-radius:50%;background:#5FD4FF;animation:cbmDot 1s ease-in-out infinite}" +
     ".cbm-chat .dots i:nth-child(2){animation-delay:.15s}.cbm-chat .dots i:nth-child(3){animation-delay:.3s}" +
-    ".cbm-chat form{display:flex;gap:8px;padding:10px 10px 12px;border-top:1px solid rgba(95,212,255,.25)}" +
+    ".cbm-chat form{display:flex;align-items:flex-end;gap:8px;padding:10px 10px 12px;border-top:1px solid rgba(95,212,255,.25);flex:none}" +
     ".cbm-chat textarea{flex:1;resize:none;height:44px;max-height:110px;border-radius:22px;border:1.5px solid rgba(95,212,255,.6);background:rgba(4,12,48,.7);" +
-    "color:#fff;padding:11px 16px;font:inherit;font-size:15px;line-height:1.4;outline:none;box-sizing:border-box}" +
+    "color:#fff;padding:11px 16px;font:inherit;font-size:16px;line-height:1.4;outline:none;box-sizing:border-box;min-width:0;-webkit-appearance:none;appearance:none}" +
     ".cbm-chat textarea::placeholder{color:#85B7EB}" +
     ".cbm-chat textarea:focus{border-color:#FFC83D}" +
     ".cbm-chat .send{width:46px;height:46px;flex:none;border-radius:50%;border:0;background:#FFC83D;color:#2A1A00;cursor:pointer;display:flex;align-items:center;justify-content:center;" +
@@ -99,6 +99,8 @@
     ".cbm-chat .recbar .cx{border:0;background:none;color:#ffd0d8;font-size:18px;padding:4px;cursor:pointer}" +
     "@keyframes cbmRec{to{box-shadow:0 0 0 14px rgba(255,59,92,0)}}" +
     ".cbm-chat .send:disabled{opacity:.5}" +
+    ".cbm-chat button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}" +
+    "html.cbm-lock,html.cbm-lock body{overflow:hidden!important;overscroll-behavior:none}" +
     "@keyframes cbmFloat{0%,100%{transform:translateY(0) rotateZ(-2deg)}50%{transform:translateY(-6px) rotateZ(2deg)}}" +
     "@keyframes cbmSway{0%,100%{transform:rotateY(-10deg) rotateX(3deg)}50%{transform:rotateY(12deg) rotateX(-3deg)}}" +
     "@keyframes cbmScan{from{top:-50%}to{top:105%}}" +
@@ -127,7 +129,13 @@
     return esc(s).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
   }
 
+  function noZoom() {
+    var vp = document.querySelector('meta[name="viewport"]');
+    if (vp && !/maximum-scale/.test(vp.content)) vp.content += ",maximum-scale=1";
+  }
+
   function init() {
+    noZoom();
     var st = document.createElement("style");
     st.textContent = css;
     document.head.appendChild(st);
@@ -165,7 +173,7 @@
 
     var av = chat.querySelector(".av"), msgs = chat.querySelector(".msgs"), form = chat.querySelector("form");
     var ta = chat.querySelector("textarea"), sendBtn = chat.querySelector(".send");
-    var pos = { x: 0, y: 0 }, home = null, drag = null, moved = false, sayT, busyT, sending = false, isOpen = false;
+    var pos = { x: 0, y: 0 }, home = null, drag = null, moved = false, sayT, busyT, sending = false, isOpen = false, lockY = 0;
 
     function W() { return window.innerWidth; }
     function H() { return window.innerHeight; }
@@ -245,6 +253,10 @@
       av.classList.toggle("flip", false);
       render();
       cb.classList.add("away");
+      lockY = window.scrollY || 0;
+      document.documentElement.classList.add("cbm-lock");
+      try { tg && tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
+      fit();
       chat.classList.add("open");
       haptic("medium");
       try { if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeChat); } } catch (e) {}
@@ -258,6 +270,9 @@
       chat.classList.remove("open");
       cb.classList.remove("away");
       ta.blur();
+      document.documentElement.classList.remove("cbm-lock");
+      try { tg && tg.enableVerticalSwipes && tg.enableVerticalSwipes(); } catch (e) {}
+      setTimeout(function () { window.scrollTo(0, lockY); }, 50);
       try { if (tg && tg.BackButton) { tg.BackButton.offClick(closeChat); tg.BackButton.hide(); } } catch (e) {}
     }
     chat.querySelector(".x").addEventListener("click", closeChat);
@@ -400,17 +415,43 @@
     micBtn.addEventListener("click", function () { if (recording) stopRec(true); else startRec(); });
     recbar.querySelector(".cx").addEventListener("click", function () { stopRec(false); haptic(); });
 
-    /* keep the window above the phone keyboard */
-    if (window.visualViewport) {
-      var fit = function () {
-        var vv = window.visualViewport;
-        var kb = Math.max(0, H() - vv.height - vv.offsetTop);
-        chat.style.bottom = "calc(env(safe-area-inset-bottom,0px) + " + (12 + kb) + "px)";
-        chat.style.height = Math.max(260, vv.height - 100) + "px";
-      };
-      window.visualViewport.addEventListener("resize", fit);
-      window.visualViewport.addEventListener("scroll", fit);
+    /* keep the window exactly in the visible area above the phone keyboard */
+    var probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;left:0;bottom:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-bottom:env(safe-area-inset-bottom,0px)";
+    document.body.appendChild(probe);
+    var fitRaf = 0, wasKb = false;
+    function fit() {
+      var vv = window.visualViewport;
+      var top = vv ? vv.offsetTop : 0, vh = vv ? vv.height : H();
+      var kb = H() - vh > 120;                                   // keyboard is up
+      var safe = kb ? 0 : (parseFloat(getComputedStyle(probe).paddingBottom) || 0);
+      var gapTop = kb ? 8 : Math.min(88, vh * 0.12), gapBot = kb ? 6 : 12 + safe;
+      chat.style.bottom = "auto";
+      chat.style.top = Math.round(top + gapTop) + "px";
+      chat.style.height = Math.round(Math.max(220, vh - gapTop - gapBot)) + "px";
+      if (kb !== wasKb) { wasKb = kb; msgs.scrollTop = msgs.scrollHeight; }
     }
+    function fitSoon() { if (!isOpen) return; cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fit); }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", fitSoon);
+      window.visualViewport.addEventListener("scroll", fitSoon);
+    }
+    window.addEventListener("resize", fitSoon);
+    try { tg && tg.onEvent && tg.onEvent("viewportChanged", fitSoon); } catch (e) {}
+    ta.addEventListener("focus", function () { setTimeout(fitSoon, 60); setTimeout(fitSoon, 350); });
+    ta.addEventListener("blur", function () { setTimeout(fitSoon, 60); setTimeout(fitSoon, 350); });
+    /* tapping ➤ / 🎤 must not close the keyboard (that made the window jump and the tap miss) */
+    [sendBtn, micBtn].forEach(function (b) { b.addEventListener("mousedown", function (e) { e.preventDefault(); }); });
+    /* tap the messages to hide the keyboard, like Telegram */
+    msgs.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("a")) return;
+      var sel = window.getSelection && String(window.getSelection());
+      if (!sel && document.activeElement === ta) ta.blur();
+    });
+    /* page behind must not scroll while the chat is open */
+    document.addEventListener("touchmove", function (e) {
+      if (isOpen && !(e.target.closest && e.target.closest(".cbm-chat .msgs, .cbm-chat textarea"))) e.preventDefault();
+    }, { passive: false });
 
     /* ---------- floating face ---------- */
     var saved = null;
