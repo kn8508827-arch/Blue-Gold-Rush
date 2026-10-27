@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c12">
+<title>Cooler Today</title>
+<link rel="icon" href="../cooler-fly/cooler.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b0c12;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--ink:#f4f3ff;--mist:#a7a6c6;
+  --cyan:#7cf3ff;--violet:#b48cff;--gold:#ffd166;--pink:#ff8ad8;--ok:#4cd17a;--bad:#ff9aaa;--acc:#ff7a8a;--acc2:#ffb36b;
+  --kh:"Kantumruy Pro",system-ui,sans-serif;--dsp:"Unbounded","Kantumruy Pro",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--kh);line-height:1.5;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+  background:radial-gradient(520px 360px at 90% -10%,color-mix(in srgb,var(--acc) 28%,transparent),transparent 60%),
+             radial-gradient(520px 380px at -15% 40%,color-mix(in srgb,var(--acc2) 14%,transparent),transparent 60%),var(--bg)}
+.wrap{max-width:620px;margin:0 auto}
+button,a,input,textarea,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:12px}
+.top{display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;flex:none;border-radius:14px;background:var(--glass);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;text-decoration:none;font-size:18px}
+.top h1{flex:1;min-width:0;margin:0;font-family:var(--dsp);font-weight:700;font-size:18px;letter-spacing:.3px}
+.top small{display:block;font-family:var(--kh);font-weight:400;font-size:12.5px;color:var(--mist);letter-spacing:0}
+.quota{flex:none;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;width:76px;padding:9px 4px;border-radius:20px;font-size:12px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);line-height:1.25;text-align:center}
+.tab i{font-style:normal;font-size:24px}
+.tab.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 40%,transparent),color-mix(in srgb,var(--acc2) 26%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc),0 10px 22px -12px var(--acc)}
+.banner{display:none;margin-top:14px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,138,216,.14));box-shadow:inset 0 0 0 1px rgba(255,209,102,.35)}
+.banner.show{display:block}
+.banner b{display:block;font-size:15px}
+.banner p{margin:4px 0 10px;font-size:13.5px;color:#e9e6ff}
+.banner a{display:inline-block;padding:9px 14px;border-radius:14px;font-weight:700;color:#14122e;text-decoration:none;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.card{position:relative;margin-top:14px;padding:16px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px var(--line),0 20px 40px -24px #000}
+.hero{display:flex;gap:12px;align-items:center}
+.hero .ic{width:52px;height:52px;flex:none;border-radius:16px;display:grid;place-items:center;font-size:28px;background:linear-gradient(145deg,color-mix(in srgb,var(--acc) 55%,#fff0),color-mix(in srgb,var(--acc2) 40%,#fff0));box-shadow:0 10px 24px -12px var(--acc)}
+.hero h2{margin:0;font-size:17px}
+.hero p{margin:2px 0 0;font-size:13px;color:var(--mist)}
+.step{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:14px;font-weight:700}
+.step .n{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font:700 11px var(--dsp);background:#ffffff1c}
+.step small{margin-left:auto;font-weight:400;font-size:12px;color:var(--mist)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;padding:4px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button{padding:10px 4px;border-radius:12px;font-weight:700;font-size:14px;color:var(--mist)}
+.seg button.on{color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.chip.on{background:linear-gradient(135deg,var(--acc2),var(--acc));color:#14122e}
+.chip.ex{background:rgba(124,243,255,.07);box-shadow:inset 0 0 0 1px rgba(124,243,255,.22);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opt{padding:10px 6px;border-radius:16px;font-size:13px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);text-align:center;line-height:1.35}
+.opt.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 34%,transparent),color-mix(in srgb,var(--acc2) 22%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc2)}
+textarea,input[type=text],input[type=number]{width:100%;padding:12px 14px;border-radius:16px;border:0;font-size:15px;line-height:1.65;background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px var(--line);color-scheme:dark}
+textarea{min-height:100px;resize:vertical}
+textarea:focus,input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--acc2)}
+::placeholder{color:#7c7b98}
+.amount{font:700 28px/1.2 var(--dsp);text-align:center;padding:14px}
+.drop{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:rgba(0,0,0,.25);border:1.5px dashed rgba(255,255,255,.18);cursor:pointer}
+.drop img{width:64px;height:64px;flex:none;border-radius:14px;object-fit:cover}
+.drop .ph{width:64px;height:64px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:28px;background:#ffffff10}
+.drop b{display:block}
+.drop small{color:var(--mist)}
+.drop .x{margin-left:auto;padding:6px 10px;border-radius:10px;background:#ffffff14;font-size:12px}
+.note{margin-top:8px;font-size:12.5px;color:var(--mist)}
+.go{width:100%;margin-top:16px;padding:16px;border-radius:20px;font-weight:700;font-size:16px;color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc) 70%,var(--pink));box-shadow:0 14px 30px -14px var(--acc)}
+.go.busy{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.go.busy,.rec.on{animation:none}}
+.status{min-height:20px;margin-top:8px;font-size:13px;color:var(--mist);text-align:center}
+.status.err{color:var(--bad)}
+.result{display:none}
+.result.show{display:block}
+.result h3{margin:0 0 10px;font-size:15.5px}
+.txt{white-space:pre-wrap;font-size:14.5px;line-height:1.8;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px var(--line);word-break:break-word}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:12px 8px;border-radius:16px;font-weight:700;font-size:14px;background:#ffffff14;box-shadow:inset 0 0 0 1px var(--line)}
+.acts .main{grid-column:1/-1;color:#14122e;background:linear-gradient(135deg,var(--gold),var(--pink))}
+.list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line)}
+.row .ic{font-size:20px;flex:none}
+.row .b{flex:1;min-width:0}
+.row .b b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .b small{color:var(--mist);font-size:12px}
+.row .v{font-weight:700;white-space:nowrap}
+.row .v.in{color:var(--ok)}.row .v.out{color:var(--bad)}
+.row .del{flex:none;width:34px;height:34px;border-radius:10px;background:#ffffff10;font-size:14px}
+.empty{padding:14px;text-align:center;color:var(--mist);font-size:13px}
+.rec{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;margin:6px auto 4px;font-size:34px;color:#fff;background:radial-gradient(circle at 35% 30%,#ff8aa0,#ff3b5c 60%,#b0102c);box-shadow:0 0 0 6px rgba(255,59,92,.18),0 14px 34px -10px #ff3b5c}
+.rec.on{animation:ring 1.2s ease-in-out infinite}
+.rec.on span{display:block;width:30px;height:30px;border-radius:8px;background:#fff}
+@keyframes ring{50%{box-shadow:0 0 0 16px rgba(255,59,92,.08),0 14px 34px -10px #ff3b5c}}
+.timer{text-align:center;font:700 24px var(--dsp)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kpi{padding:12px 8px;border-radius:18px;text-align:center;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line)}
+.kpi small{display:block;color:var(--mist);font-size:12px}
+.kpi b{display:block;font:700 16px var(--dsp);margin-top:2px}
+.kpi.in b{color:var(--ok)}.kpi.out b{color:var(--bad)}
+.month{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.month button{width:42px;height:42px;border-radius:14px;background:#ffffff12;font-size:18px}
+.month b{font:700 16px var(--dsp)}
+.bars{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.bar .l{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.bar .t{height:10px;border-radius:99px;background:#ffffff10;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.days{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:8px;padding:6px;border-radius:14px;background:rgba(0,0,0,.2)}
+.days i{flex:1;min-height:2px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--acc),var(--acc2))}
+.foot{margin-top:16px;text-align:center;font-size:11.5px;color:#7c7b98}
+@media (max-width:360px){.grid{grid-template-columns:repeat(2,1fr)}}
+/* ☀️ Today extras */
+.big{font:700 44px/1.1 var(--dsp);letter-spacing:-1px}
+.datecard{text-align:center;padding:6px 0 2px}
+.datecard .wd{font-size:15px;color:var(--mist)}
+.datecard .sol{font:700 24px/1.3 var(--kh);margin-top:2px}
+.datecard .lun{font-size:14.5px;color:#e6e2ff;margin-top:4px}
+.pill{display:inline-flex;align-items:center;gap:6px;margin:8px 4px 0;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;background:#ffffff12;box-shadow:inset 0 0 0 1px var(--line)}
+.pill.gold{background:rgba(255,209,102,.16);box-shadow:inset 0 0 0 1px rgba(255,209,102,.4)}
+.pill.hol{background:rgba(255,122,138,.16);box-shadow:inset 0 0 0 1px rgba(255,122,138,.4)}
+.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.mini{padding:12px 6px;border-radius:18px;text-align:center;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}
+.mini i{display:block;font-style:normal;font-size:24px}
+.mini b{display:block;font:700 15px var(--dsp);margin-top:2px}
+.mini small{display:block;color:var(--mist);font-size:11.5px}
+.news a{display:flex;gap:10px;padding:11px 12px;border-radius:16px;text-decoration:none;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line);margin-top:7px}
+.news a b{display:block;font-size:14px;font-weight:600;line-height:1.55}
+.news a small{color:var(--mist);font-size:12px}
+.news a .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 11px var(--dsp);background:#ffffff1a}
+.quote{margin-top:12px;padding:12px 14px;border-radius:16px;font-size:14px;background:linear-gradient(135deg,rgba(255,209,102,.12),rgba(255,138,216,.1))}
+.sw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line);margin-top:8px;cursor:pointer}
+.sw .b{flex:1}
+.sw .b b{display:block;font-size:14px}
+.sw .b small{color:var(--mist);font-size:12px}
+.tg{flex:none;width:50px;height:30px;border-radius:99px;background:#ffffff22;position:relative;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
+.sw.on .tg{background:var(--ok)}
+.sw.on .tg::after{left:23px}
+select{width:100%;padding:12px 14px;border-radius:16px;border:0;font-size:15px;background:rgba(0,0,0,.32);box-shadow:inset 0 0 0 1px var(--line);color-scheme:dark}
+.wnow{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px}
+.wnow .ico{font-size:58px}
+.wmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.wday{display:grid;grid-template-columns:76px 34px 1fr auto;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line);margin-top:7px;font-size:13.5px}
+.wday .ic{font-size:22px;text-align:center}
+.wday .t{font-weight:700;white-space:nowrap}
+.wday small{color:var(--mist)}
+.tip{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(124,243,255,.08);font-size:13.5px}
+.conv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.res{margin-top:10px;padding:14px;border-radius:18px;text-align:center;background:linear-gradient(135deg,rgba(76,209,122,.16),rgba(255,209,102,.12))}
+.res b{display:block;font:700 26px/1.25 var(--dsp)}
+.res small{color:var(--mist)}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13.5px}
+td{padding:9px 6px;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:700}
+.gcards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.gc{padding:12px;border-radius:18px;background:linear-gradient(160deg,rgba(255,209,102,.16),rgba(255,255,255,.03));box-shadow:inset 0 0 0 1px rgba(255,209,102,.3)}
+.gc small{display:block;color:var(--mist);font-size:12px}
+.gc b{display:block;font:700 18px var(--dsp);color:#ffe7a3}
+.gc span{font-size:12px;color:#e6e2ff}
+.countdown{text-align:center;margin-top:12px}
+.countdown .big{color:#ffe7a3}
+.trips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.trips button{padding:10px 4px;border-radius:16px;font-size:12.5px;font-weight:600;background:#ffffff0b;box-shadow:inset 0 0 0 1px var(--line);line-height:1.35}
+.trips button i{display:block;font-style:normal;font-size:22px}
+.trips button small{display:block;font-weight:400;color:var(--mist);font-size:10.5px}
+.trips button.on{background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 34%,transparent),color-mix(in srgb,var(--acc2) 22%,transparent));box-shadow:inset 0 0 0 1.5px var(--acc2)}
+.place{padding:12px 14px;border-radius:18px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line);margin-top:8px}
+.place b{display:block;font-size:15px}
+.place p{margin:3px 0;font-size:13.5px;color:#e6e2ff}
+.place small{display:block;color:var(--gold);font-size:12.5px}
+.place a{display:inline-block;margin-top:8px;padding:7px 12px;border-radius:12px;font-size:13px;font-weight:700;text-decoration:none;color:#14122e;background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.html{font-size:14px;line-height:1.85;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 1px var(--line)}
+.html code{font:inherit;color:var(--cyan)}
+.steps{margin:8px 0 0;padding:0;list-style:none}
+.steps li{padding:10px 12px;border-radius:14px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line);margin-top:6px;font-size:14px}
+.sos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.sos a{padding:12px 6px;border-radius:18px;text-align:center;text-decoration:none;font-weight:700;background:rgba(255,90,110,.16);box-shadow:inset 0 0 0 1px rgba(255,90,110,.4)}
+.sos a b{display:block;font:700 22px var(--dsp)}
+.sos a small{font-weight:400;color:#ffd7dc;font-size:12px}
+.bpres{margin-top:10px;padding:12px 14px;border-radius:16px;background:#ffffff0d;font-size:14px}
+details.topic{margin-top:7px;border-radius:16px;background:#ffffff0a;box-shadow:inset 0 0 0 1px var(--line)}
+details.topic summary{padding:12px 14px;font-weight:700;cursor:pointer}
+details.topic .html{margin:0 10px 10px;background:none;box-shadow:none;padding:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="back" href="./" aria-label="ត្រឡប់ទៅ Hub">←</a>
+    <h1>☀️ Cooler Today <small>ជីវិត & ព័ត៌មាន · រាល់ថ្ងៃ</small></h1>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="មុខងារ"></nav>
+  <div class="banner" id="banner" role="alert"><b id="bTitle"></b><p id="bText"></p><a id="bLink" href="#"></a></div>
+  <section class="card" id="form"></section>
+  <div class="foot">Cooler Today · Open-Meteo · ER-API · Gold-API · Google News · @TeamSmosSneabot</div>
+</div>
+
+<script>
+"use strict";
+const API = "https://bot-smos-smea-production.up.railway.app";
+const BOT = "TeamSmosSneabot";
+const tg = window.Telegram && window.Telegram.WebApp;
+const INIT = (tg && tg.initData) || (() => { const m = location.hash.match(/[#&]tg=([^&]+)/); return m ? decodeURIComponent(m[1]) : ""; })();
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const safe = s => esc(s).replace(/&lt;(\/?)(b|i|code)&gt;/g, "<$1$2>").replace(/\n/g, "<br>");
+const store = { get(k, d) { try { const v = localStorage.getItem("ctd:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem("ctd:" + k, JSON.stringify(v)); } catch (e) {} } };
+const haptic = t => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t || "light"); } catch (e) {} };
+const openLink = u => { try { if (tg && tg.openLink) { tg.openLink(u); return; } } catch (e) {} window.open(u, "_blank"); };
+const kh = n => String(n).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]);
+const fmt = (v, d = 0) => (+v).toLocaleString("en", { minimumFractionDigits: d, maximumFractionDigits: d });
+if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor("#0b0c12"); tg.BackButton.show(); tg.BackButton.onClick(() => { location.href = "./"; }); } catch (e) {} }
+
+const TOOLS = {
+  today: { i: "☀️", t: "ថ្ងៃនេះ", a: ["#ffb36b", "#ffd166"], d: "ថ្ងៃខែ · ចន្ទគតិ · អាកាសធាតុ · ដុល្លារ · មាស · ព័ត៌មាន" },
+  weather: { i: "🌤️", t: "អាកាសធាតុ", a: ["#7cc4ff", "#7cf3ff"], d: "២៥ ខេត្ត · ឥឡូវ + ៧ ថ្ងៃ" },
+  rate: { i: "💱", t: "ដុល្លារ", a: ["#4cd17a", "#7cf3ff"], d: "គណនា $ ⇄ ៛ · រូបិយប័ណ្ណ ៦ ទៀត" },
+  gold: { i: "🪙", t: "មាស", a: ["#ffd166", "#ffb36b"], d: "តម្លៃមាសពិភពលោក · ជី · ដំឡឹង · ក្រាម" },
+  news: { i: "📰", t: "ព័ត៌មាន", a: ["#8fa2ff", "#b48cff"], d: "ព័ត៌មានថ្មីៗតាមប្រធានបទ" },
+  sila: { i: "🙏", t: "ថ្ងៃសីល", a: ["#ffd166", "#ff8ad8"], d: "ថ្ងៃសីលបន្ទាប់ · បើក/បិទការរំលឹក" },
+  anniv: { i: "🕯️", t: "ខួប & បុណ្យ", a: ["#ff9f5a", "#ffd166"], d: "ខួបចន្ទគតិ ឬសុរិយគតិ · Bot រំលឹកឲ្យ" },
+  trip: { i: "🧭", t: "ដើរលេង", a: ["#4cd1a0", "#7cc4ff"], d: "កន្លែងល្អៗទូទាំងប្រទេស · Google Maps" },
+  health: { i: "🧓", t: "សុខភាព", a: ["#ff7a8a", "#ffb36b"], d: "លំហាត់ · សម្ពាធឈាម · សួរ AI · លេខបន្ទាន់" },
+};
+const ALIAS = { morning: "today", calendar: "today" };
+const S = { tool: null, member: null, st: null, dash: null, province: store.get("province", "phnom_penh"), trip: store.get("trip", "sr"), htab: "ex" };
+
+async function post(path, data) {
+  const r = await fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ initData: INIT }, data || {})) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.msg || `😔 មានបញ្ហា (${r.status})`);
+  return j;
+}
+function status(t, bad) { const s = $("status"); if (s) { s.textContent = t || ""; s.classList.toggle("err", !!bad); } }
+function banner(title, text, link, href) { $("bTitle").textContent = title; $("bText").textContent = text; $("bLink").textContent = link; $("bLink").href = href; $("banner").classList.add("show"); }
+const head = () => { const t = TOOLS[S.tool]; return `<div class="hero"><span class="ic">${t.i}</span><div><h2>${t.t}</h2><p>${t.d}</p></div></div>`; };
+const step = (n, t, small) => `<div class="step"><span class="n">${n}</span>${t}${small ? `<small>${small}</small>` : ""}</div>`;
+const loading = () => `<div class="empty">⏳ កំពុងទាញទិន្នន័យ…</div>`;
+const provSelect = () => `<select id="prov" aria-label="ខេត្ត">${(S.st ? S.st.provinces : [["phnom_penh", "ភ្នំពេញ"]]).map(([k, n]) => `<option value="${k}"${k === S.province ? " selected" : ""}>📍 ${esc(n)}</option>`).join("")}</select>`;
+const sw = (id, on, title, sub) => `<div class="sw${on ? " on" : ""}" role="switch" aria-checked="${!!on}" tabindex="0" data-sw="${id}"><span class="b"><b>${title}</b><small>${sub}</small></span><span class="tg"></span></div>`;
+
+$("tabs").innerHTML = Object.entries(TOOLS).map(([k, t]) => `<button type="button" class="tab" role="tab" data-k="${k}"><i>${t.i}</i>${t.t}</button>`).join("");
+$("tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) select(b.dataset.k, true); });
+function select(k, user) {
+  k = ALIAS[k] || k; if (!TOOLS[k]) k = "today";
+  S.tool = k; store.set("tool", k);
+  const t = TOOLS[k];
+  document.documentElement.style.setProperty("--acc", t.a[0]); document.documentElement.style.setProperty("--acc2", t.a[1]);
+  [...$("tabs").children].forEach(b => { const on = b.dataset.k === k; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); if (on) b.scrollIntoView({ inline: "center", block: "nearest", behavior: user ? "smooth" : "auto" }); });
+  try { history.replaceState(null, "", "?app=" + k + location.hash); } catch (e) {}
+  render(); if (user) haptic();
+}
+function ready() {
+  if (!INIT) { $("form").innerHTML = head() + `<div class="empty">📱 សូមបើកពី Cooler Hub ក្នុង Telegram</div>`; return false; }
+  if (S.member === false) { $("form").innerHTML = head() + `<div class="empty">🔒 សម្រាប់សមាជិក — ចុចប៊ូតុងខាងលើដើម្បីចូលរួម</div>`; return false; }
+  if (!S.st) { $("form").innerHTML = head() + loading(); return false; }
+  return true;
+}
+
+// ---------- render ----------
+function render() {
+  if (!ready()) return;
+  const k = S.tool;
+  ({ today: rToday, weather: rWeather, rate: rRate, gold: rGold, news: rNews, sila: rSila, anniv: rAnniv, trip: rTrip, health: rHealth })[k]();
+}
+async function rToday() {
+  $("form").innerHTML = head() + loading();
+  try {
+    const d = S.dash = await post("/today/dash", { province: S.province });
+    if (S.tool !== "today") return;
+    const c = d.cal, w = d.weather, r = d.rates, g = d.gold;
+    let h = head() + `<div class="datecard"><div class="wd">ថ្ងៃ${esc(c.weekday)}</div><div class="sol">${esc(c.solar)}</div><div class="lun">🌙 ${esc(c.lunar)}</div>
+      <span class="pill">${esc(c.animal)}</span>${c.sila ? `<span class="pill gold">🙏 ${c.sila.days === 0 ? "ថ្ងៃនេះជាថ្ងៃសីល" : c.sila.days === 1 ? "ស្អែកថ្ងៃសីល" : `ថ្ងៃសីល ${kh(c.sila.days)} ថ្ងៃទៀត`}</span>` : ""}
+      ${c.holiday ? `<span class="pill hol">🎉 ${esc(c.holiday)}</span>` : ""}</div>`;
+    h += `<div class="minis">
+      <div class="mini" data-go="weather"><i>${w ? w.now.icon : "🌤️"}</i><b>${w ? w.now.temp + "°" : "—"}</b><small>${w ? esc(w.name) : "អាកាសធាតុ"}</small></div>
+      <div class="mini" data-go="rate"><i>💵</i><b>${r ? fmt(r.khr) : "—"}</b><small>៛ / $1</small></div>
+      <div class="mini" data-go="gold"><i>🪙</i><b>${g ? "$" + fmt(g.chi) : "—"}</b><small>មាស ១ ជី</small></div></div>`;
+    if (w && w.days[0] && w.days[0].tip) h += `<div class="tip">${esc(w.days[0].tip)}</div>`;
+    if (d.news.length) h += step("📰", "ព័ត៌មានថ្មីៗ") + `<div class="news">${d.news.map((n, i) => `<a href="${esc(n.link)}" data-link="${esc(n.link)}"><span class="n">${i + 1}</span><span><b>${esc(n.title)}</b><small>${esc(n.source || "")} ${esc(n.when || "")}</small></span></a>`).join("")}</div>`;
+    if (c.upcoming.length) h += step("🎉", "ថ្ងៃឈប់ខាងមុខ") + `<div class="list">${c.upcoming.map(([dt, name, left]) => `<div class="row"><span class="ic">📅</span><span class="b"><b>${esc(name)}</b><small>${dt} · ${left === 0 ? "ថ្ងៃនេះ" : kh(left) + " ថ្ងៃទៀត"}</small></span></div>`).join("")}</div>`;
+    h += `<div class="quote">💬 ${esc(c.quote)}</div>`;
+    h += step("🔔", "ទទួលក្នុង Telegram") + sw("brief", !!d.brief, "☀️ ព័ត៌មានព្រឹក ម៉ោង ៧:០០", "ថ្ងៃខែ · អាកាសធាតុ · ដុល្លារ · មាស · ព័ត៌មាន") + sw("sila", d.sila, "🙏 រំលឹកថ្ងៃសីល", "ល្ងាចមុនថ្ងៃសីល និងព្រឹកថ្ងៃសីល") + `<div class="status" id="status"></div>`;
+    $("form").innerHTML = h;
+  } catch (err) { $("form").innerHTML = head() + `<div class="status err">${esc(err.message)}</div>`; }
+}
+async function rWeather() {
+  $("form").innerHTML = head() + `<div style="margin-top:12px">${provSelect()}</div><div id="wbox">${loading()}</div>`;
+  try {
+    const w = await post("/today/weather", { province: S.province });
+    if (S.tool !== "weather") return;
+    $("wbox").innerHTML = `<div class="wnow"><span class="ico">${w.now.icon}</span><span><span class="big">${w.now.temp}°</span><div>${esc(w.now.desc)}</div></span></div>
+      <div class="wmeta"><div class="kpi"><small>🌡️ មានអារម្មណ៍</small><b>${w.now.feels}°</b></div><div class="kpi"><small>💧 សំណើម</small><b>${w.now.humidity}%</b></div><div class="kpi"><small>🌬️ ខ្យល់</small><b>${w.now.wind}<span style="font-size:11px"> km/h</span></b></div></div>
+      ${w.days[0].tip ? `<div class="tip">${esc(w.days[0].tip)}</div>` : ""}
+      ${step("📅", "៧ ថ្ងៃខាងមុខ")}${w.days.map(d => `<div class="wday"><span><b>${esc(d.label)}</b><br><small>${d.date}</small></span><span class="ic">${d.icon}</span><span>${esc(d.desc)}${d.rain != null ? `<br><small>☔ ${d.rain}%</small>` : ""}</span><span class="t">${d.tmin}°–${d.tmax}°</span></div>`).join("")}`;
+  } catch (err) { $("wbox").innerHTML = `<div class="status err">${esc(err.message)}</div>`; }
+}
+async function rRate() {
+  const dir = store.get("dir", "usd"), amt = store.get("amt", "100");
+  $("form").innerHTML = head() + `<div style="margin-top:14px" class="seg" data-dir><button type="button" data-v="usd" class="${dir === "usd" ? "on" : ""}">$ → ៛</button><button type="button" data-v="khr" class="${dir === "khr" ? "on" : ""}">៛ → $</button></div>
+    ${step(1, "💵 ចំនួន")}<input type="number" class="amount" id="amt" inputmode="decimal" value="${esc(amt)}"><div class="chips" data-quickamt style="margin-top:8px">${(dir === "usd" ? [1, 10, 50, 100, 500] : [10000, 50000, 100000, 400000, 1000000]).map(v => `<button type="button" class="chip" data-v="${v}">${dir === "usd" ? "$" + fmt(v) : fmt(v) + " ៛"}</button>`).join("")}</div>
+    <div id="rbox">${loading()}</div>`;
+  try { S.rates = await post("/today/rates"); if (S.tool === "rate") calc(); } catch (err) { $("rbox").innerHTML = `<div class="status err">${esc(err.message)}</div>`; }
+}
+function calc() {
+  const r = S.rates; if (!r || !$("rbox")) return;
+  const dir = store.get("dir", "usd"), a = +($("amt").value || 0); store.set("amt", $("amt").value);
+  const usd = dir === "usd" ? a : a / r.khr;
+  $("rbox").innerHTML = `<div class="res"><small>${dir === "usd" ? "$" + fmt(a, 2).replace(/\.00$/, "") + " =" : fmt(a) + " ៛ ="}</small><b>${dir === "usd" ? fmt(a * r.khr) + " ៛" : "$" + fmt(a / r.khr, 2)}</b><small>1$ = ${fmt(r.khr)} ៛</small></div>
+    ${step("🌏", "រូបិយប័ណ្ណផ្សេង", dir === "usd" ? "$" + fmt(a, 2).replace(/\.00$/, "") : fmt(a) + " ៛")}<table>${r.others.map(([code, label, perUsd, khrPer]) => `<tr><td>${esc(label)}</td><td>${fmt(usd * perUsd, perUsd * usd < 100 ? 2 : 0)} ${code}</td></tr>`).join("")}</table>
+    <div class="note">🕒 ${esc(r.date)} · អត្រាទីផ្សារអន្តរជាតិ — ហាងប្ដូរប្រាក់អាចខុសបន្តិច</div>`;
+}
+async function rGold() {
+  $("form").innerHTML = head() + `<div id="gbox">${loading()}</div>`;
+  try {
+    const g = S.goldd = await post("/today/gold");
+    if (S.tool !== "gold") return;
+    const both = v => `<b>$${fmt(v, 2)}</b>${g.khr ? `<span>≈ ${fmt(v * g.khr)} ៛</span>` : ""}`;
+    $("gbox").innerHTML = `<div class="gcards"><div class="gc"><small>✨ ១ ជី (3.75g)</small>${both(g.chi)}</div><div class="gc"><small>🏅 ១ ដំឡឹង (37.5g)</small>${both(g.damlung)}</div><div class="gc"><small>⚖️ ១ ក្រាម</small>${both(g.gram)}</div><div class="gc"><small>🌍 ១ អោន (31.1g)</small><b>$${fmt(g.oz, 2)}</b></div></div>
+      ${step("🧮", "គណនាមាស")}<div class="conv"><input type="number" id="chi" inputmode="decimal" value="${esc(store.get("chi", "1"))}" aria-label="ចំនួនជី"><b>ជី</b></div><div class="res" id="gres"></div>
+      <div class="note">🕒 ${esc(g.at)} · តម្លៃមាសពិភពលោក 99.99% — ហាងមាសក្នុងស្រុកបូកថ្លៃជាង ហើយតម្លៃលក់/ទិញខុសគ្នា សូមសួរហាងមុន 🙏</div>`;
+    gcalc();
+  } catch (err) { $("gbox").innerHTML = `<div class="status err">${esc(err.message)}</div>`; }
+}
+function gcalc() { const g = S.goldd, el = $("gres"); if (!g || !el) return; const n = +($("chi").value || 0); store.set("chi", $("chi").value);
+  el.innerHTML = `<small>${fmt(n, 2).replace(/\.00$/, "")} ជី =</small><b>$${fmt(n * g.chi, 2)}</b>${g.khr ? `<small>≈ ${fmt(n * g.chi * g.khr)} ៛</small>` : ""}`; }
+async function rNews() {
+  const topic = store.get("topic", "top");
+  $("form").innerHTML = head() + `<div class="chips scroll" data-topic style="margin-top:12px">${S.st.newsTopics.map(([k, l]) => `<button type="button" class="chip${k === topic ? " on" : ""}" data-v="${k}">${esc(l)}</button>`).join("")}</div><div id="nbox" class="news">${loading()}</div>`;
+  try {
+    const n = await post("/today/news", { topic });
+    if (S.tool !== "news") return;
+    $("nbox").innerHTML = n.items.length ? n.items.map((it, i) => `<a href="${esc(it.link)}" data-link="${esc(it.link)}"><span class="n">${i + 1}</span><span><b>${esc(it.title)}</b><small>${esc(it.source || "")} ${esc(it.when || "")}</small></span></a>`).join("") : `<div class="empty">មិនទាន់មានព័ត៌មាន — សាកម្ដងទៀតបន្តិចទៀត</div>`;
+  } catch (err) { $("nbox").innerHTML = `<div class="status err">${esc(err.message)}</div>`; }
+}
+async function rSila() {
+  $("form").innerHTML = head() + loading();
+  try {
+    const s = await post("/today/sila");
+    if (S.tool !== "sila") return;
+    const n = s.upcoming[0];
+    let h = head();
+    if (n) h += `<div class="countdown"><div class="big">${n.days === 0 ? "ថ្ងៃនេះ" : n.days === 1 ? "ស្អែក" : kh(n.days) + " ថ្ងៃ"}</div><div>${n.days > 1 ? "ទៀតដល់ថ្ងៃសីល" : "ជាថ្ងៃសីល 🙏"}</div><span class="pill gold">🌙 ${esc(n.lunar)}</span></div>`;
+    h += sw("sila", s.on, "🔔 រំលឹកថ្ងៃសីលក្នុង Telegram", `ម៉ោង ${kh(s.eve)}:០០ ល្ងាចមុនថ្ងៃ និងព្រឹកថ្ងៃសីល`) + `<div class="status" id="status"></div>`;
+    h += step("📅", "ថ្ងៃសីលខាងមុខ") + `<div class="list">${s.upcoming.map(u => `<div class="row"><span class="ic">🙏</span><span class="b"><b>${esc(u.lunar)}</b><small>${esc(u.solar)}</small></span><span class="v">${u.days === 0 ? "ថ្ងៃនេះ" : kh(u.days) + " ថ្ងៃ"}</span></div>`).join("")}</div>`;
+    h += `<div class="quote">🪷 ${esc(s.precepts)}</div>`;
+    $("form").innerHTML = h;
+  } catch (err) { $("form").innerHTML = head() + `<div class="status err">${esc(err.message)}</div>`; }
+}
+function rAnniv() {
+  const lunar = store.get("alunar", false), st = S.st;
+  const days = n => Array.from({ length: n }, (_, i) => `<option value="${i + 1}">${kh(i + 1)}</option>`).join("");
+  let h = head() + step(1, "📆 ប្រភេទថ្ងៃ") + `<div class="seg" data-alunar><button type="button" data-v="0" class="${lunar ? "" : "on"}">☀️ សុរិយគតិ</button><button type="button" data-v="1" class="${lunar ? "on" : ""}">🌙 ចន្ទគតិ</button></div>`;
+  h += step(2, "📅 ថ្ងៃ ខែ") + (lunar
+    ? `<div class="grid" style="grid-template-columns:1fr 1fr"><select id="aday">${days(15)}</select><select id="awan"><option value="0">កើត</option><option value="1">រោច</option></select></div><select id="amon" style="margin-top:8px">${st.lunarMonths.map((m, i) => `<option value="${i}">ខែ${esc(m)}</option>`).join("")}</select>`
+    : `<div class="grid" style="grid-template-columns:1fr 2fr"><select id="aday">${days(31)}</select><select id="amon">${st.solarMonths.map((m, i) => `<option value="${i + 1}">${esc(m)}</option>`).join("")}</select></div>`);
+  h += step(3, "✍️ ឈ្មោះខួប") + `<input type="text" id="atitle" maxlength="80" placeholder="ឧ. ខួបកំណើតម៉ាក់ · ខួបលោកតា"><div class="chips scroll" data-ex style="margin-top:8px">${["ខួបកំណើតម៉ាក់", "ខួបកំណើតប៉ា", "ខួបលោកតា", "ខួបរៀបការ"].map(x => `<button type="button" class="chip ex">${x}</button>`).join("")}</div>`;
+  h += `<button class="go" id="go" type="button">💾 រក្សាទុក</button><div class="status" id="status"></div>` + step("🕯️", "ខួបរបស់ខ្ញុំ") + `<div class="list" id="list">${loading()}</div><div class="note">⏰ Bot រំលឹកម៉ោង ៦ ល្ងាចមុនថ្ងៃ និងព្រឹកថ្ងៃខួប ក្នុង Telegram</div>`;
+  $("form").innerHTML = h; loadAnniv();
+}
+async function loadAnniv() { try { renderAnniv((await post("/today/anniv/list")).items); } catch (e) { renderAnniv([]); } }
+function renderAnniv(items) {
+  const l = $("list"); if (!l) return;
+  l.innerHTML = items.length ? items.map(a => `<div class="row"><span class="ic">${a.lunar ? "🌙" : "☀️"}</span><span class="b"><b>${esc(a.title)}</b><small>${esc(a.when)}${a.next ? " · " + esc(a.next) : ""}</small></span><span class="v">${a.left === 0 ? "ថ្ងៃនេះ" : a.left != null ? kh(a.left) + " ថ្ងៃ" : ""}</span><button type="button" class="del" data-del="${a.id}" aria-label="លុប">🗑️</button></div>`).join("") : `<div class="empty">មិនទាន់មានខួបទេ</div>`;
+}
+function rTrip() {
+  const t = S.st.trip, cur = t.find(p => p.key === S.trip) || t[0];
+  let h = head() + `<button class="go" type="button" data-random style="margin-top:12px">🎲 Trip ចៃដន្យ — មិនដឹងទៅណា?</button>` + step(1, "📍 ជ្រើសខេត្ត") + `<div class="trips">${t.map(p => `<button type="button" data-trip="${p.key}" class="${p.key === cur.key ? "on" : ""}"><i>${p.emoji}</i>${esc(p.km)}<small>${p.drive === "—" ? "រាជធានី" : esc(p.drive)}</small></button>`).join("")}</div>`;
+  h += step(2, `${cur.emoji} ${esc(cur.km)}`, cur.drive === "—" ? "" : "🚗 " + esc(cur.drive)) + `<div id="places">${cur.places.map(pl => `<div class="place"><b>${esc(pl.km)}</b><p>${esc(pl.desc)}</p><small>💡 ${esc(pl.tip)}</small><a href="${esc(pl.map)}" data-link="${esc(pl.map)}">🗺️ មើលលើ Google Maps</a></div>`).join("")}</div><div class="note">🚗 ម៉ោងធ្វើដំណើរគិតពីភ្នំពេញ ជាការប៉ាន់ស្មានប៉ុណ្ណោះ</div>`;
+  $("form").innerHTML = h;
+}
+function rHealth() {
+  const H = S.st.health, tab = S.htab;
+  const tabs = [["ex", "🏃 លំហាត់ថ្ងៃនេះ"], ["bal", "⚖️ ទប់លំនឹង"], ["bp", "🩸 សម្ពាធឈាម"], ["ask", "🤖 សួរ AI"], ["guide", "📚 មគ្គុទេសក៍"], ["water", "💧 ផឹកទឹក"], ["sleep", "😴 គេង"], ["warn", "🚨 សញ្ញាគ្រោះថ្នាក់"]];
+  let h = head() + `<div class="sos"><a href="tel:119"><b>119</b><small>🚑 ឡានពេទ្យ</small></a><a href="tel:117"><b>117</b><small>👮 ប៉ូលិស</small></a><a href="tel:118"><b>118</b><small>🚒 អគ្គិភ័យ</small></a></div>`;
+  h += `<div class="chips scroll" data-htab style="margin-top:12px">${tabs.map(([k, l]) => `<button type="button" class="chip${k === tab ? " on" : ""}" data-v="${k}">${l}</button>`).join("")}</div>`;
+  if (tab === "ex") h += step("🏃", esc(H.routine.title), "១០ នាទី") + `<ul class="steps">${H.routine.steps.map(s => `<li>${safe(s)}</li>`).join("")}</ul><div class="tip">${safe(H.stop)}</div><button class="go" id="done" type="button">✅ ខ្ញុំធ្វើរួចហើយ (+${H.points} ពិន្ទុ)</button><div class="status" id="status"></div>`;
+  if (tab === "bal") h += `<div class="html" style="margin-top:10px">${safe(H.balance)}</div>`;
+  if (tab === "water") h += `<div class="html" style="margin-top:10px">${safe(H.water)}</div>`;
+  if (tab === "sleep") h += `<div class="html" style="margin-top:10px">${safe(H.sleep)}</div>`;
+  if (tab === "warn") h += `<div class="html" style="margin-top:10px">${safe(H.warning)}</div>`;
+  if (tab === "guide") h += H.topics.map(([k, l, t]) => `<details class="topic"><summary>${esc(l)}</summary><div class="html">${safe(t)}</div></details>`).join("");
+  if (tab === "bp") h += step(1, "🩸 វាស់បាន", "ខាងលើ/ខាងក្រោម ជីពចរ") + `<div class="conv"><input type="text" id="bpin" inputmode="numeric" placeholder="130/85 72"><button class="chip on" type="button" id="bpsave">💾 កត់</button></div><div id="bpres"></div><div class="status" id="status"></div>` + step(2, "📋 ១០ ដងចុងក្រោយ") + `<div class="list" id="list">${loading()}</div>`;
+  if (tab === "ask") h += step(1, "🙋 សំណួរសុខភាព") + `<textarea id="hq" maxlength="300" placeholder="ឧ. ថ្ងៃក្ដៅ មនុស្សចាស់គួរផឹកទឹកប៉ុន្មាន?"></textarea><button class="go" id="ask" type="button">🤖 សួរ AI</button><div class="status" id="status"></div><div id="ans"></div>`;
+  h += `<div class="note">⚕️ ព័ត៌មានទូទៅប៉ុណ្ណោះ មិនមែនជំនួសគ្រូពេទ្យទេ</div>`;
+  $("form").innerHTML = h;
+  if (tab === "bp") loadBp();
+}
+async function loadBp() { try { renderBp((await post("/today/bp/list")).items); } catch (e) { renderBp([]); } }
+function renderBp(items) { const l = $("list"); if (l) l.innerHTML = items.length ? items.map(b => `<div class="row"><span class="ic">${b.emoji}</span><span class="b"><b>${b.s}/${b.d}${b.p ? ` · ❤️ ${b.p}` : ""}</b><small>${esc(b.at)}</small></span><span class="v">${esc(b.label)}</span></div>`).join("") : `<div class="empty">មិនទាន់មានកំណត់ត្រា</div>`; }
+
+// ---------- events ----------
+$("form").addEventListener("change", e => {
+  if (e.target.id === "prov") { S.province = e.target.value; store.set("province", S.province); render(); }
+});
+$("form").addEventListener("input", e => { if (e.target.id === "amt") calc(); if (e.target.id === "chi") gcalc(); });
+$("form").addEventListener("click", async e => {
+  const a = e.target.closest("a[data-link]"); if (a) { e.preventDefault(); openLink(a.dataset.link); return; }
+  const mini = e.target.closest("[data-go]"); if (mini) { select(mini.dataset.go, true); return; }
+  const s = e.target.closest("[data-sw]"); if (s) { toggle(s); return; }
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.closest("[data-dir]")) { store.set("dir", b.dataset.v); store.set("amt", b.dataset.v === "usd" ? "100" : "100000"); rRate(); return; }
+  if (b.closest("[data-quickamt]")) { $("amt").value = b.dataset.v; calc(); haptic(); return; }
+  if (b.closest("[data-topic]")) { store.set("topic", b.dataset.v); rNews(); haptic(); return; }
+  if (b.closest("[data-alunar]")) { store.set("alunar", b.dataset.v === "1"); rAnniv(); return; }
+  if (b.closest("[data-ex]")) { $("atitle").value = b.textContent; return; }
+  if (b.dataset.del) { try { renderAnniv((await post("/today/anniv/del", { id: b.dataset.del })).items); haptic("medium"); } catch (err) { status(err.message, true); } return; }
+  if (b.dataset.trip) { S.trip = b.dataset.trip; store.set("trip", S.trip); rTrip(); haptic(); $("places").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (b.hasAttribute("data-random")) { const t = S.st.trip, p = t[Math.floor(Math.random() * t.length)]; S.trip = p.key; rTrip(); const pls = $("places").children; const pick = pls[Math.floor(Math.random() * pls.length)]; pick.style.boxShadow = "inset 0 0 0 2px var(--gold)"; pick.scrollIntoView({ behavior: "smooth", block: "center" }); haptic("medium"); return; }
+  if (b.closest("[data-htab]")) { S.htab = b.dataset.v; rHealth(); haptic(); return; }
+  if (b.id === "go" && S.tool === "anniv") { addAnniv(b); return; }
+  if (b.id === "done") { try { const r = await post("/today/health/done"); status(r.new ? `🎉 ល្អណាស់! +${S.st.health.points} ពិន្ទុ${r.points != null ? " · សរុប " + r.points : ""}` : "✅ ថ្ងៃនេះកត់រួចហើយ — ស្អែកមកទៀតណា 💪"); haptic("heavy"); } catch (err) { status(err.message, true); } return; }
+  if (b.id === "bpsave") { try { const r = await post("/today/bp/add", { text: $("bpin").value }); $("bpres").innerHTML = `<div class="bpres">${r.result.emoji} <b>${esc(r.result.label)}</b><br>${safe(r.result.advice)}</div>`; renderBp(r.items); $("bpin").value = ""; status(""); } catch (err) { status(err.message, true); } return; }
+  if (b.id === "ask") { b.disabled = true; b.textContent = "⏳ AI កំពុងគិត…"; try { const r = await post("/today/health/ask", { q: $("hq").value }); $("ans").innerHTML = `<div class="html" style="margin-top:10px;${r.emergency ? "box-shadow:inset 0 0 0 1.5px #ff5a6e" : ""}">${safe(r.text)}</div>`; status(""); } catch (err) { status(err.message, true); } b.disabled = false; b.textContent = "🤖 សួរ AI"; return; }
+});
+$("form").addEventListener("keydown", e => { const s = e.target.closest("[data-sw]"); if (s && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(s); } });
+async function toggle(el) {
+  const on = !el.classList.contains("on"); el.classList.toggle("on", on); el.setAttribute("aria-checked", on); haptic("medium");
+  try {
+    if (el.dataset.sw === "sila") { await post("/today/sila/set", { on }); status(on ? "🙏 បើករំលឹកថ្ងៃសីលរួច" : "🔕 បិទរួច"); }
+    if (el.dataset.sw === "brief") { await post("/today/brief/set", { on, province: S.province }); status(on ? "☀️ ចាប់ពីស្អែក ម៉ោង ៧:០០ Bot ផ្ញើព័ត៌មានព្រឹកឲ្យ" : "🔕 បិទរួច"); }
+  } catch (err) { el.classList.toggle("on", !on); status(err.message, true); }
+}
+async function addAnniv(b) {
+  const lunar = store.get("alunar", false), title = $("atitle").value.trim();
+  if (!title) { status("✍️ សរសេរឈ្មោះខួប", true); return; }
+  b.disabled = true;
+  try {
+    const r = await post("/today/anniv/add", { lunar, day: $("aday").value, month: $("amon").value, waning: lunar && $("awan").value === "1", title });
+    renderAnniv(r.items); $("atitle").value = ""; status("✅ រក្សាទុករួច — Bot នឹងរំលឹកឲ្យ"); haptic("heavy");
+  } catch (err) { status(err.message, true); }
+  b.disabled = false;
+}
+
+// ---------- start ----------
+(async function boot() {
+  select(new URLSearchParams(location.search).get("app") || store.get("tool", "today"));
+  if (!INIT) return;
+  try {
+    const j = await post("/today/me");
+    S.member = !!j.member; S.st = j;
+    if (!j.member) banner("🔒 Cooler Today សម្រាប់សមាជិក", "ចូលរួមជាសមាជិក ដើម្បីមើលអាកាសធាតុ ដុល្លារ មាស ព័ត៌មាន ថ្ងៃសីល និងច្រើនទៀត។", "💳 ចូលរួមឥឡូវ", `https://t.me/${BOT}?start=go_pay`);
+    render();
+  } catch (err) { $("form").innerHTML = head() + `<div class="status err">⚠️ មិនអាចភ្ជាប់ Server — ${esc(err.message)}</div>`; }
+})();
+</script>
+</body>
+</html>
